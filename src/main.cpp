@@ -69,17 +69,17 @@ int main(void)
     3, 5, 7,
   };
 
-  float z3 = 1.0f;
+  float z3 = 0.0f;
   GLfloat cardPositions[] = {
-    -0.5f, -0.5f*1.396f, z3, 0.0f, 1.0f,
     -0.5f,  0.5f*1.396f, z3, 0.0f, 0.0f,
-    0.5f , -0.5f*1.396f, z3, 1.0f, 1.0f,
     0.5f ,  0.5f*1.396f, z3, 1.0f, 0.0f,
+    0.5f , -0.5f*1.396f, z3, 1.0f, 1.0f,
+    -0.5f, -0.5f*1.396f, z3, 0.0f, 1.0f,
   };
 
   GLuint cardIndices[] = {
-    0, 1, 2,
-    2, 1, 3
+    3, 2, 0,
+    0, 2, 1
   };
 
 
@@ -122,13 +122,19 @@ int main(void)
 
   Texture cardTex = Texture("../assets/card.png");
   cardTex.Bind(0);
-  GLint cardTextureUniformID = cardShader.GetUniformLocation("cardTexture");
+  GLint cardTextureUniformID = cardShader.GetUniformLocation("frontCardTexture");
   glUniform1i(cardTextureUniformID, 0);
+
+  Texture backCardTex = Texture("../assets/back.png");
+  cardTex.Bind(1);
+  GLint backCardTextureUniformID = cardShader.GetUniformLocation("backCardTexture");
+  glUniform1i(backCardTextureUniformID, 1);
 
   GLint cardProjID = cardShader.GetUniformLocation("projMatrix");
   glUniformMatrix4fv(cardProjID, 1, GL_FALSE, glm::value_ptr(projMatrix));
   GLint cardCamID = cardShader.GetUniformLocation("cameraMatrix");
   glUniformMatrix4fv(cardCamID, 1, GL_FALSE, glm::value_ptr(cameraMatrix));
+  GLint cardRotID = cardShader.GetUniformLocation("rotMatrix");
   
   float x = 0.1;
 
@@ -154,6 +160,10 @@ int main(void)
     cardIndexBuffer.Bind();
     cardShader.Bind();
     cardTex.Bind(0);
+    backCardTex.Bind(1);
+    rotationMatrix = glm::translate(identity, glm::vec3(0.0f, 0.5f, 3.0f));
+    rotationMatrix = glm::rotate(rotationMatrix, glm::radians(x), glm::vec3(0.0f, 1.0f, 0.0f));
+    glUniformMatrix4fv(cardRotID, 1, GL_FALSE, glm::value_ptr(rotationMatrix));
     GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 
     

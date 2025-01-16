@@ -22,6 +22,8 @@ add_executable(${PROJECT_NAME}
     src/main.cpp
     src/shaders/BasicVertex.cpp
     src/shaders/BasicFragment.cpp
+    src/shaders/CardVertex.cpp
+    src/shaders/CardFragment.cpp
     src/WindowManager.cpp
     src/Shader.cpp
     src/ErrorHandling.cpp
@@ -29,6 +31,8 @@ add_executable(${PROJECT_NAME}
     src/IndexBuffer.cpp
     src/VertexArray.cpp
     src/MemoryLayout.cpp
+    src/Texture.cpp
+    src/external/stb_image.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE glfw GLEW::GLEW glm)

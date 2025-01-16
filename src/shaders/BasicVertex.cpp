@@ -13,6 +13,6 @@ uniform mat4 rotationMatrix;
 void main()
 {
   gl_Position = projMatrix * cameraMatrix * rotationMatrix * position;
-  vertColor = vec4(position.x+0.5, position.y+0.5, 0, 1);
+  vertColor = vec4(position.x+0.5, 0, position.y+0.5, 1);
 }
 )";

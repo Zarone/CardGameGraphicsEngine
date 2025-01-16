@@ -1,16 +1,17 @@
 #include <GL/glew.h>
 #include "../include/VertexBuffer.h"
+#include "../include/ErrorHandling.h"
 
 VertexBuffer::VertexBuffer(void* data, unsigned int size) {
-  glGenBuffers(1, &(this->bufferID));
-  glBindBuffer(GL_ARRAY_BUFFER, this->bufferID);
-  glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
+  GLCall(glGenBuffers(1, &(this->bufferID)));
+  GLCall(glBindBuffer(GL_ARRAY_BUFFER, this->bufferID));
+  GLCall(glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW));
 }
 
 void VertexBuffer::Bind() {
-  glBindBuffer(GL_ARRAY_BUFFER, this->bufferID);
+  GLCall(glBindBuffer(GL_ARRAY_BUFFER, this->bufferID));
 }
 
 void VertexBuffer::Unbind() {
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
 }

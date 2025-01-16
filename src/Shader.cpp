@@ -1,23 +1,24 @@
-#include "../include/Shader.h"
 #include <GL/glew.h>
 #include <iostream>
+#include "../include/Shader.h"
+#include "../include/ErrorHandling.h"
 
 unsigned int Shader::CompileShader(unsigned int type, const std::string& source ) {
-  unsigned int id = glCreateShader(type);
+  GLCall(unsigned int id = glCreateShader(type));
   const char* src = source.c_str();
-  glShaderSource(id, 1, &src, NULL);
-  glCompileShader(id);
+  GLCall(glShaderSource(id, 1, &src, NULL));
+  GLCall(glCompileShader(id));
 
   int result;
-  glGetShaderiv(id, GL_COMPILE_STATUS, &result);
+  GLCall(glGetShaderiv(id, GL_COMPILE_STATUS, &result));
   if (!result) {
     int length;
-    glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
+    GLCall(glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length));
     char* message = (char*)alloca(length * sizeof(char));
-    glGetShaderInfoLog(id, length, &length, message);
+    GLCall(glGetShaderInfoLog(id, length, &length, message));
     std::cout << "Failed to compile " << (type == GL_VERTEX_SHADER ? "vertex" : "fragment") << " shader" << std::endl;
     std::cout << message << std::endl;
-    glDeleteShader(id);
+    GLCall(glDeleteShader(id));
     return 0;
   }
 
@@ -25,27 +26,29 @@ unsigned int Shader::CompileShader(unsigned int type, const std::string& source 
 }
 
 Shader::Shader(const std::string& vertexShader, const std::string& fragmentShader) {
-  programID = glCreateProgram();
+  GLCall(programID = glCreateProgram());
   unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexShader);
   unsigned int fs = CompileShader(GL_FRAGMENT_SHADER, fragmentShader);
 
-  glAttachShader(programID, vs);
-  glAttachShader(programID, fs);
-  glLinkProgram(programID);
-  glValidateProgram(programID);
+  GLCall(glAttachShader(programID, vs));
+  GLCall(glAttachShader(programID, fs));
+  GLCall(glLinkProgram(programID));
+  GLCall(glValidateProgram(programID));
 
-  glDeleteShader(vs);
-  glDeleteShader(fs);
+  GLCall(glDeleteShader(vs));
+  GLCall(glDeleteShader(fs));
 }
 
 void Shader::Bind() {
-  glUseProgram(this->programID);
+  GLCall(glUseProgram(this->programID));
 }
 
 int Shader::GetUniformLocation(const std::string& name) {
-  return glGetUniformLocation(this->programID, name.c_str());
+  GLCall(int x = glGetUniformLocation(this->programID, name.c_str()));
+
+  return x;
 }
 
 Shader::~Shader() {
-  glDeleteProgram(this->programID);
+  GLCall(glDeleteProgram(this->programID));
 }

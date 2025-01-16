@@ -34,6 +34,7 @@ add_executable(${PROJECT_NAME}
     src/Texture.cpp
     src/external/stb_image.cpp
     src/Renderer.cpp
+    src/CardRenderingData.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE glfw GLEW::GLEW glm)

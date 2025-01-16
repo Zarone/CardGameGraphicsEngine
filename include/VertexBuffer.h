@@ -5,7 +5,8 @@ class VertexBuffer
 private:
   unsigned int bufferID;
 public:
-  VertexBuffer(void* data, unsigned int size);
+  VertexBuffer();
+  VertexBuffer(void* data, unsigned int size, bool dynamicDraw = false);
   void Bind();
   void Unbind();
 };

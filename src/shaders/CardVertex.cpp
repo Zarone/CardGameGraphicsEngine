@@ -6,19 +6,17 @@ std::string myShaders::cardVertex = R"(
 layout(location = 0) in vec4 position;
 layout(location = 1) in vec2 textureCoordinates;
 
-out vec4 vertColor;
 out vec2 fragmentTextureCoordinates;
 
 uniform mat4 projMatrix;
 uniform mat4 cameraMatrix;
-uniform mat4 rotMatrix;
+uniform mat4 modelMatrix;
 
 void main()
 {
-  gl_Position = projMatrix * cameraMatrix * rotMatrix * position;
-  vertColor = vec4(position.x+0.5, position.y+0.5, 0, 1);
+  gl_Position = projMatrix * cameraMatrix * modelMatrix * position;
 
-  fragmentTextureCoordinates = vec2(textureCoordinates.x, textureCoordinates.y);
+  fragmentTextureCoordinates = textureCoordinates;
 }
 )";
 

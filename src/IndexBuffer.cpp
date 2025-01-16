@@ -2,6 +2,8 @@
 #include "../include/IndexBuffer.h"
 #include "../include/ErrorHandling.h"
 
+IndexBuffer::IndexBuffer() {}
+
 IndexBuffer::IndexBuffer(void* data, unsigned int triangleCount) {
   GLCall(glGenBuffers(1, &(this->bufferID)));
   GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->bufferID));

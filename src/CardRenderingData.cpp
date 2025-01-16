@@ -11,7 +11,3 @@ GLuint CardRenderingData::cardIndices[] = {
   3, 2, 0,
   0, 2, 1
 };
-
-bool CardRenderingData::IsTextureBound() {
-  return this->textureBound;
-}

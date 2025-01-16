@@ -48,14 +48,14 @@ int main(void)
     
 
     Texture cardTex = Texture("../assets/card3.png");
-    cardTex.Bind(0);
-    GLint cardTextureUniformID = cardShader.GetUniformLocation("frontCardTexture");
-    glUniform1i(cardTextureUniformID, 0);
+    //cardTex.Bind(0);
+    //GLint cardTextureUniformID = cardShader.GetUniformLocation("frontCardTexture");
+    //glUniform1i(cardTextureUniformID, 0);
 
     Texture backCardTex = Texture("../assets/back.png");
-    cardTex.Bind(1);
-    GLint backCardTextureUniformID = cardShader.GetUniformLocation("backCardTexture");
-    glUniform1i(backCardTextureUniformID, 1);
+    //cardTex.Bind(1);
+    //GLint backCardTextureUniformID = cardShader.GetUniformLocation("backCardTexture");
+    //glUniform1i(backCardTextureUniformID, 1);
   // )
 
   cardShader.SetUniform4fv("projMatrix", false, glm::value_ptr(projMatrix));
@@ -79,8 +79,9 @@ int main(void)
     cardBuffer.Bind();
     cardIndexBuffer.Bind();
     cardShader.Bind();
-    cardTex.Bind(0);
-    backCardTex.Bind(1);
+    cardTex.Bind(3);
+    //backCardTex.Bind(1);
+    cardShader.SetUniform1i("cardTexture", 3);
     modelMatrix = glm::translate(identity, glm::vec3(0.0f, 0.5f, 1.0f));
     cardShader.SetUniform4fv("modelMatrix", false, glm::value_ptr(modelMatrix));
     GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));

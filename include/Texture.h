@@ -10,9 +10,12 @@ private:
   int height;
   int width;
   int bitsPerPixel;
+  bool isBound;
+  unsigned int boundTo;
 public:
   Texture(const std::string& path);
   ~Texture();
   void Bind(unsigned int textureSlot);
   void Unbind();
+  bool GetIsBound();
 };

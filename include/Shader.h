@@ -13,5 +13,6 @@ public:
   void Bind();
   int GetUniformLocation(const std::string& name);
   void SetUniform4fv(const std::string& name, bool transpose, GLfloat* pointer);
+  void SetUniform1i(const std::string& name, GLuint val);
   ~Shader();
 };

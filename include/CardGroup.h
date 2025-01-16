@@ -8,6 +8,7 @@
 #include "VertexArray.h"
 #include "IndexBuffer.h"
 #include "Shader.h"
+#include "TextureMap.h"
 
 typedef struct CardItem
 {
@@ -27,6 +28,8 @@ private:
   VertexBuffer transformBuffer;
   MemoryLayout transformBufferLayout;
   Shader cardShader;
+  TextureMap* textureMap;
+  bool zFlipped;
   
   // keeps track of whether or not 
   // we need to update position info 
@@ -35,6 +38,14 @@ private:
 
   const static unsigned int estimatedMax;
 public:
-  CardGroup(glm::vec3 position, float rotationX, float rotationY, float scaleX, float scaleY);
-  void Render();
+  CardGroup(
+    TextureMap* textureMap, 
+    glm::vec3 position, 
+    float rotationX, 
+    float rotationZ, 
+    float scaleX, 
+    float scaleY,
+    bool zFlipped
+  );
+  void Render(unsigned int maxBindableTextures);
 };

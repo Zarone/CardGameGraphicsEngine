@@ -1,5 +1,6 @@
 #include <GL/glew.h>
 #include <iostream>
+#include <unordered_map>
 
 #include "../include/Texture.h"
 #include "../include/ErrorHandling.h"
@@ -41,4 +42,15 @@ Texture::~Texture() {
 void Texture::Bind(unsigned int textureSlot) {
   GLCall(glActiveTexture(GL_TEXTURE0 + textureSlot));
   GLCall(glBindTexture(GL_TEXTURE_2D, this->textureID));
+  this->isBound = true;
+  this->boundTo = textureSlot;
+}
+
+void Texture::Unbind() {
+  GLCall(glBindTexture(GL_TEXTURE_2D, 0));
+  this->isBound = false;
+}
+
+bool Texture::GetIsBound() {
+  return this->isBound;
 }

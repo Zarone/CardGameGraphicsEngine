@@ -57,6 +57,11 @@ void Shader::SetUniform4fv(const std::string& name, bool transpose, GLfloat* poi
   GLCall(glUniformMatrix4fv(thisID, 1, transpose, pointer));
 }
 
+void Shader::SetUniform1i(const std::string& name, GLuint val) {
+  GLint thisID = this->GetUniformLocation(name);
+  GLCall(glUniform1i(thisID, val));
+}
+
 Shader::~Shader() {
   GLCall(glDeleteProgram(this->programID));
 }

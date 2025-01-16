@@ -1,3 +1,5 @@
+#pragma once
+
 #include "GLFW/glfw3.h"
 
 class WindowManager 
@@ -8,7 +10,9 @@ private:
   unsigned int ny;
 public:
   WindowManager();
+  void SetupOpenGL();
   bool ShouldClose();
+  void GetCursorPosition(double* x, double* y);
   void SwapBuffers();
   void PollEvents();
 

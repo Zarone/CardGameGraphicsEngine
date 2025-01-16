@@ -25,8 +25,8 @@ void VertexArray::AddBuffer(VertexBuffer& buffer, const MemoryLayout& layout) {
     MemoryElement el = elements.at(i);
     unsigned int type = el.type;
     unsigned int count = el.count;
-    std::cout << numAttribs << ", " << count << ", " << type << ", " << GL_FALSE << ", " << layout.GetStride() << ", " << currentIndex << std::endl;
     GLCall(glEnableVertexAttribArray(numAttribs));
+    std::cout << numAttribs << ", " << count << ", " << type << ", " << GL_FALSE << ", " << layout.GetStride() << ", " << currentIndex << std::endl;
     GLCall(glVertexAttribPointer(numAttribs, count, type, GL_FALSE, layout.GetStride(), (const void*)currentIndex));
     currentIndex += count*MemoryLayout::SizeOfType(type);
     ++numAttribs;

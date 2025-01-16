@@ -18,7 +18,7 @@ void main()
   gl_Position = projMatrix * cameraMatrix * rotMatrix * position;
   vertColor = vec4(position.x+0.5, position.y+0.5, 0, 1);
 
-  fragmentTextureCoordinates = textureCoordinates;
+  fragmentTextureCoordinates = vec2(textureCoordinates.x, textureCoordinates.y);
 }
 )";
 

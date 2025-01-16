@@ -1,8 +1,11 @@
 #include <GL/glew.h>
 #include <cstdlib>
+#include <iostream>
 #include "../include/MemoryLayout.h"
 
 MemoryLayout::MemoryLayout() {
+  stride = 0;
+  this->elements = {};
 }
 
 unsigned int MemoryLayout::SizeOfType(unsigned int type) {
@@ -15,6 +18,7 @@ unsigned int MemoryLayout::SizeOfType(unsigned int type) {
 }
 
 void MemoryLayout::AddMemoryElement(unsigned int type, unsigned int count) {
+  std::cout << count << ", " << SizeOfType(type) << std::endl;
   this->stride += count * SizeOfType(type);
   elements.push_back({
     .type = type,

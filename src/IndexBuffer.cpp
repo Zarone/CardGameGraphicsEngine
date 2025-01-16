@@ -1,18 +1,19 @@
 #include <GL/glew.h>
 #include "../include/IndexBuffer.h"
+#include "../include/ErrorHandling.h"
 
 IndexBuffer::IndexBuffer(void* data, unsigned int triangleCount) {
-  glGenBuffers(1, &(this->bufferID));
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->bufferID);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, triangleCount*3*sizeof(GLuint), data, GL_STATIC_DRAW);
+  GLCall(glGenBuffers(1, &(this->bufferID)));
+  GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->bufferID));
+  GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, triangleCount*3*sizeof(GLuint), data, GL_STATIC_DRAW));
 }
 
 void IndexBuffer::Bind() {
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->bufferID);
+  GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->bufferID));
 }
 
 void IndexBuffer::Unbind() {
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+  GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 }
 
 

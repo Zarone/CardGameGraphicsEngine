@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <GL/glew.h>
 
 class Shader 
 {
@@ -10,5 +11,6 @@ public:
   Shader(const std::string& vertexShader, const std::string& fragmentShader);
   void Bind();
   int GetUniformLocation(const std::string& name);
+  void SetUniform4fv(const std::string& name, bool transpose, GLfloat* pointer);
   ~Shader();
 };

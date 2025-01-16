@@ -44,9 +44,15 @@ void Shader::Bind() {
 }
 
 int Shader::GetUniformLocation(const std::string& name) {
+  this->Bind();
   GLCall(int x = glGetUniformLocation(this->programID, name.c_str()));
 
   return x;
+}
+
+void Shader::SetUniform4fv(const std::string& name, bool transpose, GLfloat* pointer) {
+  GLint thisID = this->GetUniformLocation(name);
+  GLCall(glUniformMatrix4fv(thisID, 1, transpose, pointer));
 }
 
 Shader::~Shader() {

@@ -33,6 +33,7 @@ add_executable(${PROJECT_NAME}
     src/MemoryLayout.cpp
     src/Texture.cpp
     src/external/stb_image.cpp
+    src/Renderer.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE glfw GLEW::GLEW glm)

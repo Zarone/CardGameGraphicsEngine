@@ -1,5 +1,8 @@
-#include "../include/WindowManager.h"
 #include <cstdlib>
+#include <GL/glew.h>
+#include <iostream>
+#include "../include/WindowManager.h"
+#include "../include/ErrorHandling.h"
 
 WindowManager::WindowManager() {
   /* Initialize the library */
@@ -26,8 +29,26 @@ WindowManager::WindowManager() {
   glfwMakeContextCurrent(this->window);
 }
 
+void WindowManager::SetupOpenGL() {
+  if (glewInit() != GLEW_OK) {
+    std::cout << "Error with glew" << std::endl;
+  }
+
+  std::cout << glGetString(GL_VERSION) << std::endl;
+
+  GLCall(glEnable(GL_DEPTH_TEST));
+  GLCall(glDepthFunc(GL_LESS));
+
+  GLCall(glEnable(GL_BLEND));
+  GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+}
+
 bool WindowManager::ShouldClose() {
   return glfwWindowShouldClose(window);
+}
+
+void WindowManager::GetCursorPosition(double* x, double* y) {
+  glfwGetCursorPos(this->window, x, y);
 }
 
 void WindowManager::SwapBuffers() {

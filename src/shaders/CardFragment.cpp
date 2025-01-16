@@ -15,7 +15,12 @@ void main()
   if (gl_FrontFacing) {
     color = texture(frontCardTexture, fragmentTextureCoordinates);
   } else {
-    color = texture(backCardTexture, vec2(1-fragmentTextureCoordinates.x, fragmentTextureCoordinates.y));
+    color = texture(
+      backCardTexture, vec2(
+        1-fragmentTextureCoordinates.x, 
+        fragmentTextureCoordinates.y
+      )
+    );
   }
 }
 )";

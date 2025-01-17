@@ -17,6 +17,8 @@
 #include "../include/Texture.h"
 #include "../include/Renderer.h"
 #include "../include/CardRenderingData.h"
+#include "../include/CardGroup.h"
+#include "../include/TextureMap.h"
 
 int main(void)
 {
@@ -30,42 +32,57 @@ int main(void)
   glm::mat4 cameraMatrix = glm::mat4(1.0f);
   myRenderer.Setup3DTransforms(projMatrix, cameraMatrix);
 
-  // CardGroup hand = CardGroup();
-  // hand.AddCard("card3");
+  TextureMap textureMap = TextureMap();
+  CardGroup hand(
+    &textureMap,
+    glm::vec3(0.0f, 0.5f, 1.0f),
+    0.0f,
+    0.0f,
+    1.0f,
+    1.0f,
+    false
+  );
+  hand.AddCard(0);
+  hand.AddCard(1);
+  hand.PrepareTextures();
   // (
-    VertexArray cardVao = VertexArray();
-    cardVao.Bind();
-    VertexBuffer cardBuffer = VertexBuffer(CardRenderingData::cardPositions, 5*4*sizeof(float));
-    cardBuffer.Bind();
-    MemoryLayout cardMemoryLayout = MemoryLayout();
-    cardMemoryLayout.AddMemoryElement(GL_FLOAT, 3);
-    cardMemoryLayout.AddMemoryElement(GL_FLOAT, 2);
-    cardVao.AddBuffer(cardBuffer, cardMemoryLayout);
-    IndexBuffer cardIndexBuffer = IndexBuffer(CardRenderingData::cardIndices, 2);
-    cardIndexBuffer.Bind();
-    Shader cardShader = Shader(myShaders::cardVertex, myShaders::cardFragment);
-    cardShader.Bind();
+    //VertexArray cardVao = VertexArray();
+    //cardVao.Bind();
+    //VertexBuffer cardBuffer = VertexBuffer(CardRenderingData::cardPositions, 5*4*sizeof(float));
+    //cardBuffer.Bind();
+    //MemoryLayout cardMemoryLayout = MemoryLayout();
+    //cardMemoryLayout.AddMemoryElement(GL_FLOAT, 3);
+    //cardMemoryLayout.AddMemoryElement(GL_FLOAT, 2);
+    //cardVao.AddBuffer(cardBuffer, cardMemoryLayout);
+    //IndexBuffer cardIndexBuffer = IndexBuffer(CardRenderingData::cardIndices, 2);
+    //cardIndexBuffer.Bind();
+    //Shader cardShader = Shader(myShaders::cardVertex, myShaders::cardFragment);
+    //cardShader.Bind();
     
 
-    Texture cardTex = Texture("../assets/card3.png");
+    //Texture cardTex = Texture("../assets/card3.png");
     //cardTex.Bind(0);
     //GLint cardTextureUniformID = cardShader.GetUniformLocation("frontCardTexture");
     //glUniform1i(cardTextureUniformID, 0);
 
-    Texture backCardTex = Texture("../assets/back.png");
+    //Texture backCardTex = Texture("../assets/back.png");
     //cardTex.Bind(1);
     //GLint backCardTextureUniformID = cardShader.GetUniformLocation("backCardTexture");
     //glUniform1i(backCardTextureUniformID, 1);
   // )
 
-  cardShader.SetUniform4fv("projMatrix", false, glm::value_ptr(projMatrix));
-  cardShader.SetUniform4fv("cameraMatrix", false, glm::value_ptr(cameraMatrix));
+  //cardShader.SetUniform4fv("projMatrix", false, glm::value_ptr(projMatrix));
+  //cardShader.SetUniform4fv("cameraMatrix", false, glm::value_ptr(cameraMatrix));
   
   double cursorX;
   double cursorY;
 
   glm::mat4 modelMatrix;
   glm::mat4 identity = glm::mat4(1.0f);
+
+  GLint maxBindableTextures;
+  glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxBindableTextures);
+  std::cout << "maxBindableTextures: " << maxBindableTextures << std::endl;
 
   /* Loop until the user closes the window */
   while (!myWindow.ShouldClose())
@@ -75,16 +92,18 @@ int main(void)
     /* Render here */
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    cardVao.Bind();
-    cardBuffer.Bind();
-    cardIndexBuffer.Bind();
-    cardShader.Bind();
-    cardTex.Bind(3);
-    //backCardTex.Bind(1);
-    cardShader.SetUniform1i("cardTexture", 3);
-    modelMatrix = glm::translate(identity, glm::vec3(0.0f, 0.5f, 1.0f));
-    cardShader.SetUniform4fv("modelMatrix", false, glm::value_ptr(modelMatrix));
-    GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+    //cardVao.Bind();
+    //cardBuffer.Bind();
+    //cardIndexBuffer.Bind();
+    //cardShader.Bind();
+    //cardTex.Bind(3);
+    ////backCardTex.Bind(1);
+    //cardShader.SetUniform1i("cardTexture", 3);
+    //modelMatrix = glm::translate(identity, glm::vec3(0.0f, 0.5f, 1.0f));
+    //cardShader.SetUniform4fv("modelMatrix", false, glm::value_ptr(modelMatrix));
+    //GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+    
+    hand.Render(maxBindableTextures, projMatrix, cameraMatrix);
 
     /* Swap front and back buffers */
     myWindow.SwapBuffers();

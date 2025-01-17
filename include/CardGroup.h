@@ -19,6 +19,8 @@ typedef struct CardItem
 class CardGroup
 {
 private:
+  const static unsigned int estimatedMax;
+
   glm::mat4 transform;
   std::vector<CardItem> cards = {};
   VertexArray groupVao;
@@ -27,6 +29,8 @@ private:
   MemoryLayout staticBufferLayout;
   VertexBuffer transformBuffer;
   MemoryLayout transformBufferLayout;
+  VertexBuffer textureIDBuffer;
+  MemoryLayout textureIDBufferLayout;
   Shader cardShader;
   TextureMap* textureMap;
   bool zFlipped;
@@ -35,8 +39,6 @@ private:
   // we need to update position info 
   // before the next render.
   bool dirty; 
-
-  const static unsigned int estimatedMax;
 public:
   CardGroup(
     TextureMap* textureMap, 
@@ -47,5 +49,13 @@ public:
     float scaleY,
     bool zFlipped
   );
-  void Render(unsigned int maxBindableTextures);
+  void Render(unsigned int maxBindableTextures, glm::mat4& projMatrix, glm::mat4& camMatrix);
+  void AddCard(unsigned int id);
+
+  /*
+  *
+  * @brief Must be called after cards are added to group
+  *
+  */
+  void PrepareTextures();
 };

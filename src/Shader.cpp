@@ -28,7 +28,7 @@ unsigned int Shader::CompileShader(unsigned int type, const std::string& source 
 Shader::Shader() {}
 
 Shader::Shader(const std::string& vertexShader, const std::string& fragmentShader) {
-  GLCall(programID = glCreateProgram());
+  GLCall(this->programID = glCreateProgram());
   unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexShader);
   unsigned int fs = CompileShader(GL_FRAGMENT_SHADER, fragmentShader);
 
@@ -55,6 +55,11 @@ int Shader::GetUniformLocation(const std::string& name) {
 void Shader::SetUniform4fv(const std::string& name, bool transpose, GLfloat* pointer) {
   GLint thisID = this->GetUniformLocation(name);
   GLCall(glUniformMatrix4fv(thisID, 1, transpose, pointer));
+}
+
+void Shader::SetUniform1iv(const std::string& name, unsigned int count, GLint* data) {
+  GLint thisID = this->GetUniformLocation(name);
+  GLCall(glUniform1iv(thisID, count, data));
 }
 
 void Shader::SetUniform1i(const std::string& name, GLuint val) {

@@ -5,30 +5,19 @@ std::string myShaders::cardFragment = R"(
 
 layout(location = 0) out vec4 color;
 
-in vec2 fragmentTextureCoordinates;
+//in vec2 fragmentTextureCoordinates;
+//flat in int f_cardTexture;
 
-//uniform sampler2D backCardTexture;
-//uniform sampler2D frontCardTexture;
-uniform sampler2D cardTexture;
+//uniform sampler2D textures[16];
 
 void main()
 {
-  if (gl_FrontFacing) {
-    color = texture(cardTexture, fragmentTextureCoordinates);
-  } else {
-    color = texture(
-      cardTexture, vec2(
-        1-fragmentTextureCoordinates.x, 
-        fragmentTextureCoordinates.y
-      )
-    );
-  }
-  
+  color = vec4(0.0, 1.0, 0.0, 1.0);
   //if (gl_FrontFacing) {
-    //color = texture(frontCardTexture, fragmentTextureCoordinates);
+    //color = texture(textures[f_cardTexture], fragmentTextureCoordinates);
   //} else {
     //color = texture(
-      //backCardTexture, vec2(
+      //textures[f_cardTexture], vec2(
         //1-fragmentTextureCoordinates.x, 
         //fragmentTextureCoordinates.y
       //)

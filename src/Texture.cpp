@@ -54,3 +54,12 @@ void Texture::Unbind() {
 bool Texture::GetIsBound() {
   return this->isBound;
 }
+
+int Texture::GetBoundSlot() {
+  return this->boundTo;
+}
+
+std::ostream& operator<<(std::ostream&os, const Texture& t) {
+  os << "Texture: isBound: " << t.isBound << ", boundTo: " << t.boundTo;
+  return os;
+}

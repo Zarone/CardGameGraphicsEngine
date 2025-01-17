@@ -1,4 +1,5 @@
 #pragma once
+#include <iostream>
 
 class Card
 {
@@ -7,4 +8,5 @@ private:
 public:
   Card(unsigned int id);
   unsigned int GetID();
+  friend std::ostream& operator<<(std::ostream& os, const Card& c);
 };

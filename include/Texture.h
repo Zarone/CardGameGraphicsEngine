@@ -18,4 +18,6 @@ public:
   void Bind(unsigned int textureSlot);
   void Unbind();
   bool GetIsBound();
+  int GetBoundSlot();
+  friend std::ostream& operator<<(std::ostream& os, const Texture& t);
 };

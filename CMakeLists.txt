@@ -19,22 +19,25 @@ find_package(GLEW)
 
 # Add the executable with all source files
 add_executable(${PROJECT_NAME}
-    src/main.cpp
+    src/external/stb_image.cpp
     src/shaders/BasicVertex.cpp
     src/shaders/BasicFragment.cpp
     src/shaders/CardVertex.cpp
     src/shaders/CardFragment.cpp
-    src/WindowManager.cpp
-    src/Shader.cpp
-    src/ErrorHandling.cpp
-    src/VertexBuffer.cpp
-    src/IndexBuffer.cpp
-    src/VertexArray.cpp
-    src/MemoryLayout.cpp
-    src/Texture.cpp
-    src/external/stb_image.cpp
-    src/Renderer.cpp
+    src/Card.cpp
+    src/CardGroup.cpp
     src/CardRenderingData.cpp
+    src/ErrorHandling.cpp
+    src/IndexBuffer.cpp
+    src/main.cpp
+    src/MemoryLayout.cpp
+    src/Renderer.cpp
+    src/Shader.cpp
+    src/Texture.cpp
+    src/TextureMap.cpp
+    src/VertexArray.cpp
+    src/VertexBuffer.cpp
+    src/WindowManager.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE glfw GLEW::GLEW glm)

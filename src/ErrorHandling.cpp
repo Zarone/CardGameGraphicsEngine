@@ -4,7 +4,9 @@
 #include "../include/ErrorHandling.h"
 
 void GLClearError() {
-  while (glGetError());
+  while (glGetError()) {
+    std::cout << "unhandled error?" << std::endl;
+  }
 }
 
 bool GLLogCall(const char* function, const char* file, int line) {

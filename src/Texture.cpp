@@ -47,6 +47,7 @@ void Texture::Bind(unsigned int textureSlot) {
 }
 
 void Texture::Unbind() {
+  GLCall(glActiveTexture(GL_TEXTURE0 + this->boundTo));
   GLCall(glBindTexture(GL_TEXTURE_2D, 0));
   this->isBound = false;
 }

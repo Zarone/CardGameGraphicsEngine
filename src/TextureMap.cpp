@@ -1,8 +1,9 @@
 #include <iostream>
 #include "../include/TextureMap.h"
+#include "../include/ErrorHandling.h"
 
 TextureMap::TextureMap()
-:currentlyBound(0), nextFreeIndex(0)
+:currentlyBound(0), lru()
 {}
 
 const std::string TextureMap::pathPrefix = "../assets/";
@@ -11,15 +12,6 @@ const std::unordered_map<unsigned int, std::string> TextureMap::IDToPath = {
   {1, "card2"},
   {2, "card3"},
 };
-
-template<typename K, typename V>
-void printMap(std::ostream& os, std::unordered_map<K, V> const &map)
-{
-  os << "printing map:" << std::endl;
-  for (auto &pair: map) {
-    os << "(" << pair.first << ", " << pair.second << ")" << std::endl;
-  }
-}
 
 void TextureMap::SetupTexturePath(const std::string& path) {
   auto texture = this->map.find(path);
@@ -30,8 +22,7 @@ void TextureMap::SetupTexturePath(const std::string& path) {
       std::forward_as_tuple(TextureMap::pathPrefix + path + ".png"));
   }
 
-  printMap(std::cout, this->map);
-
+  PrintMapToStream<std::string, Texture>(std::cout, this->map);
 }
 
 void TextureMap::SetupBack() {
@@ -48,27 +39,34 @@ void TextureMap::SetupCard(unsigned int id) {
   }
 }
 
-void TextureMap::ResetIndexing() {
-  this->nextFreeIndex = 0;
-  this->currentlyBound = 0;
-}
-
-int TextureMap::GetUnusedTextureSlot() {
-  std::cout << "UNIMPLEMENTED FreeUnusedTexture" << std::endl;
-  exit(EXIT_FAILURE);
-}
-
 void TextureMap::RequestBind(unsigned int maxBindableTextures, unsigned int id) {
-  unsigned int nextSlot = nextFreeIndex;
-  if (this->currentlyBound == maxBindableTextures) {
-    this->nextFreeIndex = this->GetUnusedTextureSlot(); 
-  }
-
   auto path = this->IDToPath.find(id);
   if (path != this->IDToPath.end()) {
     auto texture = this->map.find(path->second);
     if (texture != this->map.end()) {
+      // if it's already bound, do nothing
+      if (texture->second.GetIsBound()) {
+        // update lru list by moving this element to front
+        this->lru.Access(&(texture->second));
+        return;
+      }
+
+      // the default is just the currentlyBound because
+      // we can just fill linearly at the start
+      unsigned int nextSlot = this->currentlyBound;
+
+      if (this->currentlyBound == maxBindableTextures) {
+        Texture* tex = this->lru.PopLRU();
+        ASSERT(tex->GetIsBound());
+        nextSlot = tex->GetBoundSlot();
+
+        tex->Unbind();
+        this->currentlyBound--;
+      }
+
+      // this->lru.Push(&(texture->second));
       texture->second.Bind(nextSlot);
+      this->currentlyBound++;
     } else {
       std::cout << "Could not find texture of path " << path->second << std::endl;
       exit(EXIT_FAILURE);
@@ -77,8 +75,6 @@ void TextureMap::RequestBind(unsigned int maxBindableTextures, unsigned int id) 
     std::cout << "Could not find card of id " << id << std::endl;
     exit(EXIT_FAILURE);
   }
-
-  nextFreeIndex++;
 }
 
 int TextureMap::GetSlotOf(unsigned int id) {
@@ -93,6 +89,10 @@ int TextureMap::GetSlotOf(unsigned int id) {
 
 std::ostream& operator<<(std::ostream& os, const TextureMap& t) {
   os << "Map: ";
-  printMap(os, t.map);
+  PrintMapToStream(os, t.map);
   return os;
+}
+
+int TextureMap::Size() {
+  return this->map.size();
 }

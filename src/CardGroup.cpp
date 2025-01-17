@@ -108,10 +108,19 @@ void CardGroup::Render(
 
   // Pass texture units as an array to the shader
   std::vector<int> textureUnits(maxBindableTextures);
-  std::iota(textureUnits.begin(), textureUnits.end(), 0); // {0, 1, 2, ...}
+  int mapSize = this->textureMap->Size();
+  std::cout << "textureUnits" << std::endl;
+  for (int i = 0; i < maxBindableTextures; ++i) {
+    if (i < mapSize) {
+      textureUnits[i] = i;
+    } else {
+      textureUnits[i] = 0;
+    }
+    std::cout << i << ": " << textureUnits[i] << std::endl;
+  }
   cardShader.SetUniform1iv("textures", maxBindableTextures, textureUnits.data());
 
-  //std::cout << "Prerender mapping: " << *this->textureMap << std::endl;
+  std::cout << "Prerender mapping: " << *this->textureMap << std::endl;
 
   if (this->zFlipped) {
     GLCall(glDrawElementsInstanced(
@@ -156,7 +165,6 @@ void CardGroup::Render(
       ));
 
       i += maxBindableTextures;
-      this->textureMap->ResetIndexing();
     }
   }
 

@@ -34,13 +34,24 @@ add_executable(${PROJECT_NAME}
     src/Renderer.cpp
     src/Shader.cpp
     src/Texture.cpp
+    src/TextureLRU.cpp
     src/TextureMap.cpp
     src/VertexArray.cpp
     src/VertexBuffer.cpp
     src/WindowManager.cpp
 )
 
+add_executable(test
+  src/external/stb_image.cpp
+  test/main.cpp
+  test/TestTextureLRU.cpp
+  src/TextureLRU.cpp
+  src/Texture.cpp
+  src/ErrorHandling.cpp
+)
+
 target_link_libraries(${PROJECT_NAME} PRIVATE glfw GLEW::GLEW glm)
+target_link_libraries(test PRIVATE GLEW::GLEW)
 
 if (APPLE)
   target_link_libraries(${PROJECT_NAME} PRIVATE "-framework OpenGL")

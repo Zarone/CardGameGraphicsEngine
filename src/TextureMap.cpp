@@ -13,11 +13,11 @@ const std::unordered_map<unsigned int, std::string> TextureMap::IDToPath = {
 };
 
 template<typename K, typename V>
-void print_map(std::unordered_map<K, V> const &m)
+void printMap(std::ostream& os, std::unordered_map<K, V> const &map)
 {
-  std::cout << "printing map:" << std::endl;
-  for (auto const &pair: m) {
-    std::cout << "{" << pair.first << ": " << pair.second << "}\n";
+  os << "printing map:" << std::endl;
+  for (auto &pair: map) {
+    os << "(" << pair.first << ", " << pair.second << ")" << std::endl;
   }
 }
 
@@ -30,7 +30,7 @@ void TextureMap::SetupTexturePath(const std::string& path) {
       std::forward_as_tuple(TextureMap::pathPrefix + path + ".png"));
   }
 
-  print_map(this->map);
+  printMap(std::cout, this->map);
 
 }
 
@@ -77,6 +77,8 @@ void TextureMap::RequestBind(unsigned int maxBindableTextures, unsigned int id) 
     std::cout << "Could not find card of id " << id << std::endl;
     exit(EXIT_FAILURE);
   }
+
+  nextFreeIndex++;
 }
 
 int TextureMap::GetSlotOf(unsigned int id) {
@@ -87,4 +89,10 @@ int TextureMap::GetSlotOf(unsigned int id) {
     std::cout << "Could not find card of id " << id << std::endl;
     exit(EXIT_FAILURE);
   }
+}
+
+std::ostream& operator<<(std::ostream& os, const TextureMap& t) {
+  os << "Map: ";
+  printMap(os, t.map);
+  return os;
 }

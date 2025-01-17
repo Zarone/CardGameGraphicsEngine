@@ -20,4 +20,5 @@ public:
   void RequestBind(unsigned int maxMindableTextures, unsigned int id);
   void ResetIndexing();
   int GetSlotOf(unsigned int id);
+  friend std::ostream& operator<<(std::ostream& os, const TextureMap& t);
 };

@@ -25,6 +25,7 @@ CardGroup::CardGroup(
   cardShader(myShaders::cardVertex, myShaders::cardFragment)
 {
   this->transform = glm::mat4(1.0f); // setup to identity
+  this->transform = glm::translate(this->transform, position);
   this->transform = glm::rotate(this->transform, rotationX, glm::vec3(1.0f, 0.0f, 0.0f));
   this->transform = glm::rotate(this->transform, rotationZ, glm::vec3(0.0f, 0.0f, 1.0f));
   this->transform = glm::scale(this->transform, glm::vec3(scaleX, scaleY, zFlipped ? -1.0f : 1.0f));
@@ -38,13 +39,13 @@ CardGroup::CardGroup(
   this->staticBufferLayout.AddMemoryElement(GL_FLOAT, 2); // texture uv coordinates
   this->groupVao.AddBuffer(this->staticBuffer, this->staticBufferLayout);
 
-  this->transformBuffer = VertexBuffer(NULL, estimatedMax*3*sizeof(float), true);
+  this->transformBuffer = VertexBuffer(NULL, estimatedMax*4*sizeof(float), true);
   this->transformBufferLayout = MemoryLayout();
   this->transformBufferLayout.AddMemoryElement(GL_FLOAT, 3, true); // position relative group
   this->transformBufferLayout.AddMemoryElement(GL_FLOAT, 1, true); // rotation
   this->groupVao.AddBuffer(this->transformBuffer, this->transformBufferLayout);
 
-  this->textureIDBuffer = VertexBuffer(NULL, estimatedMax*3*sizeof(float), true);
+  this->textureIDBuffer = VertexBuffer(NULL, estimatedMax*1*sizeof(GLint), true);
   this->textureIDBufferLayout = MemoryLayout();
   this->textureIDBufferLayout.AddMemoryElement(GL_INT, 1, true); // texture slot
   this->groupVao.AddBuffer(this->textureIDBuffer, this->textureIDBufferLayout);
@@ -53,6 +54,8 @@ CardGroup::CardGroup(
 }
 
 void CardGroup::PrepareTextures() {
+  int size = this->cards.size();
+
   if (zFlipped) {
     this->textureMap->SetupBack();
   } else {
@@ -63,6 +66,9 @@ void CardGroup::PrepareTextures() {
       this->textureMap->SetupCard(card.GetID());
     }
   }
+
+  this->textureIDBuffer.RewriteData(NULL, size*sizeof(GLint), true);
+
 }
 
 void CardGroup::Render(
@@ -79,14 +85,15 @@ void CardGroup::Render(
     int vertexSize = 3+1;
 
     float buffer[vertexSize*size];
-    for (int i = 0; i < size; i+=vertexSize) {
-      buffer[i] = (float)i/10.0f;
+    for (int i = 0; i < size*vertexSize; i+=vertexSize) {
+      buffer[i] = (float)i/8.0f;
       buffer[i+1] = 0.0f;
-      buffer[i+2] = (float)i/10.0f;
+      buffer[i+2] = (float)i/20.0f;
+      std::cout << "image x: " << buffer[i] << std::endl;
       buffer[i+3] = (float)i/10.0f;
     }
 
-    this->transformBuffer.RewriteData(buffer, size, true);
+    this->transformBuffer.RewriteData(buffer, size*vertexSize*sizeof(GLfloat), true);
   }
 
   int i = 0;
@@ -98,10 +105,13 @@ void CardGroup::Render(
   cardShader.SetUniform4fv("projMatrix", false, glm::value_ptr(projMatrix));
   cardShader.SetUniform4fv("cameraMatrix", false, glm::value_ptr(camMatrix));
   cardShader.SetUniform4fv("modelMatrix", false, glm::value_ptr(this->transform));
+
   // Pass texture units as an array to the shader
-  //std::vector<int> textureUnits(maxBindableTextures);
-  //std::iota(textureUnits.begin(), textureUnits.end(), 0); // {0, 1, 2, ...}
-  //cardShader.SetUniform1iv("textures", maxBindableTextures, textureUnits.data());
+  std::vector<int> textureUnits(maxBindableTextures);
+  std::iota(textureUnits.begin(), textureUnits.end(), 0); // {0, 1, 2, ...}
+  cardShader.SetUniform1iv("textures", maxBindableTextures, textureUnits.data());
+
+  //std::cout << "Prerender mapping: " << *this->textureMap << std::endl;
 
   if (this->zFlipped) {
     GLCall(glDrawElementsInstanced(
@@ -131,7 +141,7 @@ void CardGroup::Render(
       }
       
       // write data from buffer to gpu
-      this->transformBuffer.OverwriteData(
+      this->textureIDBuffer.OverwriteData(
         buffer, 
         i*sizeof(GLint)*vertexSize, 
         batchSize*sizeof(GLint)*vertexSize

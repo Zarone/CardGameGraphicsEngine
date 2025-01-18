@@ -8,7 +8,7 @@ layout(location = 0) out vec4 color;
 in vec2 fragmentTextureCoordinates;
 flat in int f_cardTexture;
 
-uniform sampler2D textures[2];
+uniform sampler2D textures[16];
 
 void main()
 {

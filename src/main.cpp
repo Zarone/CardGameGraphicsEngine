@@ -55,8 +55,8 @@ int main(void)
   glm::mat4 modelMatrix;
   glm::mat4 identity = glm::mat4(1.0f);
 
-  GLint maxBindableTextures = 2;
-  //glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxBindableTextures);
+  GLint maxBindableTextures;
+  glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxBindableTextures);
   std::cout << "maxBindableTextures: " << maxBindableTextures << std::endl;
 
   /* Loop until the user closes the window */

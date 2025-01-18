@@ -89,7 +89,7 @@ void CardGroup::Render(
     for (int i = 0; i < size*transformVertexSize; i+=transformVertexSize) {
       buffer[i] = (float)i/8.0f;
       buffer[i+1] = 0.0f;
-      buffer[i+2] = (float)i/20.0f;
+      buffer[i+2] = (float)i/80.0f;
       buffer[i+3] = (float)i/10.0f;
     }
 
@@ -109,7 +109,6 @@ void CardGroup::Render(
   // Pass texture units as an array to the shader
   std::vector<int> textureUnits(maxBindableTextures);
   int mapSize = this->textureMap->Size();
-  std::cout << "textureUnits: ";
   for (int i = 0; i < maxBindableTextures; ++i) {
     if (i < mapSize) {
       textureUnits[i] = i;
@@ -117,7 +116,6 @@ void CardGroup::Render(
       textureUnits[i] = 0;
     }
   }
-  PrintVector(std::cout, textureUnits);
   cardShader.SetUniform1iv("textures", maxBindableTextures, textureUnits.data());
 
   if (this->zFlipped) {
@@ -136,7 +134,6 @@ void CardGroup::Render(
 
     while (i < size) {
       int batchSize = fmin(maxBindableTextures, size-i);
-      std::cout << "batch size " << batchSize << std::endl;
 
       // bind all textures about to be used
       for (int j = i; j < i+batchSize; ++j) {
@@ -149,12 +146,8 @@ void CardGroup::Render(
       }
 
       for (int j = 0; j < vertexSize*size; ++j) {
-        std::cout << "Vertex " << j << " : " << buffer[j] << std::endl;
       }
 
-      std::cout << "offset: " << i*sizeof(GLint) << std::endl;
-      std::cout << "size: " << batchSize*sizeof(GLint) << std::endl;
-      
       // write data from buffer to gpu
       this->textureIDBuffer.OverwriteData(
         buffer+i*vertexSize, 
@@ -191,14 +184,6 @@ void CardGroup::Render(
         sizeof(GLfloat)*transformVertexSize, 
         (const void*)(i*sizeof(GLfloat)*transformVertexSize+3*sizeof(GLfloat))
       ));
-
-
-
-      std::cout << "Prerender mapping: " << *this->textureMap << std::endl;
-
-      std::cout << "i: " << i << std::endl;
-      std::cout << "indices: " << i*6*sizeof(GLuint) << std::endl;
-      std::cout << "num_instances: " << batchSize << std::endl;
 
       GLCall(glDrawElementsInstanced(
         GL_TRIANGLES, 

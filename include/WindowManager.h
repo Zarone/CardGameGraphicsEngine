@@ -23,5 +23,9 @@ public:
   */
   float AspectRatio();
 
+  bool CursorInBounds(double posX, double posY);
+  int GetWidth();
+  int GetHeight();
+
   ~WindowManager();
 };

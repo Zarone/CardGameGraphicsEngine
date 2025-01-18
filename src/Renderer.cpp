@@ -1,6 +1,9 @@
 #include "../include/Renderer.h"
 
-Renderer::Renderer(WindowManager* window): window(window) {
+Renderer::Renderer(WindowManager* window, int maxBindableTextures): 
+  window(window),
+  maxBindableTextures(maxBindableTextures)
+{
 }
 
 void Renderer::Setup3DTransforms(const glm::vec3& cameraPosition, const glm::vec3& cameraDirection) {
@@ -12,5 +15,16 @@ void Renderer::Setup3DTransforms(const glm::vec3& cameraPosition, const glm::vec
     cameraPosition,
     cameraPosition+cameraDirection,
     glm::vec3(0.0f, 1.0f, 0.0f)
+  );
+}
+
+bool Renderer::InsideWindowBounds(double posX, double posY) {
+  return this->window->CursorInBounds(posX, posY);
+}
+
+glm::vec2 Renderer::GetScreenPositionFromCamera(glm::vec4 screenCoords) {
+  return glm::vec2(
+    (screenCoords.x/screenCoords.w+1)/2*window->GetWidth(),
+    (-screenCoords.y/screenCoords.w+1)/2*window->GetHeight()
   );
 }

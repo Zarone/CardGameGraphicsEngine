@@ -11,11 +11,11 @@
 #include "Shader.h"
 #include "TextureMap.h"
 
-typedef struct CardItem
-{
-  Card card;
-  CardRenderingData cardRenderingData;
-} CardItem;
+typedef struct RenderData {
+  bool isHand;
+  double cursorX;
+  double cursorY;
+} RenderData;
 
 class CardGroup
 {
@@ -23,7 +23,8 @@ private:
   const static unsigned int estimatedMax;
 
   glm::mat4 transform;
-  std::vector<CardItem> cards = {};
+
+  std::vector<Card> cards = {};
 
   VertexArray groupVao;
   VertexBuffer staticBuffer;
@@ -49,6 +50,9 @@ private:
   // we need to update position info 
   // before the next render.
   bool dirty; 
+  int lastCursorX;
+  int lastCursorY;
+  bool wasInsideBoundary;
 
   void DrawElements(int size);
 public:
@@ -60,7 +64,7 @@ public:
     float width, 
     bool zFlipped
   );
-  void Render(unsigned int maxBindableTextures, Renderer& renderer);
+  void Render(Renderer& renderer, const RenderData& renderData);
   void AddCard(unsigned int id);
 
   /*

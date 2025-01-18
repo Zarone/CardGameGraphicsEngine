@@ -8,4 +8,5 @@ private:
 public:
   static GLfloat cardPositions[];
   static GLuint cardIndices[];
+  static float cardHeightRatio;
 };

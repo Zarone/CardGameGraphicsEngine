@@ -22,8 +22,6 @@ void TextureMap::SetupTexturePath(const std::string& path) {
       std::forward_as_tuple(path),
       std::forward_as_tuple(TextureMap::pathPrefix + path + ".png"));
   }
-
-  PrintMapToStream<std::string, Texture>(std::cout, this->map);
 }
 
 void TextureMap::SetupBack() {

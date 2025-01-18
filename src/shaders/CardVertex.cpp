@@ -16,12 +16,25 @@ uniform mat4 projMatrix;
 uniform mat4 cameraMatrix;
 uniform mat4 modelMatrix;
 
+mat4 getZRotation(float rotation) 
+{
+  float sinR = sin(rotation);
+  float cosR = cos(rotation);
+  return mat4(
+    cosR, -sinR, 0, 0,
+    sinR, cosR, 0, 0,
+    0, 0, 1, 0,
+    0, 0, 0, 1
+  );
+}
+
 void main()
 {
   vec3 vertexPosition = position + positionRelativeGroup;
+  mat4 dynamicRotationMatrix = getZRotation(rotation);
 
   gl_Position = 
-    projMatrix * cameraMatrix * modelMatrix 
+    projMatrix * cameraMatrix * modelMatrix * dynamicRotationMatrix
     * vec4(vertexPosition, 1);
 
   fragmentTextureCoordinates = textureCoordinates;

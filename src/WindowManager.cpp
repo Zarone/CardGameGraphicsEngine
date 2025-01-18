@@ -63,6 +63,18 @@ float WindowManager::AspectRatio() {
   return (float)nx/ny;
 }
 
+bool WindowManager::CursorInBounds(double posX, double posY) {
+  return posX > 0 && posY > 0 && posX < this->nx && posY < this->ny;
+}
+
+int WindowManager::GetWidth() {
+  return this->nx;
+}
+
+int WindowManager::GetHeight() {
+  return this->ny;
+}
+
 WindowManager::~WindowManager() {
   glfwTerminate();
 }

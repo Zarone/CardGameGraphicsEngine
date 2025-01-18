@@ -11,6 +11,7 @@ const std::unordered_map<unsigned int, std::string> TextureMap::IDToPath = {
   {0, "card1"},
   {1, "card2"},
   {2, "card3"},
+  {3, "card4"},
 };
 
 void TextureMap::SetupTexturePath(const std::string& path) {
@@ -64,7 +65,7 @@ void TextureMap::RequestBind(unsigned int maxBindableTextures, unsigned int id) 
         this->currentlyBound--;
       }
 
-      // this->lru.Push(&(texture->second));
+      this->lru.Push(&(texture->second));
       texture->second.Bind(nextSlot);
       this->currentlyBound++;
     } else {

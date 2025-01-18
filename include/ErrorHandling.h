@@ -4,7 +4,9 @@
 #include <list>
 #include <iostream>
 
-#define ASSERT(x) if (!(x)) std::cout << "FAILED ASSERT" << std::endl;raise(SIGTRAP);
+#define ASSERT(x) if (!(x)) {\
+  std::cout << "FAILED ASSERT: " << #x << ", file: " << __FILE__ << ", line: " << __LINE__ << std::endl;raise(SIGTRAP);\
+}
 #define GLCall(x) GLClearError();\
   x;\
   ASSERT(GLLogCall(#x, __FILE__, __LINE__))
@@ -14,6 +16,14 @@ bool GLLogCall(const char* function, const char* file, int line);
 
 template<typename T>
 void PrintVector(std::ostream& os, std::list<T> const &map)
+{
+  os << "printing vector: ({addr}, {val})" << std::endl;
+  for (auto &pair: map) {
+    os << "(" << &pair << ", " << pair << ")" << std::endl;
+  }
+}
+template<typename T>
+void PrintVector(std::ostream& os, std::vector<T> const &map)
 {
   os << "printing vector: ({addr}, {val})" << std::endl;
   for (auto &pair: map) {

@@ -15,7 +15,7 @@ void VertexArray::Unbind() {
   GLCall(glBindVertexArray(0));
 }
 
-void VertexArray::AddBuffer(VertexBuffer& buffer, const MemoryLayout& layout) {
+unsigned int VertexArray::AddBuffer(VertexBuffer& buffer, const MemoryLayout& layout) {
   unsigned int currentIndex = 0;
   std::vector<MemoryElement> elements = layout.GetElements();
   this->Bind();
@@ -32,4 +32,5 @@ void VertexArray::AddBuffer(VertexBuffer& buffer, const MemoryLayout& layout) {
     currentIndex += count*MemoryLayout::SizeOfType(type);
     ++numAttribs;
   }
+  return numAttribs-1;
 }

@@ -35,7 +35,7 @@ int main(void)
   TextureMap textureMap = TextureMap();
   CardGroup hand(
     &textureMap,
-    glm::vec3(0.0f, 0.0f, 3.0f),
+    glm::vec3(0.0f, 0.0f, 3.5f),
     0.0f,
     0.0f,
     1.0f,
@@ -45,6 +45,7 @@ int main(void)
   hand.AddCard(0);
   hand.AddCard(1);
   hand.AddCard(2);
+  hand.AddCard(3);
 
   hand.PrepareTextures();
   

@@ -10,22 +10,21 @@ void TestTextureLRU() {
   lru.Push((Texture*)10);
   lru.Push((Texture*)15);
 
-  ASSERT(lru.GetIndex(0) == (Texture*)5);
-  std::cout << "here in test" << std::endl;
+  ASSERT(lru.GetIndex(0) == (Texture*)15);
   ASSERT(lru.GetIndex(1) == (Texture*)10);
-  ASSERT(lru.GetIndex(2) == (Texture*)15);
-
-  lru.PrintData();
+  ASSERT(lru.GetIndex(2) == (Texture*)5);
 
   lru.Access((Texture*)5);
+  ASSERT(lru.GetIndex(0) == (Texture*)5);
+  ASSERT(lru.GetIndex(1) == (Texture*)15);
+  ASSERT(lru.GetIndex(2) == (Texture*)10);
 
-  lru.PrintData();
+  Texture* tex = lru.PopLRU();
+  ASSERT(tex == (Texture*)10);
+  ASSERT(lru.GetIndex(0) == (Texture*)5);
+  ASSERT(lru.GetIndex(1) == (Texture*)15);
 
-  lru.PopLRU();
-
-  lru.PrintData();
-
-  lru.PopLRU();
-
-  lru.PrintData();
+  tex = lru.PopLRU();
+  ASSERT(tex == (Texture*)15);
+  ASSERT(lru.GetIndex(0) == (Texture*)5);
 }

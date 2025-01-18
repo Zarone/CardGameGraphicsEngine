@@ -12,5 +12,5 @@ public:
   VertexArray();
   void Bind();
   void Unbind();
-  void AddBuffer(VertexBuffer& buffer, const MemoryLayout& layout);
+  unsigned int AddBuffer(VertexBuffer& buffer, const MemoryLayout& layout);
 };

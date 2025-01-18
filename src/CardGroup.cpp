@@ -43,12 +43,12 @@ CardGroup::CardGroup(
   this->transformBufferLayout = MemoryLayout();
   this->transformBufferLayout.AddMemoryElement(GL_FLOAT, 3, true); // position relative group
   this->transformBufferLayout.AddMemoryElement(GL_FLOAT, 1, true); // rotation
-  this->groupVao.AddBuffer(this->transformBuffer, this->transformBufferLayout);
+  this->transformEndAttribID = this->groupVao.AddBuffer(this->transformBuffer, this->transformBufferLayout);
 
   this->textureIDBuffer = VertexBuffer(NULL, estimatedMax*1*sizeof(GLint), true);
   this->textureIDBufferLayout = MemoryLayout();
   this->textureIDBufferLayout.AddMemoryElement(GL_INT, 1, true); // texture slot
-  this->groupVao.AddBuffer(this->textureIDBuffer, this->textureIDBufferLayout);
+  this->textureEndAttribID = this->groupVao.AddBuffer(this->textureIDBuffer, this->textureIDBufferLayout);
 
   this->indexBuffer = IndexBuffer(CardRenderingData::cardIndices, 2);
 }
@@ -78,22 +78,22 @@ void CardGroup::Render(
 ) {
   int size = this->cards.size();
 
+  // 3 for positions plus 1 for rotation
+  int transformVertexSize = 3+1;
+
   if (this->dirty) {
     // update buffer for relative position and rotation
     
-    // 3 for positions plus 1 for rotation
-    int vertexSize = 3+1;
 
-    float buffer[vertexSize*size];
-    for (int i = 0; i < size*vertexSize; i+=vertexSize) {
+    float buffer[transformVertexSize*size];
+    for (int i = 0; i < size*transformVertexSize; i+=transformVertexSize) {
       buffer[i] = (float)i/8.0f;
       buffer[i+1] = 0.0f;
       buffer[i+2] = (float)i/20.0f;
-      std::cout << "image x: " << buffer[i] << std::endl;
       buffer[i+3] = (float)i/10.0f;
     }
 
-    this->transformBuffer.RewriteData(buffer, size*vertexSize*sizeof(GLfloat), true);
+    this->transformBuffer.RewriteData(buffer, size*transformVertexSize*sizeof(GLfloat), true);
   }
 
   int i = 0;
@@ -109,18 +109,16 @@ void CardGroup::Render(
   // Pass texture units as an array to the shader
   std::vector<int> textureUnits(maxBindableTextures);
   int mapSize = this->textureMap->Size();
-  std::cout << "textureUnits" << std::endl;
+  std::cout << "textureUnits: ";
   for (int i = 0; i < maxBindableTextures; ++i) {
     if (i < mapSize) {
       textureUnits[i] = i;
     } else {
       textureUnits[i] = 0;
     }
-    std::cout << i << ": " << textureUnits[i] << std::endl;
   }
+  PrintVector(std::cout, textureUnits);
   cardShader.SetUniform1iv("textures", maxBindableTextures, textureUnits.data());
-
-  std::cout << "Prerender mapping: " << *this->textureMap << std::endl;
 
   if (this->zFlipped) {
     GLCall(glDrawElementsInstanced(
@@ -138,6 +136,7 @@ void CardGroup::Render(
 
     while (i < size) {
       int batchSize = fmin(maxBindableTextures, size-i);
+      std::cout << "batch size " << batchSize << std::endl;
 
       // bind all textures about to be used
       for (int j = i; j < i+batchSize; ++j) {
@@ -148,20 +147,65 @@ void CardGroup::Render(
         // update texture buffer using newly bound addresses
         buffer[j] = this->textureMap->GetSlotOf(cardID);
       }
+
+      for (int j = 0; j < vertexSize*size; ++j) {
+        std::cout << "Vertex " << j << " : " << buffer[j] << std::endl;
+      }
+
+      std::cout << "offset: " << i*sizeof(GLint) << std::endl;
+      std::cout << "size: " << batchSize*sizeof(GLint) << std::endl;
       
       // write data from buffer to gpu
       this->textureIDBuffer.OverwriteData(
-        buffer, 
+        buffer+i*vertexSize, 
         i*sizeof(GLint)*vertexSize, 
         batchSize*sizeof(GLint)*vertexSize
       );
+
+      this->groupVao.Bind();
+
+      this->textureIDBuffer.Bind();
+      GLCall(glVertexAttribPointer(
+        this->textureEndAttribID, 
+        1, 
+        GL_UNSIGNED_INT, 
+        GL_FALSE, 
+        sizeof(GLuint)*vertexSize, 
+        (const void*)(i*sizeof(GLuint))
+      ));
+
+      this->transformBuffer.Bind();
+      GLCall(glVertexAttribPointer(
+        this->transformEndAttribID-1, 
+        3, 
+        GL_FLOAT, 
+        GL_FALSE, 
+        sizeof(GLfloat)*transformVertexSize, 
+        (const void*)(i*sizeof(GLfloat)*transformVertexSize)
+      ));
+      GLCall(glVertexAttribPointer(
+        this->transformEndAttribID, 
+        1, 
+        GL_FLOAT, 
+        GL_FALSE, 
+        sizeof(GLfloat)*transformVertexSize, 
+        (const void*)(i*sizeof(GLfloat)*transformVertexSize+3*sizeof(GLfloat))
+      ));
+
+
+
+      std::cout << "Prerender mapping: " << *this->textureMap << std::endl;
+
+      std::cout << "i: " << i << std::endl;
+      std::cout << "indices: " << i*6*sizeof(GLuint) << std::endl;
+      std::cout << "num_instances: " << batchSize << std::endl;
 
       GLCall(glDrawElementsInstanced(
         GL_TRIANGLES, 
         6, 
         GL_UNSIGNED_INT, 
-        (const void*) (i*this->transformBufferLayout.GetStride()),
-        fmin(maxBindableTextures, size-i)
+        nullptr,
+        batchSize
       ));
 
       i += maxBindableTextures;

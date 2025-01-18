@@ -29,8 +29,10 @@ private:
   MemoryLayout staticBufferLayout;
   VertexBuffer transformBuffer;
   MemoryLayout transformBufferLayout;
+  unsigned int transformEndAttribID;
   VertexBuffer textureIDBuffer;
   MemoryLayout textureIDBufferLayout;
+  unsigned int textureEndAttribID;
   Shader cardShader;
   TextureMap* textureMap;
   bool zFlipped;

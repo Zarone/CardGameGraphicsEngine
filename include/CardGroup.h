@@ -23,6 +23,7 @@ private:
 
   glm::mat4 transform;
   std::vector<CardItem> cards = {};
+
   VertexArray groupVao;
   VertexBuffer staticBuffer;
   IndexBuffer indexBuffer;
@@ -34,8 +35,14 @@ private:
   MemoryLayout textureIDBufferLayout;
   unsigned int textureEndAttribID;
   Shader cardShader;
+
   TextureMap* textureMap;
-  bool zFlipped;
+
+  // if this is true, only the back 
+  // of the cards is shown
+  bool zFlipped; 
+
+  float width;
   
   // keeps track of whether or not 
   // we need to update position info 
@@ -47,8 +54,7 @@ public:
     glm::vec3 position, 
     float rotationX, 
     float rotationZ, 
-    float scaleX, 
-    float scaleY,
+    float width, 
     bool zFlipped
   );
   void Render(unsigned int maxBindableTextures, glm::mat4& projMatrix, glm::mat4& camMatrix);

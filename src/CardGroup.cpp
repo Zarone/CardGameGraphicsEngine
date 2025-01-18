@@ -14,21 +14,22 @@ CardGroup::CardGroup(
   glm::vec3 position, 
   float rotationX, 
   float rotationZ, 
-  float scaleX, 
-  float scaleY, 
+  float width, 
   bool zFlipped
 ) 
 : 
-  textureMap(textureMap), 
-  zFlipped(zFlipped), 
-  dirty(true), 
-  cardShader(myShaders::cardVertex, myShaders::cardFragment)
+textureMap(textureMap), 
+zFlipped(zFlipped), 
+dirty(true), 
+cardShader(myShaders::cardVertex, myShaders::cardFragment),
+width(width)
 {
   this->transform = glm::mat4(1.0f); // setup to identity
   this->transform = glm::translate(this->transform, position);
+  this->transform = glm::translate(this->transform, glm::vec3(-width/2.0f+0.5f, 0.0f, 0.0f));
   this->transform = glm::rotate(this->transform, rotationX, glm::vec3(1.0f, 0.0f, 0.0f));
   this->transform = glm::rotate(this->transform, rotationZ, glm::vec3(0.0f, 0.0f, 1.0f));
-  this->transform = glm::scale(this->transform, glm::vec3(scaleX, scaleY, zFlipped ? -1.0f : 1.0f));
+  this->transform = glm::scale(this->transform, glm::vec3(1.0f, 1.0f, zFlipped ? -1.0f : 1.0f));
 
   this->groupVao = VertexArray();
   this->groupVao.Bind();
@@ -84,14 +85,26 @@ void CardGroup::Render(
   if (this->dirty) {
     // update buffer for relative position and rotation
     
-
     float buffer[transformVertexSize*size];
     for (int i = 0; i < size*transformVertexSize; i+=transformVertexSize) {
-      buffer[i] = (float)i/8.0f;
+      int cardIndex = i/transformVertexSize;
+
+      float xGap = (this->width-1)/(size-1);
+      std::cout << "Gap = " << xGap << std::endl;
+
+      // I split this for divide by 1 error
+      if (size == 1) {
+        buffer[i] = (float)0.0f;
+      } else {
+        std::cout << "x[" << cardIndex << "] = " << cardIndex*xGap << std::endl;
+        buffer[i] = (float)cardIndex*xGap;
+      }
+
       buffer[i+1] = 0.0f;
-      buffer[i+2] = (float)i/80.0f;
+      buffer[i+2] = (float)i/200.0f;
       buffer[i+3] = (float)i/10.0f;
     }
+    PrintVector(std::cout, std::vector<float>(buffer, buffer + sizeof(buffer)/sizeof(buffer[0])));
 
     this->transformBuffer.RewriteData(buffer, size*transformVertexSize*sizeof(GLfloat), true);
   }
@@ -119,6 +132,7 @@ void CardGroup::Render(
   cardShader.SetUniform1iv("textures", maxBindableTextures, textureUnits.data());
 
   if (this->zFlipped) {
+    this->textureMap->RequestBind(maxBindableTextures, "back");
     GLCall(glDrawElementsInstanced(
       GL_TRIANGLES, 
       6, 
@@ -143,9 +157,6 @@ void CardGroup::Render(
         
         // update texture buffer using newly bound addresses
         buffer[j] = this->textureMap->GetSlotOf(cardID);
-      }
-
-      for (int j = 0; j < vertexSize*size; ++j) {
       }
 
       // write data from buffer to gpu

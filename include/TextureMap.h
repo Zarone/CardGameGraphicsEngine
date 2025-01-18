@@ -26,6 +26,7 @@ public:
   */
   Texture* GetLeastRecentTexture();
   void RequestBind(unsigned int maxMindableTextures, unsigned int id);
+  void RequestBind(unsigned int maxMindableTextures, const std::string& path);
   int GetSlotOf(unsigned int id);
   friend std::ostream& operator<<(std::ostream& os, const TextureMap& t);
   int Size();

@@ -35,12 +35,11 @@ int main(void)
   TextureMap textureMap = TextureMap();
   CardGroup hand(
     &textureMap,
-    glm::vec3(0.0f, 0.0f, 3.5f),
-    0.0f,
-    0.0f,
-    1.0f,
-    1.0f,
-    false
+    glm::vec3(0.0f, 0.0f, 1.5f),
+    0.0f, // rotateX
+    0.0f, // rotateZ
+    2.f, // width
+    false // z flipped
   );
   hand.AddCard(0);
   hand.AddCard(1);

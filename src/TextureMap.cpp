@@ -27,7 +27,7 @@ void TextureMap::SetupTexturePath(const std::string& path) {
 }
 
 void TextureMap::SetupBack() {
-  this->SetupTexturePath(TextureMap::pathPrefix + "back.png");
+  this->SetupTexturePath("back");
 }
 
 void TextureMap::SetupCard(unsigned int id) {
@@ -40,38 +40,42 @@ void TextureMap::SetupCard(unsigned int id) {
   }
 }
 
+void TextureMap::RequestBind(unsigned int maxBindableTextures, const std::string& path) {
+  auto texture = this->map.find(path);
+  if (texture != this->map.end()) {
+    // if it's already bound, do nothing
+    if (texture->second.GetIsBound()) {
+      // update lru list by moving this element to front
+      this->lru.Access(&(texture->second));
+      return;
+    }
+
+    // the default is just the currentlyBound because
+    // we can just fill linearly at the start
+    unsigned int nextSlot = this->currentlyBound;
+
+    if (this->currentlyBound == maxBindableTextures) {
+      Texture* tex = this->lru.PopLRU();
+      ASSERT(tex->GetIsBound());
+      nextSlot = tex->GetBoundSlot();
+
+      tex->Unbind();
+      this->currentlyBound--;
+    }
+
+    this->lru.Push(&(texture->second));
+    texture->second.Bind(nextSlot);
+    this->currentlyBound++;
+  } else {
+    std::cout << "Could not find texture of path " << path << std::endl;
+    exit(EXIT_FAILURE);
+  }
+}
+
 void TextureMap::RequestBind(unsigned int maxBindableTextures, unsigned int id) {
   auto path = this->IDToPath.find(id);
   if (path != this->IDToPath.end()) {
-    auto texture = this->map.find(path->second);
-    if (texture != this->map.end()) {
-      // if it's already bound, do nothing
-      if (texture->second.GetIsBound()) {
-        // update lru list by moving this element to front
-        this->lru.Access(&(texture->second));
-        return;
-      }
-
-      // the default is just the currentlyBound because
-      // we can just fill linearly at the start
-      unsigned int nextSlot = this->currentlyBound;
-
-      if (this->currentlyBound == maxBindableTextures) {
-        Texture* tex = this->lru.PopLRU();
-        ASSERT(tex->GetIsBound());
-        nextSlot = tex->GetBoundSlot();
-
-        tex->Unbind();
-        this->currentlyBound--;
-      }
-
-      this->lru.Push(&(texture->second));
-      texture->second.Bind(nextSlot);
-      this->currentlyBound++;
-    } else {
-      std::cout << "Could not find texture of path " << path->second << std::endl;
-      exit(EXIT_FAILURE);
-    }
+    TextureMap::RequestBind(maxBindableTextures, path->second);
   } else {
     std::cout << "Could not find card of id " << id << std::endl;
     exit(EXIT_FAILURE);

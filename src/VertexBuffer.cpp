@@ -29,3 +29,21 @@ void VertexBuffer::OverwriteData(void* data, unsigned int offset, unsigned int s
   GLCall(glBindBuffer(GL_ARRAY_BUFFER, this->bufferID));
   GLCall(glBufferSubData(GL_ARRAY_BUFFER, offset, size, data));
 }
+
+void VertexBuffer::OverwriteAttrib(
+  unsigned int attribIndex,
+  int count,
+  int type,
+  GLsizei stride,
+  const void* offset
+) {
+  this->Bind();
+  GLCall(glVertexAttribPointer(
+    attribIndex, 
+    count, 
+    type, 
+    GL_FALSE,
+    stride, 
+    offset 
+  ));
+}

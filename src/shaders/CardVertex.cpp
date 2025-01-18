@@ -18,7 +18,11 @@ uniform mat4 modelMatrix;
 
 void main()
 {
-  gl_Position = projMatrix * cameraMatrix * modelMatrix * vec4((position+positionRelativeGroup).xyz, 1);
+  vec3 vertexPosition = position + positionRelativeGroup;
+
+  gl_Position = 
+    projMatrix * cameraMatrix * modelMatrix 
+    * vec4(vertexPosition, 1);
 
   fragmentTextureCoordinates = textureCoordinates;
 

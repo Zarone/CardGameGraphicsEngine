@@ -5,6 +5,7 @@
 
 #include "CardRenderingData.h"
 #include "Card.h"
+#include "Renderer.h"
 #include "VertexArray.h"
 #include "IndexBuffer.h"
 #include "Shader.h"
@@ -48,6 +49,8 @@ private:
   // we need to update position info 
   // before the next render.
   bool dirty; 
+
+  void DrawElements(int size);
 public:
   CardGroup(
     TextureMap* textureMap, 
@@ -57,7 +60,7 @@ public:
     float width, 
     bool zFlipped
   );
-  void Render(unsigned int maxBindableTextures, glm::mat4& projMatrix, glm::mat4& camMatrix);
+  void Render(unsigned int maxBindableTextures, Renderer& renderer);
   void AddCard(unsigned int id);
 
   /*

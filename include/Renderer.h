@@ -8,6 +8,8 @@ class Renderer
 private:
   WindowManager* window;
 public:
+  glm::mat4 projMatrix;
+  glm::mat4 cameraMatrix;
   Renderer(WindowManager* window);
-  void Setup3DTransforms(glm::mat4& proj, glm::mat4& cam);
+  void Setup3DTransforms(const glm::vec3& cameraPosition, const glm::vec3& cameraDirection);
 };

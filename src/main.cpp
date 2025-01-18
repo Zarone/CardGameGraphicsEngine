@@ -28,9 +28,10 @@ int main(void)
 
   Renderer myRenderer(&myWindow);
 
-  glm::mat4 projMatrix = glm::mat4(1.0f);
-  glm::mat4 cameraMatrix = glm::mat4(1.0f);
-  myRenderer.Setup3DTransforms(projMatrix, cameraMatrix);
+  myRenderer.Setup3DTransforms(
+    glm::vec3(0.0f, 0.0f, 5.5f),
+    glm::vec3(0.0f, 0.0f, -1.0f)
+  );
 
   TextureMap textureMap = TextureMap();
   CardGroup hand(
@@ -66,7 +67,7 @@ int main(void)
     /* Render here */
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    hand.Render(maxBindableTextures, projMatrix, cameraMatrix);
+    hand.Render(maxBindableTextures, myRenderer);
 
     /* Swap front and back buffers */
     myWindow.SwapBuffers();

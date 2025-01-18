@@ -1,5 +1,7 @@
 #pragma once
 
+#include <GL/glew.h>
+
 class VertexBuffer
 {
 private:
@@ -11,4 +13,11 @@ public:
   void Unbind();
   void RewriteData(void* data, unsigned int size, bool dynamicDraw);
   void OverwriteData(void* data, unsigned int offset, unsigned int size);
+  void OverwriteAttrib(
+    unsigned int attribIndex,
+    int count,
+    int type,
+    GLsizei stride,
+    const void* offset
+  );
 };

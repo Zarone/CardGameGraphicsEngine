@@ -1,6 +1,5 @@
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <numeric>
 #include <iostream>
 
 #include "../include/CardGroup.h"
@@ -69,14 +68,26 @@ void CardGroup::PrepareTextures() {
   }
 
   this->textureIDBuffer.RewriteData(NULL, size*sizeof(GLint), true);
+}
 
+void CardGroup::DrawElements(int size) {
+  GLCall(glDrawElementsInstanced(
+    GL_TRIANGLES, 
+    6, 
+    GL_UNSIGNED_INT, 
+    nullptr,
+    size 
+  ));
 }
 
 void CardGroup::Render(
   unsigned int maxBindableTextures, 
-  glm::mat4& projMatrix, 
-  glm::mat4& camMatrix
+  Renderer& renderer
 ) {
+
+  glm::mat4& projMatrix = renderer.projMatrix;
+  glm::mat4& camMatrix = renderer.cameraMatrix;
+
   int size = this->cards.size();
 
   // 3 for positions plus 1 for rotation
@@ -90,26 +101,23 @@ void CardGroup::Render(
       int cardIndex = i/transformVertexSize;
 
       float xGap = (this->width-1)/(size-1);
-      std::cout << "Gap = " << xGap << std::endl;
 
       // I split this for divide by 1 error
       if (size == 1) {
         buffer[i] = (float)0.0f;
       } else {
-        std::cout << "x[" << cardIndex << "] = " << cardIndex*xGap << std::endl;
         buffer[i] = (float)cardIndex*xGap;
       }
 
       buffer[i+1] = 0.0f;
-      buffer[i+2] = (float)i/200.0f;
+      buffer[i+2] = (float)cardIndex/50.0f;
       buffer[i+3] = (float)i/10.0f;
     }
-    PrintVector(std::cout, std::vector<float>(buffer, buffer + sizeof(buffer)/sizeof(buffer[0])));
+
+    PrintVector(std::cout, std::vector<float>(buffer, buffer+transformVertexSize*size));
 
     this->transformBuffer.RewriteData(buffer, size*transformVertexSize*sizeof(GLfloat), true);
   }
-
-  int i = 0;
 
   this->groupVao.Bind();
   this->indexBuffer.Bind();
@@ -119,7 +127,9 @@ void CardGroup::Render(
   cardShader.SetUniform4fv("cameraMatrix", false, glm::value_ptr(camMatrix));
   cardShader.SetUniform4fv("modelMatrix", false, glm::value_ptr(this->transform));
 
-  // Pass texture units as an array to the shader
+  int i = 0;
+
+  // Pass texture units as an array to the shader.
   std::vector<int> textureUnits(maxBindableTextures);
   int mapSize = this->textureMap->Size();
   for (int i = 0; i < maxBindableTextures; ++i) {
@@ -133,13 +143,7 @@ void CardGroup::Render(
 
   if (this->zFlipped) {
     this->textureMap->RequestBind(maxBindableTextures, "back");
-    GLCall(glDrawElementsInstanced(
-      GL_TRIANGLES, 
-      6, 
-      GL_UNSIGNED_INT, 
-      (const void*) 0,
-      size
-    ));
+    this->DrawElements(size);
   } else {
     // just the texture slot id
     int vertexSize = 1;
@@ -166,43 +170,35 @@ void CardGroup::Render(
         batchSize*sizeof(GLint)*vertexSize
       );
 
-      this->groupVao.Bind();
 
-      this->textureIDBuffer.Bind();
-      GLCall(glVertexAttribPointer(
+      // this changes the offset within the
+      // instanced buffers so that they are read
+      // from the right offset.
+      this->textureIDBuffer.OverwriteAttrib(
         this->textureEndAttribID, 
         1, 
         GL_UNSIGNED_INT, 
-        GL_FALSE, 
         sizeof(GLuint)*vertexSize, 
         (const void*)(i*sizeof(GLuint))
-      ));
+      );
 
-      this->transformBuffer.Bind();
-      GLCall(glVertexAttribPointer(
-        this->transformEndAttribID-1, 
-        3, 
-        GL_FLOAT, 
-        GL_FALSE, 
+      this->transformBuffer.OverwriteAttrib(
+        this->transformEndAttribID-1,
+        3,
+        GL_FLOAT,
         sizeof(GLfloat)*transformVertexSize, 
         (const void*)(i*sizeof(GLfloat)*transformVertexSize)
-      ));
-      GLCall(glVertexAttribPointer(
-        this->transformEndAttribID, 
-        1, 
-        GL_FLOAT, 
-        GL_FALSE, 
+      );
+
+      this->transformBuffer.OverwriteAttrib(
+        this->transformEndAttribID,
+        1,
+        GL_FLOAT,
         sizeof(GLfloat)*transformVertexSize, 
         (const void*)(i*sizeof(GLfloat)*transformVertexSize+3*sizeof(GLfloat))
-      ));
+      );
 
-      GLCall(glDrawElementsInstanced(
-        GL_TRIANGLES, 
-        6, 
-        GL_UNSIGNED_INT, 
-        nullptr,
-        batchSize
-      ));
+      this->DrawElements(batchSize);
 
       i += maxBindableTextures;
     }

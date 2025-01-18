@@ -3,7 +3,7 @@
 std::string myShaders::cardVertex = R"(
 #version 330 core
 
-layout(location = 0) in vec3 position;
+layout(location = 0) in vec4 position;
 layout(location = 1) in vec2 textureCoordinates;
 layout(location = 2) in vec3 positionRelativeGroup;
 layout(location = 3) in float rotation;
@@ -30,11 +30,11 @@ mat4 getZRotation(float rotation)
 
 void main()
 {
-  vec3 vertexPosition = position + positionRelativeGroup;
   mat4 dynamicRotationMatrix = getZRotation(rotation);
+  vec3 vertexPosition = (dynamicRotationMatrix * position).xyz + positionRelativeGroup;
 
   gl_Position = 
-    projMatrix * cameraMatrix * modelMatrix * dynamicRotationMatrix
+    projMatrix * cameraMatrix * modelMatrix 
     * vec4(vertexPosition, 1);
 
   fragmentTextureCoordinates = textureCoordinates;

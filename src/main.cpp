@@ -61,15 +61,26 @@ int main(void)
     .isHand = true,
   };
 
+  auto currentTime = std::chrono::high_resolution_clock::now();
+  auto lastTime = currentTime;
+  auto diffTime = std::chrono::duration_cast<std::chrono::duration<float, std::milli>>(currentTime - lastTime);
+  double deltaTime = 0;
+
   /* Loop until the user closes the window */
   while (!myWindow.ShouldClose())
   {
+    currentTime = std::chrono::high_resolution_clock::now();
+    diffTime = std::chrono::duration_cast<std::chrono::duration<float, std::milli>>(currentTime - lastTime);
+    deltaTime = diffTime.count()/1000.0f;
+    lastTime = currentTime;
+
     myWindow.GetCursorPosition(&handRenderingData.cursorX, &handRenderingData.cursorY);
 
     /* Render here */
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     hand.Render(myRenderer, handRenderingData);
+    hand.UpdateTick(deltaTime);
 
     /* Swap front and back buffers */
     myWindow.SwapBuffers();

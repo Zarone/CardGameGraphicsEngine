@@ -19,18 +19,20 @@ CardGroup::CardGroup(
 : 
 textureMap(textureMap), 
 zFlipped(zFlipped), 
-dirty(true), 
+dirtyDisplay(true), 
+dirtyPosition(true), 
 cardShader(myShaders::cardVertex, myShaders::cardFragment),
 width(width),
 lastCursorX(0),
 lastCursorY(0),
-wasInsideBoundary(false)
+wasInsideBoundary(false),
+lastClosestIndex(-1)
 {
   this->transform = glm::mat4(1.0f); // setup to identity
   this->transform = glm::translate(this->transform, position);
   this->transform = glm::translate(this->transform, glm::vec3(-width/2.0f+0.5f, 0.0f, 0.0f));
-  //this->transform = glm::rotate(this->transform, glm::radians(rotationX), glm::vec3(1.0f, 0.0f, 0.0f));
-  //this->transform = glm::rotate(this->transform, glm::radians(rotationZ), glm::vec3(0.0f, 0.0f, 1.0f));
+  this->transform = glm::rotate(this->transform, glm::radians(rotationX), glm::vec3(1.0f, 0.0f, 0.0f));
+  this->transform = glm::rotate(this->transform, glm::radians(rotationZ), glm::vec3(0.0f, 0.0f, 1.0f));
   this->transform = glm::scale(this->transform, glm::vec3(1.0f, 1.0f, zFlipped ? -1.0f : 1.0f));
 
   this->groupVao = VertexArray();
@@ -62,8 +64,8 @@ void CardGroup::PrepareTextures() {
   if (zFlipped) {
     this->textureMap->SetupBack();
   } else {
-    for (Card& cardItem : this->cards) {
-      this->textureMap->SetupCard(cardItem.GetID());
+    for (CardItem& cardItem : this->cards) {
+      this->textureMap->SetupCard(cardItem.card.GetID());
     }
   }
 
@@ -84,18 +86,17 @@ void CardGroup::Render(
   Renderer& renderer,
   const RenderData& renderData
 ) {
-  std::cout << std::endl;
   glm::mat4& projMatrix = renderer.projMatrix;
   glm::mat4& camMatrix = renderer.cameraMatrix;
   int maxBindableTextures = renderer.maxBindableTextures;
 
   bool insideHandBoundary = false;
+  bool mouseMovedInBoundary = false;
 
   // I store this because I use it in
   // determining closest card
   double projectedLeftBoundary = -1.0f;
   double xScale = -1.0f;
-
 
   const float verticalMargin = 0.15f;
   const float horizontalMargin = 0.15f;
@@ -112,10 +113,6 @@ void CardGroup::Render(
         (int)renderData.cursorX != lastCursorX
       )
     ) {
-      //std::cout << "cursor: " 
-        //<< renderData.cursorX << ", "
-        //<< renderData.cursorY << ", "
-        //<< std::endl;
 
       // project top bound to screen
       glm::vec4 topLeft = glm::vec4(
@@ -126,10 +123,6 @@ void CardGroup::Render(
       );
       glm::vec4 topLeftScreenSpace = projMatrix * camMatrix * this->transform * topLeft;
       glm::vec2 projectedTopLeft = renderer.GetScreenPositionFromCamera(topLeftScreenSpace);
-      //std::cout << "projectedTopLeft: " 
-        //<< projectedTopLeft.x << ", "
-        //<< projectedTopLeft.y
-        //<< std::endl;
       
       // project bottom bound to screen
       glm::vec4 bottomRight = glm::vec4(
@@ -140,11 +133,6 @@ void CardGroup::Render(
       );
       glm::vec4 bottomRightScreenSpace = projMatrix * camMatrix * this->transform * bottomRight;
       glm::vec2 projectedBottomRight = renderer.GetScreenPositionFromCamera(bottomRightScreenSpace);
-      //std::cout << "projectedBottomRight: " 
-        //<< projectedBottomRight.x << ", "
-        //<< projectedBottomRight.y
-        //<< std::endl;
-
       
       xScale = (projectedBottomRight.x - projectedTopLeft.x)/(this->width+2*horizontalMargin);
       projectedLeftBoundary = projectedTopLeft.x+horizontalMargin*xScale;
@@ -155,7 +143,7 @@ void CardGroup::Render(
         renderData.cursorX > projectedTopLeft.x && renderData.cursorY > projectedTopLeft.y &&
         renderData.cursorX < projectedBottomRight.x && renderData.cursorY < projectedBottomRight.y 
       ) {
-        this->dirty = true;
+        mouseMovedInBoundary = true;
         insideHandBoundary = true;
       }
     } else {
@@ -163,89 +151,132 @@ void CardGroup::Render(
     }
   }
 
-  if (this->wasInsideBoundary != insideHandBoundary) this->dirty = true;
+  if (this->wasInsideBoundary != insideHandBoundary) this->dirtyPosition = true;
 
   int size = this->cards.size();
 
-  // 3 for positions plus 1 for rotation
-  int transformVertexSize = 3+1;
+  // prevent division by 0 error
+  float xGap = size == 1 ? 0 : (this->width-1)/(size-1);
+  float zGap = 1.0f/50.0f;
 
-  if (this->dirty) {
-    std::cout << "dirty so reload, cursorX: " << renderData.cursorX << std::endl;
-
-    // update buffer for relative position and rotation
-    
-    float buffer[transformVertexSize*size];
-
-    // prevent division by 0 error
-    float xGap = size == 1 ? 0 : (this->width-1)/(size-1);
-    float zGap = 1.0f/50.0f;
-    const double whitespace = 0.25f;
-
-    if (renderData.isHand && insideHandBoundary) {
-      std::cout << "hand and inside boundary" << std::endl;
-      
-      // find closest card
-      int closestIndex = 0;
-      double thisX = projectedLeftBoundary + 0.5f*xScale;
-      double smallestDistance = abs(thisX-renderData.cursorX);
-      //std::cout << "thisX for " << 0 << ": " << thisX << std::endl;
-      for (int i = 1; i < size; ++i) {
-        thisX += xGap*xScale;
-        double distance = abs(thisX - renderData.cursorX);
-        //std::cout << "thisX for " << i << ": " << thisX << std::endl;
-        //std::cout << "distance for " << i << ": " << distance << std::endl;
-        if (distance < smallestDistance) {
-          smallestDistance = distance;
-          closestIndex = i;
-        }
+  // check is the closest card changed.
+  // if it didn't, we don't need to rerender
+  if (mouseMovedInBoundary) {
+    // find closest card
+    int closestIndex = 0;
+    double thisX = projectedLeftBoundary + 0.5f*xScale;
+    double smallestDistance = abs(thisX-renderData.cursorX);
+    for (int i = 1; i < size; ++i) {
+      thisX += xGap*xScale;
+      double distance = abs(thisX - renderData.cursorX);
+      if (distance < smallestDistance) {
+        smallestDistance = distance;
+        closestIndex = i;
       }
-      std::cout << "closest index: " << closestIndex << std::endl;
+    }
 
-      int leftSize = closestIndex;
-      int rightSize = size-closestIndex-1;
+    if (closestIndex != this->lastClosestIndex) {
+      this->lastClosestIndex = closestIndex;
+      this->dirtyPosition = true;
+    }
+  }
+
+  if (this->dirtyPosition) {
+
+    // if we need to display the cards
+    // dynamically based on cursor position
+    if (renderData.isHand && insideHandBoundary) {
+      const double whitespace = 0.25f;
+      
+      int leftSize = this->lastClosestIndex;
+      int rightSize = size-this->lastClosestIndex-1;
       double leftWidth = (this->width-whitespace-1)*((double)leftSize/(size-1));
       double rightWidth = (this->width-whitespace-1)*((double)rightSize/(size-1));
-      double leftGap = leftSize == 1 ? 0 : (leftWidth-1.0f)/(leftSize-1.0f);
-      double rightGap = rightSize == 1 ? 0 : (rightWidth-1.0f)/(rightSize-1.0f);
-      std::cout << "left width: " << leftWidth << ", leftGap: " << leftGap << std::endl;
-      std::cout << "rightwidth: " << rightWidth << ", right gap: " << rightGap << std::endl;
+      if (leftWidth < 1.25f) leftWidth = 1.25f;
+      if (rightWidth < 1.25f) rightWidth = 1.25f;
+      double leftGap = fmax(0, leftSize == 1 ? 0 : (leftWidth-1.0f)/(leftSize-1.0f));
+      double rightGap = fmax(0, rightSize == 1 ? 0 : (rightWidth-1.0f)/(rightSize-1.0f));
 
-      // setup buffer info that doesn't 
-      // depend on left/right divide
-      for (int i = 0; i < size*transformVertexSize; i+=transformVertexSize) {
-        int cardIndex = i/transformVertexSize;
-        buffer[i+1] = 0.0f;
-        buffer[i+2] = (float)cardIndex*zGap;
-        buffer[i+3] = 0.0f;
-      }
+      std::cout << std::endl;
+      std::cout << "Closest Index: " << this->lastClosestIndex << std::endl;
+      std::cout << "Left Size: " << leftSize << std::endl;
+      std::cout << "Right Size: " << rightSize << std::endl;
+      std::cout << "Left Width: " << leftWidth << std::endl;
+      std::cout << "Right Width: " << rightWidth << std::endl;
+      std::cout << "Left Gap: " << leftGap << std::endl;
+      std::cout << "Right Gap: " << rightGap << std::endl;
 
       // setup buffer info that depends
       // on left/right divide
-      for (int i = 0; i < closestIndex*transformVertexSize; i+=transformVertexSize) {
-        int cardIndex = i/transformVertexSize;
-        buffer[i] = (float)cardIndex*leftGap;
+      for (int i = 0; i < this->lastClosestIndex; i++) {
+        int cardIndex = i;
+        CardRenderingData& thisCard = cards[cardIndex].renderData;
+
+        thisCard.SetActualTransform(
+          glm::vec3(
+            (float)cardIndex*leftGap,
+            0.0f,
+            (float)cardIndex*zGap
+          ),
+          0.0f
+        );
       }
 
-      buffer[transformVertexSize*closestIndex] = closestIndex*xGap;
+      CardRenderingData& closestCard = cards[this->lastClosestIndex].renderData;
+      closestCard.SetActualTransform(
+        glm::vec3(this->lastClosestIndex*xGap, 0.0f, size*zGap),
+        0.0f
+      );
 
-      // make sure selected card is in front
-      buffer[transformVertexSize*closestIndex+2] = (float)size*zGap;
+      for (int i = (this->lastClosestIndex+1); i < size; i++) {
+        int cardIndex = i;
+        CardRenderingData& thisCard = cards[this->lastClosestIndex].renderData;
 
-      for (int i = (closestIndex+1)*transformVertexSize; i < size*transformVertexSize; i+=transformVertexSize) {
-        int cardIndex = i/transformVertexSize;
-        buffer[i] = (float)(closestIndex*xGap + 0.5f+whitespace+ (cardIndex-closestIndex)*rightGap);
+        thisCard.SetActualTransform(
+          glm::vec3(
+            (float)(this->lastClosestIndex*xGap + 0.5f+whitespace+ (cardIndex-this->lastClosestIndex)*rightGap),
+            0.0f,
+            (float)cardIndex*zGap
+          ),
+          0.0f
+        );
       }
     } else {
-      float rotationPerCard = 0.0f;//renderData.isHand ? 1.0f/20.0f : 0;
-      for (int i = 0; i < size*transformVertexSize; i+=transformVertexSize) {
-        int cardIndex = i/transformVertexSize;
+      float rotationPerCard = 0;//renderData.isHand ? 1.0f/20.0f : 0;
+      for (int i = 0; i < size; i++) {
+        int cardIndex = i;
 
-        buffer[i] = (float)cardIndex*xGap;
-        buffer[i+1] = 0.0f;
-        buffer[i+2] = (float)cardIndex*zGap;
-        buffer[i+3] = (float)(cardIndex-(float)(size-1)/2.0f)*rotationPerCard;
+        CardRenderingData& thisCard = cards[cardIndex].renderData;
+
+        thisCard.SetActualTransform(
+          glm::vec3(
+            (float)cardIndex*xGap,
+            0.0f,
+            (float)cardIndex*zGap
+          ),
+          (float)(cardIndex-(float)(size-1)/2.0f)*rotationPerCard
+        );
       }
+    }
+  }
+
+  // 3 for positions plus 1 for rotation
+  const int transformVertexSize = 3+1;
+
+  if (this->dirtyDisplay) {
+
+    // update buffer for relative position and rotation
+    float buffer[transformVertexSize*size];
+
+    // load display info from cards into buffer
+    for (int i = 0; i < size*transformVertexSize; i+=transformVertexSize) {
+      int cardIndex = i/transformVertexSize;
+      CardRenderingData& thisCard = cards[cardIndex].renderData;
+
+      buffer[i] = thisCard.displayedPosition.x;
+      buffer[i+1] = thisCard.displayedPosition.y;
+      buffer[i+2] = thisCard.displayedPosition.z;
+      buffer[i+3] = thisCard.displayedRotationZ;
     }
 
 
@@ -288,7 +319,7 @@ void CardGroup::Render(
 
       // bind all textures about to be used
       for (int j = i; j < i+batchSize; ++j) {
-        unsigned int cardID = this->cards[j].GetID();
+        unsigned int cardID = this->cards[j].card.GetID();
 
         this->textureMap->RequestBind(maxBindableTextures, cardID);
         
@@ -337,7 +368,8 @@ void CardGroup::Render(
     }
   }
 
-  this->dirty = false;
+  this->dirtyPosition = false;
+  this->dirtyDisplay = false;
 
   if (renderData.isHand) {
     this->lastCursorX = (int)renderData.cursorX;
@@ -347,5 +379,16 @@ void CardGroup::Render(
 }
 
 void CardGroup::AddCard(unsigned int id) {
-  this->cards.push_back(Card(id));
+  this->cards.push_back({
+    .card = Card(id),
+    .renderData = CardRenderingData()
+  });
+}
+
+void CardGroup::UpdateTick(double deltaTime) {
+  bool anythingUpdated = false;
+  for (auto& card : this->cards) {
+    anythingUpdated = card.renderData.UpdateDisplayed(deltaTime) || anythingUpdated;
+  }
+  this->dirtyDisplay = true;
 }

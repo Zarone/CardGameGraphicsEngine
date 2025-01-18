@@ -17,6 +17,11 @@ typedef struct RenderData {
   double cursorY;
 } RenderData;
 
+typedef struct CardItem {
+  Card card;
+  CardRenderingData renderData;
+} CardItem ;
+
 class CardGroup
 {
 private:
@@ -24,7 +29,7 @@ private:
 
   glm::mat4 transform;
 
-  std::vector<Card> cards = {};
+  std::vector<CardItem> cards = {};
 
   VertexArray groupVao;
   VertexBuffer staticBuffer;
@@ -49,10 +54,13 @@ private:
   // keeps track of whether or not 
   // we need to update position info 
   // before the next render.
-  bool dirty; 
+  bool dirtyDisplay; 
+  bool dirtyPosition;
+
   int lastCursorX;
   int lastCursorY;
   bool wasInsideBoundary;
+  int lastClosestIndex;
 
   void DrawElements(int size);
 public:
@@ -73,4 +81,7 @@ public:
   *
   */
   void PrepareTextures();
+
+
+  void UpdateTick(double deltaTime);
 };

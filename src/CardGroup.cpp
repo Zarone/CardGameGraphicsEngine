@@ -182,10 +182,12 @@ void CardGroup::Render(
   }
 
   if (this->dirtyPosition) {
+    float rotationPerCard = renderData.isHand ? 1.0f/20.0f : 0;
 
     // if we need to display the cards
     // dynamically based on cursor position
     if (renderData.isHand && insideHandBoundary) {
+
       const double whitespace = 0.25f;
       
       int leftSize = this->lastClosestIndex;
@@ -197,14 +199,14 @@ void CardGroup::Render(
       double leftGap = fmax(0, leftSize == 1 ? 0 : (leftWidth-1.0f)/(leftSize-1.0f));
       double rightGap = fmax(0, rightSize == 1 ? 0 : (rightWidth-1.0f)/(rightSize-1.0f));
 
-      std::cout << std::endl;
-      std::cout << "Closest Index: " << this->lastClosestIndex << std::endl;
-      std::cout << "Left Size: " << leftSize << std::endl;
-      std::cout << "Right Size: " << rightSize << std::endl;
-      std::cout << "Left Width: " << leftWidth << std::endl;
-      std::cout << "Right Width: " << rightWidth << std::endl;
-      std::cout << "Left Gap: " << leftGap << std::endl;
-      std::cout << "Right Gap: " << rightGap << std::endl;
+      //std::cout << std::endl;
+      //std::cout << "Closest Index: " << this->lastClosestIndex << std::endl;
+      //std::cout << "Left Size: " << leftSize << std::endl;
+      //std::cout << "Right Size: " << rightSize << std::endl;
+      //std::cout << "Left Width: " << leftWidth << std::endl;
+      //std::cout << "Right Width: " << rightWidth << std::endl;
+      //std::cout << "Left Gap: " << leftGap << std::endl;
+      //std::cout << "Right Gap: " << rightGap << std::endl;
 
       // setup buffer info that depends
       // on left/right divide
@@ -218,7 +220,7 @@ void CardGroup::Render(
             0.0f,
             (float)cardIndex*zGap
           ),
-          0.0f
+          (float)(cardIndex-(float)(size-1)/2.0f)*rotationPerCard
         );
       }
 
@@ -230,7 +232,7 @@ void CardGroup::Render(
 
       for (int i = (this->lastClosestIndex+1); i < size; i++) {
         int cardIndex = i;
-        CardRenderingData& thisCard = cards[this->lastClosestIndex].renderData;
+        CardRenderingData& thisCard = cards[cardIndex].renderData;
 
         thisCard.SetActualTransform(
           glm::vec3(
@@ -238,11 +240,10 @@ void CardGroup::Render(
             0.0f,
             (float)cardIndex*zGap
           ),
-          0.0f
+          (float)(cardIndex-(float)(size-1)/2.0f)*rotationPerCard
         );
       }
     } else {
-      float rotationPerCard = 0;//renderData.isHand ? 1.0f/20.0f : 0;
       for (int i = 0; i < size; i++) {
         int cardIndex = i;
 

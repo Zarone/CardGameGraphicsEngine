@@ -13,7 +13,7 @@ private:
   glm::vec3 previousActualPosition;
   double previousActualRotationZ;
 
-  const double animationDuration = 0.5f;
+  static const double animationDuration;
   
   // between 0 and animationDuration, tracks completed
   // duration of animation between previousActual and actual

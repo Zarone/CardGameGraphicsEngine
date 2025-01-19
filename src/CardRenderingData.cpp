@@ -1,5 +1,7 @@
 #include "../include/CardRenderingData.h"
 
+const double CardRenderingData::animationDuration = 0.1f;
+
 float CardRenderingData::cardHeightRatio = 1.396f;
 
 GLfloat CardRenderingData::cardPositions[] = {
@@ -17,13 +19,14 @@ GLuint CardRenderingData::cardIndices[] = {
 CardRenderingData::CardRenderingData() {
   this->actualPosition = glm::vec3(0,0,0);
   this->previousActualPosition = glm::vec3(0,0,0);
+  this->displayedPosition = glm::vec3(0,0,0);
   this->completedDuration = animationDuration;
   this->completedAnimation = true;
 }
 
 void CardRenderingData::SetActualTransform(glm::vec3 position, double rotationZ) {
-  this->previousActualPosition = this->actualPosition;
-  this->previousActualRotationZ = this->actualRotationZ;
+  this->previousActualPosition = this->displayedPosition;
+  this->previousActualRotationZ = this->displayedRotationZ;
   this->actualPosition = position;
   this->actualRotationZ = rotationZ;
   this->completedDuration = 0;

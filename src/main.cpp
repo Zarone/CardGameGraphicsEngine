@@ -40,12 +40,16 @@ int main(void)
     &textureMap,
     glm::vec3(0.0f, -2.0f, 4.0f),
     //glm::vec3(0.0f, -0.5f, 7.0f),
-    -20.0f, // rotateX
+    0.0f, // rotateX
     0.0f, // rotateZ
     4.0f, // width
     false // z flipped
   );
 
+  hand.AddCard(0);
+  hand.AddCard(1);
+  hand.AddCard(2);
+  hand.AddCard(3);
   hand.AddCard(0);
   hand.AddCard(1);
   hand.AddCard(2);

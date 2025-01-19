@@ -30,7 +30,7 @@ lastClosestIndex(-1)
 {
   this->transform = glm::mat4(1.0f); // setup to identity
   this->transform = glm::translate(this->transform, position);
-  this->transform = glm::translate(this->transform, glm::vec3(-width/2.0f+0.5f, 0.0f, 0.0f));
+  this->transform = glm::translate(this->transform, glm::vec3(-width/2.0f, 0.0f, 0.0f));
   this->transform = glm::rotate(this->transform, glm::radians(rotationX), glm::vec3(1.0f, 0.0f, 0.0f));
   this->transform = glm::rotate(this->transform, glm::radians(rotationZ), glm::vec3(0.0f, 0.0f, 1.0f));
   this->transform = glm::scale(this->transform, glm::vec3(1.0f, 1.0f, zFlipped ? -1.0f : 1.0f));
@@ -98,6 +98,20 @@ void CardGroup::Render(
   double projectedLeftBoundary = -1.0f;
   double xScale = -1.0f;
 
+  int size = this->cards.size();
+
+  // this is the area we reserve for white space
+  // to the left and right of the card the user is
+  // hovering over
+  const double whitespace = 0.05f;
+
+  // this makes sure the default card packing allows
+  // room for whitespace
+  //double margin = renderData.isHand ? whitespace + 1.0f : 0.0f;
+  double margin = renderData.isHand ? (
+    size <= 3 ? 1.0f+whitespace : (size + size*whitespace - whitespace - width)/(size-3)
+  ): 0.0f;
+
   const float verticalMargin = 0.15f;
   const float horizontalMargin = 0.15f;
 
@@ -116,7 +130,7 @@ void CardGroup::Render(
 
       // project top bound to screen
       glm::vec4 topLeft = glm::vec4(
-        -0.5f-horizontalMargin, 
+        -horizontalMargin+margin, 
         0.5f*CardRenderingData::cardHeightRatio+verticalMargin, 
         0.0f, 
         1.0f
@@ -126,7 +140,7 @@ void CardGroup::Render(
       
       // project bottom bound to screen
       glm::vec4 bottomRight = glm::vec4(
-        -0.5f+width+horizontalMargin, 
+        width+horizontalMargin-margin, 
         -0.5f*CardRenderingData::cardHeightRatio-verticalMargin, 
         0.0f, 
         1.0f
@@ -134,8 +148,8 @@ void CardGroup::Render(
       glm::vec4 bottomRightScreenSpace = projMatrix * camMatrix * this->transform * bottomRight;
       glm::vec2 projectedBottomRight = renderer.GetScreenPositionFromCamera(bottomRightScreenSpace);
       
-      xScale = (projectedBottomRight.x - projectedTopLeft.x)/(this->width+2*horizontalMargin);
-      projectedLeftBoundary = projectedTopLeft.x+horizontalMargin*xScale;
+      xScale = (projectedBottomRight.x - projectedTopLeft.x)/(this->width+2*horizontalMargin-2*margin);
+      projectedLeftBoundary = projectedTopLeft.x+(horizontalMargin-margin)*xScale;
 
       // see if cursor is below top left boundary and 
       // above bottom right boundary
@@ -153,60 +167,79 @@ void CardGroup::Render(
 
   if (this->wasInsideBoundary != insideHandBoundary) this->dirtyPosition = true;
 
-  int size = this->cards.size();
-
   // prevent division by 0 error
-  float xGap = size == 1 ? 0 : (this->width-1)/(size-1);
-  float zGap = 1.0f/50.0f;
+  float xGap = size == 1 ? 0 : (this->width-1-2*margin)/(size-1);
+  float zGap = 1.0f/200.0f;
 
   // check is the closest card changed.
   // if it didn't, we don't need to rerender
   if (mouseMovedInBoundary) {
     // find closest card
+    
     int closestIndex = 0;
-    double thisX = projectedLeftBoundary + 0.5f*xScale;
-    double smallestDistance = abs(thisX-renderData.cursorX);
-    for (int i = 1; i < size; ++i) {
-      thisX += xGap*xScale;
-      double distance = abs(thisX - renderData.cursorX);
-      if (distance < smallestDistance) {
-        smallestDistance = distance;
-        closestIndex = i;
+
+    double distanceToLastClosest = 1.0f;
+    if (this->wasInsideBoundary) {
+      ASSERT(this->lastClosestIndex != -1);
+      distanceToLastClosest = abs(projectedLeftBoundary + (0.5f+margin+xGap*this->lastClosestIndex)*xScale-renderData.cursorX)/xScale;
+      closestIndex = this->lastClosestIndex;
+    }
+
+    std::cout << "Distance to last closest " << this->lastClosestIndex << ": " << distanceToLastClosest << std::endl;
+    if (!this->wasInsideBoundary || distanceToLastClosest > 0.4f) {
+      double thisX = projectedLeftBoundary + (0.5f+margin)*xScale;
+      double smallestDistance = abs(thisX-renderData.cursorX);
+      closestIndex = 0;
+      std::cout << "Distance " << 0 << ": " << smallestDistance/xScale << std::endl;
+      for (int i = 1; i < size; ++i) {
+        thisX += xGap*xScale;
+        double distance = abs(thisX - renderData.cursorX);
+        std::cout << "Distance " << i << ": " << distance/xScale << " compared to min " << smallestDistance/xScale << std::endl;
+        if (distance < smallestDistance) {
+          std::cout << "smaller index " << i << std::endl;
+          smallestDistance = distance;
+          closestIndex = i;
+        }
+      }
+
+      // move 1 in the direction of the new closest index
+      if (this->wasInsideBoundary) {
+        closestIndex = this->lastClosestIndex + (closestIndex-this->lastClosestIndex)/abs(closestIndex-this->lastClosestIndex);
       }
     }
 
-    if (closestIndex != this->lastClosestIndex) {
-      this->lastClosestIndex = closestIndex;
+    if (this->wasInsideBoundary && closestIndex != this->lastClosestIndex) {
       this->dirtyPosition = true;
     }
+    std::cout << "ending with closest index " << closestIndex << std::endl;
+    this->lastClosestIndex = closestIndex;
   }
 
   if (this->dirtyPosition) {
-    float rotationPerCard = renderData.isHand ? 1.0f/20.0f : 0;
+    float rotationPerCard = 0;//renderData.isHand ? glm::radians(10.0f) : 0;
 
     // if we need to display the cards
     // dynamically based on cursor position
     if (renderData.isHand && insideHandBoundary) {
-
-      const double whitespace = 0.25f;
       
+      double centerX = this->lastClosestIndex*xGap+0.5f+margin;
+
       int leftSize = this->lastClosestIndex;
       int rightSize = size-this->lastClosestIndex-1;
-      double leftWidth = (this->width-whitespace-1)*((double)leftSize/(size-1));
-      double rightWidth = (this->width-whitespace-1)*((double)rightSize/(size-1));
-      if (leftWidth < 1.25f) leftWidth = 1.25f;
-      if (rightWidth < 1.25f) rightWidth = 1.25f;
-      double leftGap = fmax(0, leftSize == 1 ? 0 : (leftWidth-1.0f)/(leftSize-1.0f));
-      double rightGap = fmax(0, rightSize == 1 ? 0 : (rightWidth-1.0f)/(rightSize-1.0f));
+      double leftWidth = centerX-whitespace-0.5f;
+      double rightWidth = this->width-centerX-0.5f-whitespace;
+      double leftGap = leftSize == 1 ? 0 : (leftWidth-1.0f)/(leftSize-1.0f);
+      double rightGap = rightSize == 1 ? 0 : (rightWidth-1.0f)/(rightSize-1.0f);
 
-      //std::cout << std::endl;
-      //std::cout << "Closest Index: " << this->lastClosestIndex << std::endl;
-      //std::cout << "Left Size: " << leftSize << std::endl;
-      //std::cout << "Right Size: " << rightSize << std::endl;
-      //std::cout << "Left Width: " << leftWidth << std::endl;
-      //std::cout << "Right Width: " << rightWidth << std::endl;
-      //std::cout << "Left Gap: " << leftGap << std::endl;
-      //std::cout << "Right Gap: " << rightGap << std::endl;
+      std::cout << std::endl;
+      std::cout << "Closest Index: " << this->lastClosestIndex << std::endl;
+      std::cout << "Margin: " << margin << std::endl;
+      std::cout << "Left Size: " << leftSize << std::endl;
+      std::cout << "Right Size: " << rightSize << std::endl;
+      std::cout << "Left Width: " << leftWidth << std::endl;
+      std::cout << "Right Width: " << rightWidth << std::endl;
+      std::cout << "Left Gap: " << leftGap << std::endl;
+      std::cout << "Right Gap: " << rightGap << std::endl;
 
       // setup buffer info that depends
       // on left/right divide
@@ -214,19 +247,22 @@ void CardGroup::Render(
         int cardIndex = i;
         CardRenderingData& thisCard = cards[cardIndex].renderData;
 
+        std::cout << "LHS x = " << (float)cardIndex*leftGap+0.5f << std::endl;
         thisCard.SetActualTransform(
           glm::vec3(
-            (float)cardIndex*leftGap,
+            //(float)cardIndex*leftGap+0.5f,
+            (float)(centerX - 0.5f - whitespace - 0.5f - (this->lastClosestIndex-cardIndex-1)*leftGap),
             0.0f,
             (float)cardIndex*zGap
           ),
-          (float)(cardIndex-(float)(size-1)/2.0f)*rotationPerCard
+          (float)(cardIndex-(float)this->lastClosestIndex)/size*rotationPerCard
         );
       }
 
+      std::cout << "center x = " << centerX << std::endl;
       CardRenderingData& closestCard = cards[this->lastClosestIndex].renderData;
       closestCard.SetActualTransform(
-        glm::vec3(this->lastClosestIndex*xGap, 0.0f, size*zGap),
+        glm::vec3(centerX, 0.0f, this->lastClosestIndex*zGap),
         0.0f
       );
 
@@ -234,13 +270,17 @@ void CardGroup::Render(
         int cardIndex = i;
         CardRenderingData& thisCard = cards[cardIndex].renderData;
 
+        //std::cout << "this->lastClosestIndex*xGap: " << this->lastClosestIndex*xGap << std::endl;
+        //std::cout << "0.5f + whitespace + 0.5f: " << 0.5f + whitespace + 0.5f << std::endl;
+        //std::cout << "(cardIndex-this->lastClosestIndex-1): " << (cardIndex-this->lastClosestIndex-1) << std::endl;
+        std::cout << "RHS x = " << (centerX + 0.5f + whitespace + 0.5f + (cardIndex-this->lastClosestIndex-1)*rightGap) << std::endl;
         thisCard.SetActualTransform(
           glm::vec3(
-            (float)(this->lastClosestIndex*xGap + 0.5f+whitespace+ (cardIndex-this->lastClosestIndex)*rightGap),
+            (float)(centerX + 0.5f + whitespace + 0.5f + (cardIndex-this->lastClosestIndex-1)*rightGap),
             0.0f,
-            (float)cardIndex*zGap
+            (float)(this->lastClosestIndex - (cardIndex-this->lastClosestIndex)) *zGap
           ),
-          (float)(cardIndex-(float)(size-1)/2.0f)*rotationPerCard
+          (float)(cardIndex-(float)(this->lastClosestIndex))/size*rotationPerCard
         );
       }
     } else {
@@ -251,11 +291,11 @@ void CardGroup::Render(
 
         thisCard.SetActualTransform(
           glm::vec3(
-            (float)cardIndex*xGap,
+            (float)cardIndex*xGap+0.5f+margin,
             0.0f,
             (float)cardIndex*zGap
           ),
-          (float)(cardIndex-(float)(size-1)/2.0f)*rotationPerCard
+          (float)(cardIndex-(float)(size-1)/2.0f)/size*rotationPerCard
         );
       }
     }

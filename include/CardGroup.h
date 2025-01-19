@@ -72,6 +72,7 @@ public:
     float width, 
     bool zFlipped
   );
+
   bool GetInsideHandBoundary(
     Renderer& renderer,
     const RenderData& renderData,
@@ -80,6 +81,31 @@ public:
     bool& mouseMovedInBoundary,
     double& xScale,
     double& projectedLeftBoundary
+  );
+
+  int GetClosestCardIndex(
+    double projectedLeftBoundary,
+    double margin,
+    double xGap,
+    double xScale,
+    const RenderData& renderData,
+    int size
+  );
+
+  void UpdateHandPosition(
+    const RenderData& renderData,
+    bool insideHandBoundary,
+    double xGap,
+    double margin,
+    int size,
+    double whitespace,
+    double zGap
+  );
+
+  void BindAndDrawAllFrontFaces(
+    int maxBindableTextures,
+    int transformVertexSize,
+    int size
   );
 
   void Render(Renderer& renderer, const RenderData& renderData);

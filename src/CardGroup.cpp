@@ -139,23 +139,204 @@ bool CardGroup::GetInsideHandBoundary(
   }
 }
 
+int CardGroup::GetClosestCardIndex(
+  double projectedLeftBoundary,
+  double margin,
+  double xGap,
+  double xScale,
+  const RenderData& renderData,
+  int size
+) {
+  int closestIndex = 0;
+
+  double distanceToLastClosest = 1.0f;
+  if (this->wasInsideBoundary) {
+    ASSERT(this->lastClosestIndex != -1);
+    distanceToLastClosest = abs(projectedLeftBoundary + (0.5f+margin+xGap*this->lastClosestIndex)*xScale-renderData.cursorX)/xScale;
+    closestIndex = this->lastClosestIndex;
+  }
+
+  if (!this->wasInsideBoundary || distanceToLastClosest > 0.4f) {
+    double thisX = projectedLeftBoundary + (0.5f+margin)*xScale;
+    double smallestDistance = abs(thisX-renderData.cursorX);
+    closestIndex = 0;
+    for (int i = 1; i < size; ++i) {
+      thisX += xGap*xScale;
+      double distance = abs(thisX - renderData.cursorX);
+      if (distance < smallestDistance) {
+        smallestDistance = distance;
+        closestIndex = i;
+      }
+    }
+
+    // move 1 in the direction of the new closest index
+    if (this->wasInsideBoundary) {
+      closestIndex = this->lastClosestIndex + (closestIndex-this->lastClosestIndex)/abs(closestIndex-this->lastClosestIndex);
+    }
+  }
+
+  return closestIndex;
+}
+
+void CardGroup::UpdateHandPosition(
+  const RenderData& renderData,
+  bool insideHandBoundary,
+  double xGap,
+  double margin,
+  int size,
+  double whitespace,
+  double zGap
+) {
+  float rotationPerCard = 0;//renderData.isHand ? glm::radians(10.0f) : 0;
+
+  // if we need to display the cards
+  // dynamically based on cursor position
+  if (renderData.isHand && insideHandBoundary) {
+    
+    std::cout << "this->lastClosestIndex: " << this->lastClosestIndex << std::endl;
+
+    double centerX = this->lastClosestIndex*xGap+0.5f+margin;
+    std::cout << "centerX: " << centerX << std::endl;
+
+    int leftSize = this->lastClosestIndex;
+    int rightSize = size-this->lastClosestIndex-1;
+    double leftWidth = centerX-whitespace-0.5f;
+    double rightWidth = this->width-centerX-0.5f-whitespace;
+    double leftGap = leftSize == 1 ? 0 : (leftWidth-1.0f)/(leftSize-1.0f);
+    double rightGap = rightSize == 1 ? 0 : (rightWidth-1.0f)/(rightSize-1.0f);
+
+    // setup buffer info that depends
+    // on left/right divide
+    for (int i = 0; i < this->lastClosestIndex; i++) {
+      int cardIndex = i;
+      CardRenderingData& thisCard = cards[cardIndex].renderData;
+
+      thisCard.SetActualTransform(
+        glm::vec3(
+          //(float)cardIndex*leftGap+0.5f,
+          (float)(centerX - fmax(0.5f + whitespace + 0.5f, xGap) - (this->lastClosestIndex-cardIndex-1)*leftGap),
+          0.0f,
+          (float)cardIndex*zGap
+        ),
+        (float)(cardIndex-(float)this->lastClosestIndex)/size*rotationPerCard
+      );
+    }
+
+    CardRenderingData& closestCard = cards[this->lastClosestIndex].renderData;
+    closestCard.SetActualTransform(
+      glm::vec3(centerX, 0.0f, this->lastClosestIndex*zGap),
+      0.0f
+    );
+
+    for (int i = (this->lastClosestIndex+1); i < size; i++) {
+      int cardIndex = i;
+      CardRenderingData& thisCard = cards[cardIndex].renderData;
+
+      thisCard.SetActualTransform(
+        glm::vec3(
+          (float)(centerX + fmax(0.5f + whitespace + 0.5f, xGap) + (cardIndex-this->lastClosestIndex-1)*rightGap),
+          0.0f,
+          (float)(this->lastClosestIndex - (cardIndex-this->lastClosestIndex)) *zGap
+        ),
+        (float)(cardIndex-(float)(this->lastClosestIndex))/size*rotationPerCard
+      );
+    }
+  } else {
+    for (int i = 0; i < size; i++) {
+      int cardIndex = i;
+
+      CardRenderingData& thisCard = cards[cardIndex].renderData;
+
+      thisCard.SetActualTransform(
+        glm::vec3(
+          (float)cardIndex*xGap+0.5f+margin,
+          0.0f,
+          (float)cardIndex*zGap
+        ),
+        (float)(cardIndex-(float)(size-1)/2.0f)/size*rotationPerCard
+      );
+    }
+  }
+}
+
+void CardGroup::BindAndDrawAllFrontFaces(
+  int maxBindableTextures,
+  int transformVertexSize,
+  int size
+) {
+  // just the texture slot id
+  int vertexSize = 1;
+
+  int buffer[vertexSize*size];
+
+  int i = 0;
+  while (i < size) {
+    int batchSize = fmin(maxBindableTextures, size-i);
+
+    // bind all textures about to be used
+    for (int j = i; j < i+batchSize; ++j) {
+      unsigned int cardID = this->cards[j].card.GetID();
+
+      this->textureMap->RequestBind(maxBindableTextures, cardID);
+      
+      // update texture buffer using newly bound addresses
+      buffer[j] = this->textureMap->GetSlotOf(cardID);
+    }
+
+    // write data from buffer to gpu
+    this->textureIDBuffer.OverwriteData(
+      buffer+i*vertexSize, 
+      i*sizeof(GLint)*vertexSize, 
+      batchSize*sizeof(GLint)*vertexSize
+    );
+
+    // this changes the offset within the
+    // instanced buffers so that they are read
+    // from the right offset.
+    this->textureIDBuffer.OverwriteAttrib(
+      this->textureEndAttribID, 
+      1, 
+      GL_UNSIGNED_INT, 
+      sizeof(GLuint)*vertexSize, 
+      (const void*)(i*sizeof(GLuint))
+    );
+
+    this->transformBuffer.OverwriteAttrib(
+      this->transformEndAttribID-1,
+      3,
+      GL_FLOAT,
+      sizeof(GLfloat)*transformVertexSize, 
+      (const void*)(i*sizeof(GLfloat)*transformVertexSize)
+    );
+
+    this->transformBuffer.OverwriteAttrib(
+      this->transformEndAttribID,
+      1,
+      GL_FLOAT,
+      sizeof(GLfloat)*transformVertexSize, 
+      (const void*)(i*sizeof(GLfloat)*transformVertexSize+3*sizeof(GLfloat))
+    );
+
+    this->DrawElements(batchSize);
+
+    i += maxBindableTextures;
+  }
+}
+
+
 void CardGroup::Render(
   Renderer& renderer,
   const RenderData& renderData
 ) {
-  glm::mat4& projMatrix = renderer.projMatrix;
-  glm::mat4& camMatrix = renderer.cameraMatrix;
-  int maxBindableTextures = renderer.maxBindableTextures;
-
   bool insideHandBoundary = false;
   bool mouseMovedInBoundary = false;
+
+  int size = this->cards.size();
 
   // I store this because I use it in
   // determining closest card
   double projectedLeftBoundary = -1.0f;
   double xScale = -1.0f;
-
-  int size = this->cards.size();
 
   // this is the area we reserve for white space
   // to the left and right of the card the user is
@@ -164,18 +345,34 @@ void CardGroup::Render(
 
   // this makes sure the default card packing allows
   // room for whitespace
+  double margin = 0.0f;
   //double margin = renderData.isHand ? whitespace + 1.0f : 0.0f;
-  double margin = renderData.isHand ? (
-    size <= 3 ? 1.0f+whitespace : (size + size*whitespace - whitespace - width)/(size-3)
-  ): 0.0f;
+  //double margin = renderData.isHand ? (
+    //size <= 3 ? 1.0f+whitespace : (size + size*whitespace - whitespace - width)/(size-3)
+  //): 0.0f;
+
+  if (size == 1) {
+    margin = (this->width-1.0f)/2.0f;
+  } else if (renderData.isHand) {
+    if (size > 3) {
+      // I got this equation by solving:
+      //    xGap = (width-1-2*margin)/(size-1)
+      //    margin = whitespace + 1 - xGap
+      margin = (size + size*whitespace - whitespace - width)/(size-3);
+    } else {
+      margin = 1.0f + whitespace;
+    }
+  } else {
+    margin = 0.0f;
+  }
 
   const float verticalMargin = 0.15f;
   const float horizontalMargin = 0.15f;
 
   // if we need to know boundaries
   if (renderData.isHand) {
-    // check if cursor is near the card group
 
+    // check if cursor is near the card group
     insideHandBoundary = this->GetInsideHandBoundary(renderer, renderData, margin-horizontalMargin, -verticalMargin, mouseMovedInBoundary, xScale, projectedLeftBoundary);
   }
 
@@ -190,113 +387,41 @@ void CardGroup::Render(
   if (mouseMovedInBoundary) {
     // find closest card
     
-    int closestIndex = 0;
-
-    double distanceToLastClosest = 1.0f;
-    if (this->wasInsideBoundary) {
-      ASSERT(this->lastClosestIndex != -1);
-      distanceToLastClosest = abs(projectedLeftBoundary + (0.5f+margin+xGap*this->lastClosestIndex)*xScale-renderData.cursorX)/xScale;
-      closestIndex = this->lastClosestIndex;
-    }
-
-    if (!this->wasInsideBoundary || distanceToLastClosest > 0.4f) {
-      double thisX = projectedLeftBoundary + (0.5f+margin)*xScale;
-      double smallestDistance = abs(thisX-renderData.cursorX);
-      closestIndex = 0;
-      for (int i = 1; i < size; ++i) {
-        thisX += xGap*xScale;
-        double distance = abs(thisX - renderData.cursorX);
-        if (distance < smallestDistance) {
-          smallestDistance = distance;
-          closestIndex = i;
-        }
-      }
-
-      // move 1 in the direction of the new closest index
-      if (this->wasInsideBoundary) {
-        closestIndex = this->lastClosestIndex + (closestIndex-this->lastClosestIndex)/abs(closestIndex-this->lastClosestIndex);
-      }
-    }
+    int closestIndex = this->GetClosestCardIndex(
+      projectedLeftBoundary,
+      margin,
+      xGap,
+      xScale,
+      renderData,
+      size
+    );
 
     if (this->wasInsideBoundary && closestIndex != this->lastClosestIndex) {
       this->dirtyPosition = true;
     }
+
     this->lastClosestIndex = closestIndex;
   }
 
+  // If we need to update the actual
+  // card positions
   if (this->dirtyPosition) {
-    float rotationPerCard = 0;//renderData.isHand ? glm::radians(10.0f) : 0;
-
-    // if we need to display the cards
-    // dynamically based on cursor position
-    if (renderData.isHand && insideHandBoundary) {
-      
-      double centerX = this->lastClosestIndex*xGap+0.5f+margin;
-
-      int leftSize = this->lastClosestIndex;
-      int rightSize = size-this->lastClosestIndex-1;
-      double leftWidth = centerX-whitespace-0.5f;
-      double rightWidth = this->width-centerX-0.5f-whitespace;
-      double leftGap = leftSize == 1 ? 0 : (leftWidth-1.0f)/(leftSize-1.0f);
-      double rightGap = rightSize == 1 ? 0 : (rightWidth-1.0f)/(rightSize-1.0f);
-
-      // setup buffer info that depends
-      // on left/right divide
-      for (int i = 0; i < this->lastClosestIndex; i++) {
-        int cardIndex = i;
-        CardRenderingData& thisCard = cards[cardIndex].renderData;
-
-        thisCard.SetActualTransform(
-          glm::vec3(
-            //(float)cardIndex*leftGap+0.5f,
-            (float)(centerX - 0.5f - whitespace - 0.5f - (this->lastClosestIndex-cardIndex-1)*leftGap),
-            0.0f,
-            (float)cardIndex*zGap
-          ),
-          (float)(cardIndex-(float)this->lastClosestIndex)/size*rotationPerCard
-        );
-      }
-
-      CardRenderingData& closestCard = cards[this->lastClosestIndex].renderData;
-      closestCard.SetActualTransform(
-        glm::vec3(centerX, 0.0f, this->lastClosestIndex*zGap),
-        0.0f
-      );
-
-      for (int i = (this->lastClosestIndex+1); i < size; i++) {
-        int cardIndex = i;
-        CardRenderingData& thisCard = cards[cardIndex].renderData;
-
-        thisCard.SetActualTransform(
-          glm::vec3(
-            (float)(centerX + 0.5f + whitespace + 0.5f + (cardIndex-this->lastClosestIndex-1)*rightGap),
-            0.0f,
-            (float)(this->lastClosestIndex - (cardIndex-this->lastClosestIndex)) *zGap
-          ),
-          (float)(cardIndex-(float)(this->lastClosestIndex))/size*rotationPerCard
-        );
-      }
-    } else {
-      for (int i = 0; i < size; i++) {
-        int cardIndex = i;
-
-        CardRenderingData& thisCard = cards[cardIndex].renderData;
-
-        thisCard.SetActualTransform(
-          glm::vec3(
-            (float)cardIndex*xGap+0.5f+margin,
-            0.0f,
-            (float)cardIndex*zGap
-          ),
-          (float)(cardIndex-(float)(size-1)/2.0f)/size*rotationPerCard
-        );
-      }
-    }
+    this->UpdateHandPosition(
+      renderData,
+      insideHandBoundary,
+      xGap,
+      margin,
+      size,
+      whitespace,
+      zGap
+    );
   }
 
   // 3 for positions plus 1 for rotation
   const int transformVertexSize = 3+1;
 
+  // if we need to update the
+  // displayed position
   if (this->dirtyDisplay) {
 
     // update buffer for relative position and rotation
@@ -321,13 +446,14 @@ void CardGroup::Render(
   this->indexBuffer.Bind();
   this->transformBuffer.Bind();
   this->cardShader.Bind();
+  glm::mat4& projMatrix = renderer.projMatrix;
+  glm::mat4& camMatrix = renderer.cameraMatrix;
   cardShader.SetUniform4fv("projMatrix", false, glm::value_ptr(projMatrix));
   cardShader.SetUniform4fv("cameraMatrix", false, glm::value_ptr(camMatrix));
   cardShader.SetUniform4fv("modelMatrix", false, glm::value_ptr(this->transform));
 
-  int i = 0;
-
   // Pass texture units as an array to the shader.
+  int maxBindableTextures = renderer.maxBindableTextures;
   std::vector<int> textureUnits(maxBindableTextures);
   int mapSize = this->textureMap->Size();
   for (int i = 0; i < maxBindableTextures; ++i) {
@@ -339,69 +465,17 @@ void CardGroup::Render(
   }
   cardShader.SetUniform1iv("textures", maxBindableTextures, textureUnits.data());
 
+  // bind textures and shift buffer for
+  // rendering
   if (this->zFlipped) {
     this->textureMap->RequestBind(maxBindableTextures, "back");
     this->DrawElements(size);
   } else {
-    // just the texture slot id
-    int vertexSize = 1;
-
-    int buffer[vertexSize*size];
-
-    while (i < size) {
-      int batchSize = fmin(maxBindableTextures, size-i);
-
-      // bind all textures about to be used
-      for (int j = i; j < i+batchSize; ++j) {
-        unsigned int cardID = this->cards[j].card.GetID();
-
-        this->textureMap->RequestBind(maxBindableTextures, cardID);
-        
-        // update texture buffer using newly bound addresses
-        buffer[j] = this->textureMap->GetSlotOf(cardID);
-      }
-
-      std::cout << "Overwrite texture data" << std::endl;
-
-      // write data from buffer to gpu
-      this->textureIDBuffer.OverwriteData(
-        buffer+i*vertexSize, 
-        i*sizeof(GLint)*vertexSize, 
-        batchSize*sizeof(GLint)*vertexSize
-      );
-
-
-      // this changes the offset within the
-      // instanced buffers so that they are read
-      // from the right offset.
-      this->textureIDBuffer.OverwriteAttrib(
-        this->textureEndAttribID, 
-        1, 
-        GL_UNSIGNED_INT, 
-        sizeof(GLuint)*vertexSize, 
-        (const void*)(i*sizeof(GLuint))
-      );
-
-      this->transformBuffer.OverwriteAttrib(
-        this->transformEndAttribID-1,
-        3,
-        GL_FLOAT,
-        sizeof(GLfloat)*transformVertexSize, 
-        (const void*)(i*sizeof(GLfloat)*transformVertexSize)
-      );
-
-      this->transformBuffer.OverwriteAttrib(
-        this->transformEndAttribID,
-        1,
-        GL_FLOAT,
-        sizeof(GLfloat)*transformVertexSize, 
-        (const void*)(i*sizeof(GLfloat)*transformVertexSize+3*sizeof(GLfloat))
-      );
-
-      this->DrawElements(batchSize);
-
-      i += maxBindableTextures;
-    }
+    this->BindAndDrawAllFrontFaces(
+      maxBindableTextures,
+      transformVertexSize,
+      size
+    );
   }
 
   this->dirtyPosition = false;

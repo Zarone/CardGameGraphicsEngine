@@ -53,11 +53,11 @@ int main(void)
   hand.AddCard(0);
   hand.AddCard(1);
   hand.AddCard(2);
-  hand.AddCard(3);
-  hand.AddCard(0);
-  hand.AddCard(1);
-  hand.AddCard(2);
-  hand.AddCard(3);
+  //hand.AddCard(3);
+  //hand.AddCard(0);
+  //hand.AddCard(1);
+  //hand.AddCard(2);
+  //hand.AddCard(3);
 
   hand.PrepareTextures();
 

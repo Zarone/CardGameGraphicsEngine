@@ -18,7 +18,7 @@ void Renderer::Setup3DTransforms(const glm::vec3& cameraPosition, const glm::vec
   );
 }
 
-bool Renderer::InsideWindowBounds(double posX, double posY) {
+bool Renderer::InsideWindowBounds(double posX, double posY) const {
   return this->window->CursorInBounds(posX, posY);
 }
 

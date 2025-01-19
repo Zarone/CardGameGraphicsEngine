@@ -13,6 +13,6 @@ public:
   int maxBindableTextures;
   Renderer(WindowManager* window, int maxBindableTextures);
   void Setup3DTransforms(const glm::vec3& cameraPosition, const glm::vec3& cameraDirection);
-  bool InsideWindowBounds(double posX, double posY);
+  bool InsideWindowBounds(double posX, double posY) const;
   glm::vec2 GetScreenPositionFromCamera(glm::vec4 screenCoords);
 };

@@ -72,6 +72,16 @@ public:
     float width, 
     bool zFlipped
   );
+  bool GetInsideHandBoundary(
+    Renderer& renderer,
+    const RenderData& renderData,
+    double horizontalOffset,
+    double verticalOffset,
+    bool& mouseMovedInBoundary,
+    double& xScale,
+    double& projectedLeftBoundary
+  );
+
   void Render(Renderer& renderer, const RenderData& renderData);
   void AddCard(unsigned int id);
 
@@ -81,7 +91,6 @@ public:
   *
   */
   void PrepareTextures();
-
 
   void UpdateTick(double deltaTime);
 };

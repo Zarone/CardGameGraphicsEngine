@@ -6,7 +6,7 @@
 #include "../include/ErrorHandling.h"
 #include "../include/shaders/allShaders.h"
 
-const unsigned int CardGroup::estimatedMax = 20;
+const unsigned int CardGroup::estimatedMax = 60;
 
 CardGroup::CardGroup(
   TextureMap* textureMap, 
@@ -68,8 +68,6 @@ void CardGroup::PrepareTextures() {
       this->textureMap->SetupCard(cardItem.card.GetID());
     }
   }
-
-  this->textureIDBuffer.RewriteData(NULL, size*sizeof(GLint), true);
 }
 
 void CardGroup::DrawElements(int size) {
@@ -80,6 +78,65 @@ void CardGroup::DrawElements(int size) {
     nullptr,
     size 
   ));
+}
+
+bool CardGroup::GetInsideHandBoundary(
+  Renderer& renderer,
+  const RenderData& renderData,
+  double horizontalOffset,
+  double verticalOffset,
+  bool& mouseMovedInBoundary,
+  double& xScale,
+  double& projectedLeftBoundary
+) {
+  glm::mat4& projMatrix = renderer.projMatrix;
+  glm::mat4& camMatrix = renderer.cameraMatrix;
+
+  // if the cursor moved
+  if (
+    renderer.InsideWindowBounds(renderData.cursorX, renderData.cursorY) &&
+    (
+      (int)renderData.cursorY != lastCursorY || 
+      (int)renderData.cursorX != lastCursorX
+    )
+  ) {
+    // project top bound to screen
+    glm::vec4 topLeft = glm::vec4(
+      horizontalOffset, 
+      0.5f*CardRenderingData::cardHeightRatio-verticalOffset, 
+      0.0f, 
+      1.0f
+    );
+    glm::vec4 topLeftScreenSpace = projMatrix * camMatrix * this->transform * topLeft;
+    glm::vec2 projectedTopLeft = renderer.GetScreenPositionFromCamera(topLeftScreenSpace);
+    
+    // project bottom bound to screen
+    glm::vec4 bottomRight = glm::vec4(
+      width-horizontalOffset, 
+      -0.5f*CardRenderingData::cardHeightRatio+verticalOffset, 
+      0.0f, 
+      1.0f
+    );
+    glm::vec4 bottomRightScreenSpace = projMatrix * camMatrix * this->transform * bottomRight;
+    glm::vec2 projectedBottomRight = renderer.GetScreenPositionFromCamera(bottomRightScreenSpace);
+    
+    xScale = (projectedBottomRight.x - projectedTopLeft.x)/(this->width+2*(-horizontalOffset));
+    projectedLeftBoundary = projectedTopLeft.x+(-horizontalOffset)*xScale;
+
+    // see if cursor is below top left boundary and 
+    // above bottom right boundary
+    if (
+      renderData.cursorX > projectedTopLeft.x && renderData.cursorY > projectedTopLeft.y &&
+      renderData.cursorX < projectedBottomRight.x && renderData.cursorY < projectedBottomRight.y 
+    ) {
+      mouseMovedInBoundary = true;
+      return true;
+    } else {
+      return false;
+    }
+  } else {
+    return this->wasInsideBoundary;
+  }
 }
 
 void CardGroup::Render(
@@ -119,50 +176,7 @@ void CardGroup::Render(
   if (renderData.isHand) {
     // check if cursor is near the card group
 
-    // if the cursor moved
-    if (
-      renderer.InsideWindowBounds(renderData.cursorX, renderData.cursorY) &&
-      (
-        (int)renderData.cursorY != lastCursorY || 
-        (int)renderData.cursorX != lastCursorX
-      )
-    ) {
-
-      // project top bound to screen
-      glm::vec4 topLeft = glm::vec4(
-        -horizontalMargin+margin, 
-        0.5f*CardRenderingData::cardHeightRatio+verticalMargin, 
-        0.0f, 
-        1.0f
-      );
-      glm::vec4 topLeftScreenSpace = projMatrix * camMatrix * this->transform * topLeft;
-      glm::vec2 projectedTopLeft = renderer.GetScreenPositionFromCamera(topLeftScreenSpace);
-      
-      // project bottom bound to screen
-      glm::vec4 bottomRight = glm::vec4(
-        width+horizontalMargin-margin, 
-        -0.5f*CardRenderingData::cardHeightRatio-verticalMargin, 
-        0.0f, 
-        1.0f
-      );
-      glm::vec4 bottomRightScreenSpace = projMatrix * camMatrix * this->transform * bottomRight;
-      glm::vec2 projectedBottomRight = renderer.GetScreenPositionFromCamera(bottomRightScreenSpace);
-      
-      xScale = (projectedBottomRight.x - projectedTopLeft.x)/(this->width+2*horizontalMargin-2*margin);
-      projectedLeftBoundary = projectedTopLeft.x+(horizontalMargin-margin)*xScale;
-
-      // see if cursor is below top left boundary and 
-      // above bottom right boundary
-      if (
-        renderData.cursorX > projectedTopLeft.x && renderData.cursorY > projectedTopLeft.y &&
-        renderData.cursorX < projectedBottomRight.x && renderData.cursorY < projectedBottomRight.y 
-      ) {
-        mouseMovedInBoundary = true;
-        insideHandBoundary = true;
-      }
-    } else {
-      insideHandBoundary = this->wasInsideBoundary;
-    }
+    insideHandBoundary = this->GetInsideHandBoundary(renderer, renderData, margin-horizontalMargin, -verticalMargin, mouseMovedInBoundary, xScale, projectedLeftBoundary);
   }
 
   if (this->wasInsideBoundary != insideHandBoundary) this->dirtyPosition = true;
@@ -185,18 +199,14 @@ void CardGroup::Render(
       closestIndex = this->lastClosestIndex;
     }
 
-    std::cout << "Distance to last closest " << this->lastClosestIndex << ": " << distanceToLastClosest << std::endl;
     if (!this->wasInsideBoundary || distanceToLastClosest > 0.4f) {
       double thisX = projectedLeftBoundary + (0.5f+margin)*xScale;
       double smallestDistance = abs(thisX-renderData.cursorX);
       closestIndex = 0;
-      std::cout << "Distance " << 0 << ": " << smallestDistance/xScale << std::endl;
       for (int i = 1; i < size; ++i) {
         thisX += xGap*xScale;
         double distance = abs(thisX - renderData.cursorX);
-        std::cout << "Distance " << i << ": " << distance/xScale << " compared to min " << smallestDistance/xScale << std::endl;
         if (distance < smallestDistance) {
-          std::cout << "smaller index " << i << std::endl;
           smallestDistance = distance;
           closestIndex = i;
         }
@@ -211,7 +221,6 @@ void CardGroup::Render(
     if (this->wasInsideBoundary && closestIndex != this->lastClosestIndex) {
       this->dirtyPosition = true;
     }
-    std::cout << "ending with closest index " << closestIndex << std::endl;
     this->lastClosestIndex = closestIndex;
   }
 
@@ -231,23 +240,12 @@ void CardGroup::Render(
       double leftGap = leftSize == 1 ? 0 : (leftWidth-1.0f)/(leftSize-1.0f);
       double rightGap = rightSize == 1 ? 0 : (rightWidth-1.0f)/(rightSize-1.0f);
 
-      std::cout << std::endl;
-      std::cout << "Closest Index: " << this->lastClosestIndex << std::endl;
-      std::cout << "Margin: " << margin << std::endl;
-      std::cout << "Left Size: " << leftSize << std::endl;
-      std::cout << "Right Size: " << rightSize << std::endl;
-      std::cout << "Left Width: " << leftWidth << std::endl;
-      std::cout << "Right Width: " << rightWidth << std::endl;
-      std::cout << "Left Gap: " << leftGap << std::endl;
-      std::cout << "Right Gap: " << rightGap << std::endl;
-
       // setup buffer info that depends
       // on left/right divide
       for (int i = 0; i < this->lastClosestIndex; i++) {
         int cardIndex = i;
         CardRenderingData& thisCard = cards[cardIndex].renderData;
 
-        std::cout << "LHS x = " << (float)cardIndex*leftGap+0.5f << std::endl;
         thisCard.SetActualTransform(
           glm::vec3(
             //(float)cardIndex*leftGap+0.5f,
@@ -259,7 +257,6 @@ void CardGroup::Render(
         );
       }
 
-      std::cout << "center x = " << centerX << std::endl;
       CardRenderingData& closestCard = cards[this->lastClosestIndex].renderData;
       closestCard.SetActualTransform(
         glm::vec3(centerX, 0.0f, this->lastClosestIndex*zGap),
@@ -270,10 +267,6 @@ void CardGroup::Render(
         int cardIndex = i;
         CardRenderingData& thisCard = cards[cardIndex].renderData;
 
-        //std::cout << "this->lastClosestIndex*xGap: " << this->lastClosestIndex*xGap << std::endl;
-        //std::cout << "0.5f + whitespace + 0.5f: " << 0.5f + whitespace + 0.5f << std::endl;
-        //std::cout << "(cardIndex-this->lastClosestIndex-1): " << (cardIndex-this->lastClosestIndex-1) << std::endl;
-        std::cout << "RHS x = " << (centerX + 0.5f + whitespace + 0.5f + (cardIndex-this->lastClosestIndex-1)*rightGap) << std::endl;
         thisCard.SetActualTransform(
           glm::vec3(
             (float)(centerX + 0.5f + whitespace + 0.5f + (cardIndex-this->lastClosestIndex-1)*rightGap),
@@ -321,7 +314,7 @@ void CardGroup::Render(
     }
 
 
-    this->transformBuffer.RewriteData(buffer, size*transformVertexSize*sizeof(GLfloat), true);
+    this->transformBuffer.OverwriteData(buffer, 0, size*transformVertexSize*sizeof(GLfloat));
   }
 
   this->groupVao.Bind();
@@ -367,6 +360,8 @@ void CardGroup::Render(
         // update texture buffer using newly bound addresses
         buffer[j] = this->textureMap->GetSlotOf(cardID);
       }
+
+      std::cout << "Overwrite texture data" << std::endl;
 
       // write data from buffer to gpu
       this->textureIDBuffer.OverwriteData(

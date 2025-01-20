@@ -519,3 +519,7 @@ void CardGroup::UpdateTick(double deltaTime) {
   }
   this->dirtyDisplay = true;
 }
+
+double CardGroup::CheckCollision(Renderer& renderer, double x, double y) const {
+
+}

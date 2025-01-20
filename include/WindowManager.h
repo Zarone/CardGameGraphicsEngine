@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GLFW/glfw3.h"
+#include <GLFW/glfw3.h>
 
 class WindowManager 
 {
@@ -26,6 +26,7 @@ public:
   bool CursorInBounds(double posX, double posY);
   int GetWidth();
   int GetHeight();
+  GLFWwindow* GetRawPointer();
 
   ~WindowManager();
 };

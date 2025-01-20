@@ -5,20 +5,12 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <iostream>
 
-#include "../include/shaders/allShaders.h"
 #include "../include/WindowManager.h"
-#include "../include/Shader.h"
-#include "../include/ErrorHandling.h"
-#include "../include/VertexBuffer.h"
-#include "../include/IndexBuffer.h"
-#include "../include/VertexArray.h"
-#include "../include/Texture.h"
 #include "../include/Renderer.h"
-#include "../include/CardRenderingData.h"
 #include "../include/CardGroup.h"
 #include "../include/TextureMap.h"
+#include "../include/Scene.h"
 
 int main(void)
 {
@@ -35,6 +27,8 @@ int main(void)
     glm::vec3(0.0f, 0.0f, -1.0f)
   );
 
+  Scene scene(&myRenderer);
+
   TextureMap textureMap = TextureMap();
   CardGroup hand(
     &textureMap,
@@ -45,6 +39,8 @@ int main(void)
     4.0f, // width
     false // z flipped
   );
+
+  scene.AddObject(&hand);
 
   hand.AddCard(0);
   hand.AddCard(1);
@@ -73,9 +69,12 @@ int main(void)
   auto diffTime = std::chrono::duration_cast<std::chrono::duration<float, std::milli>>(currentTime - lastTime);
   double deltaTime = 0;
 
+  scene.SetupMouseClickCallback(&myWindow);
+
   /* Loop until the user closes the window */
   while (!myWindow.ShouldClose())
   {
+    
     currentTime = std::chrono::high_resolution_clock::now();
     diffTime = std::chrono::duration_cast<std::chrono::duration<float, std::milli>>(currentTime - lastTime);
     deltaTime = diffTime.count()/1000.0f;

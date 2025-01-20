@@ -75,6 +75,10 @@ int WindowManager::GetHeight() {
   return this->ny;
 }
 
+GLFWwindow* WindowManager::GetRawPointer() {
+  return this->window;
+}
+
 WindowManager::~WindowManager() {
   glfwTerminate();
 }

@@ -135,4 +135,14 @@ public:
   void PrepareTextures();
 
   void UpdateTick(double deltaTime);
+
+  /*
+  *
+  * @brief Checks for collision between this card group
+  * and the cursor
+  *
+  * @return the z coordinate of the collission
+  *
+  */
+  double CheckCollision(Renderer& renderer, double x, double y) const;
 };

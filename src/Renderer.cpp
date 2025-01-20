@@ -28,3 +28,11 @@ glm::vec2 Renderer::GetScreenPositionFromCamera(glm::vec4 screenCoords) {
     (-screenCoords.y/screenCoords.w+1)/2*window->GetHeight()
   );
 }
+
+glm::vec3 Renderer::Get3DScreenPositionFromCamera(glm::vec4 screenCoords) {
+  return glm::vec3(
+    (screenCoords.x/screenCoords.w+1)/2*window->GetWidth(),
+    (-screenCoords.y/screenCoords.w+1)/2*window->GetHeight(),
+    screenCoords.z/screenCoords.w
+  );
+}

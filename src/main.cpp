@@ -48,6 +48,7 @@ int main(void)
   );
 
   scene.AddObject(&hand);
+  scene.AddObject(&oppHand);
 
   oppHand.AddCard(0);
   oppHand.AddCard(2);

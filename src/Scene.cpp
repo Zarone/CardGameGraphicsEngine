@@ -17,8 +17,9 @@ void Scene::OnClick(GLFWwindow* window, int button, int action, int mods) {
   glfwGetCursorPos(window, &x, &y);
   std::cout << "here " << x << ", " << y << std::endl;
   double z;
-  this->CheckCollision(x, y, &z);
-  std::cout << "colission at z = " << z << std::endl;
+  if (this->CheckCollision(x, y, &z)) {
+    std::cout << "colission at z = " << z << std::endl;
+  }
 }
 
 bool Scene::CheckCollision(double x, double y, double* collisionZ) {
@@ -43,9 +44,11 @@ bool Scene::CheckCollision(double x, double y, double* collisionZ) {
 
   if (selectedObject != nullptr) {
     selectedObject->ProcessCardClick(collisionCardIndex);
-  }
 
-  return minZ;
+    *collisionZ = minZ;
+    return true;
+  }
+  return false;
 }
 
 void Scene::SetupMouseClickCallback(WindowManager* window) {

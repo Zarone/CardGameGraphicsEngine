@@ -136,6 +136,12 @@ public:
     glm::vec2& dest
   ) const;
 
+  void GroupPositionTo3DScreen(
+    Renderer* renderer, 
+    glm::vec4& src, 
+    glm::vec3& dest
+  ) const;
+
   bool GetInsideHandBoundary(
     Renderer* renderer,
     const RenderData& renderData,

@@ -96,6 +96,17 @@ void CardGroup::GroupPositionToScreen(
   dest = renderer->GetScreenPositionFromCamera(screenSpace);
 }
 
+void CardGroup::GroupPositionTo3DScreen(
+  Renderer* renderer, 
+  glm::vec4& src, 
+  glm::vec3& dest
+) const {
+  glm::mat4& projMatrix = renderer->projMatrix;
+  glm::mat4& camMatrix = renderer->cameraMatrix;
+  glm::vec4 screenSpace = projMatrix * camMatrix * this->transform * src;
+  dest = renderer->Get3DScreenPositionFromCamera(screenSpace);
+}
+
 bool CardGroup::GetInsideHandBoundary(
   Renderer* renderer,
   const RenderData& renderData,
@@ -560,6 +571,8 @@ bool CardGroup::CheckCollision(
   double* collisionZ, 
   int* collisionCardIndex
 ) const {
+  int size = this->cards.size();
+  if (size == 0) return false;
 
   // This function makes the assumption that
   // all cardgroups are projected onto the screen
@@ -578,8 +591,8 @@ bool CardGroup::CheckCollision(
     0.0f, 
     1.0f
   );
-  glm::vec2 projectedBottomRight;
-  this->GroupPositionToScreen(renderer, bottomRight, projectedBottomRight);
+  glm::vec3 projectedBottomRight;
+  this->GroupPositionTo3DScreen(renderer, bottomRight, projectedBottomRight);
 
   glm::vec4 topRight = glm::vec4(
     width, 
@@ -587,14 +600,8 @@ bool CardGroup::CheckCollision(
     0.0f, 
     1.0f
   );
-  glm::vec2 projectedTopRight;
-  this->GroupPositionToScreen(renderer, topRight, projectedTopRight);
-
-  std::cout << "x: " << (x) << std::endl;
-  std::cout << "y: " << (y) << std::endl;
-  std::cout << "projectBottomRight: " << (projectedBottomRight.x) << ", " << projectedBottomRight.y << std::endl;
-  std::cout << "projectTopRight: " << (projectedTopRight.x) << ", " << projectedTopRight.y << std::endl;
-  std::cout << "is y inside: " << ((y < projectedBottomRight.y) && (y > projectedTopRight.y)) << std::endl;
+  glm::vec3 projectedTopRight;
+  this->GroupPositionTo3DScreen(renderer, topRight, projectedTopRight);
 
   // if y inside inside the box, then you can short circuit
   // because the cursor definitely isn't in the group
@@ -618,24 +625,37 @@ bool CardGroup::CheckCollision(
   glm::vec2 projectedTopLeft;
   this->GroupPositionToScreen(renderer, topLeft, projectedTopLeft);
 
-  std::cout << "projectBottomLeft: " << (projectedBottomLeft.x) << ", " << projectedBottomLeft.y << std::endl;
-  std::cout << "projectTopLeft: " << (projectedTopLeft.x) << ", " << projectedTopLeft.y << std::endl;
-
   double t = (y-projectedTopLeft.y)/(projectedBottomLeft.y-projectedTopLeft.y);
 
   // linear interpolate to find boundaries
   double leftBoundary = t*projectedBottomLeft.x + (1-t)*(projectedTopLeft.x);
   double rightBoundary = t*projectedBottomRight.x + (1-t)*(projectedTopRight.x);
-
-  std::cout << "left boundary: " << leftBoundary << std::endl;
-  std::cout << "right boundary: " << rightBoundary << std::endl;
+  double zAtCursor = t*projectedBottomRight.z + (1-t)*projectedTopRight.z;
 
   bool inBounds = (x >= leftBoundary && x <= rightBoundary);
-  std::cout << "in bounds " << inBounds << std::endl;
 
-  *collisionZ = 1.0f;
-  *collisionCardIndex = 1;
-  return true;
+  if (!inBounds) return false;
+
+  double xGap = (rightBoundary - leftBoundary)/this->width;
+  
+  // iterate through all the cards
+  for (int i = 0; i < size; ++i) {
+    double currentCardLeftBound = leftBoundary + xGap*(this->cards[i].renderData.displayedPosition.x - 0.5f);
+    double currentCardRightBound = currentCardLeftBound + xGap;
+    double rightBoundary = (i+1 < size) ? 
+       fmin(
+         leftBoundary + xGap*(this->cards[i+1].renderData.displayedPosition.x - 0.5f), 
+         currentCardRightBound
+       ) :
+       currentCardRightBound;
+    if (x >= currentCardLeftBound && x <= rightBoundary) {
+      *collisionZ = zAtCursor;
+      *collisionCardIndex = i;
+      return true;
+    }
+  }
+
+  return false;
 }
 
 void CardGroup::ProcessCardClick(int cardIndex) {

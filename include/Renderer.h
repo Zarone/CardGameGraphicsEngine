@@ -24,4 +24,6 @@ public:
   *
   */
   glm::vec2 GetScreenPositionFromCamera(glm::vec4 screenCoords);
+
+  glm::vec3 Get3DScreenPositionFromCamera(glm::vec4 screenCoords);
 };

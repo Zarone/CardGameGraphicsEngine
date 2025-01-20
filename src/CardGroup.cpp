@@ -39,19 +39,19 @@ fullBackingPlane(SimplePlane(myShaders::basicVertex, myShaders::basicFragment, g
   this->groupVao = VertexArray();
   this->groupVao.Bind();
 
-  this->staticBuffer = VertexBuffer(CardRenderingData::cardPositions, 5*4*sizeof(float));
+  this->staticBuffer = VertexBuffer(CardRenderingData::cardPositions, 4*sizeof(CardVertex));
   this->staticBufferLayout = MemoryLayout();
   this->staticBufferLayout.AddMemoryElement(GL_FLOAT, 3); // position
   this->staticBufferLayout.AddMemoryElement(GL_FLOAT, 2); // texture uv coordinates
   this->groupVao.AddBuffer(this->staticBuffer, this->staticBufferLayout);
 
-  this->transformBuffer = VertexBuffer(NULL, estimatedMax*4*sizeof(float), true);
+  this->transformBuffer = VertexBuffer(NULL, estimatedMax*sizeof(CardTransformVertex), true);
   this->transformBufferLayout = MemoryLayout();
   this->transformBufferLayout.AddMemoryElement(GL_FLOAT, 3, true); // position relative group
   this->transformBufferLayout.AddMemoryElement(GL_FLOAT, 1, true); // rotation
   this->transformEndAttribID = this->groupVao.AddBuffer(this->transformBuffer, this->transformBufferLayout);
 
-  this->textureIDBuffer = VertexBuffer(NULL, estimatedMax*1*sizeof(GLint), true);
+  this->textureIDBuffer = VertexBuffer(NULL, estimatedMax*sizeof(TextureVertex), true);
   this->textureIDBufferLayout = MemoryLayout();
   this->textureIDBufferLayout.AddMemoryElement(GL_INT, 1, true); // texture slot
   this->textureEndAttribID = this->groupVao.AddBuffer(this->textureIDBuffer, this->textureIDBufferLayout);
@@ -279,13 +279,9 @@ void CardGroup::UpdateHandPosition(
 
 void CardGroup::BindAndDrawAllFrontFaces(
   int maxBindableTextures,
-  int transformVertexSize,
   int size
 ) {
-  // just the texture slot id
-  int vertexSize = 1;
-
-  int buffer[vertexSize*size];
+  int buffer[sizeof(TextureVertex)/sizeof(unsigned int)*size];
 
   int i = 0;
   while (i < size) {
@@ -301,9 +297,9 @@ void CardGroup::BindAndDrawAllFrontFaces(
 
     // write data from buffer to gpu
     this->textureIDBuffer.OverwriteData(
-      buffer+i*vertexSize, 
-      i*sizeof(GLint)*vertexSize, 
-      batchSize*sizeof(GLint)*vertexSize
+      buffer+i*(sizeof(TextureVertex)/sizeof(unsigned int)), 
+      i*sizeof(TextureVertex), 
+      batchSize*sizeof(TextureVertex)
     );
 
     // this changes the offset within the
@@ -313,24 +309,24 @@ void CardGroup::BindAndDrawAllFrontFaces(
       this->textureEndAttribID, 
       1, 
       GL_UNSIGNED_INT, 
-      sizeof(GLuint)*vertexSize, 
-      (const void*)(i*sizeof(GLuint))
+      sizeof(TextureVertex), 
+      (const void*)(i*sizeof(TextureVertex))
     );
 
     this->transformBuffer.OverwriteAttrib(
       this->transformEndAttribID-1,
       3,
       GL_FLOAT,
-      sizeof(GLfloat)*transformVertexSize, 
-      (const void*)(i*sizeof(GLfloat)*transformVertexSize)
+      sizeof(CardTransformVertex), 
+      (const void*)(i*sizeof(CardTransformVertex))
     );
 
     this->transformBuffer.OverwriteAttrib(
       this->transformEndAttribID,
       1,
       GL_FLOAT,
-      sizeof(GLfloat)*transformVertexSize, 
-      (const void*)(i*sizeof(GLfloat)*transformVertexSize+3*sizeof(GLfloat))
+      sizeof(CardTransformVertex), 
+      (const void*)(i*sizeof(CardTransformVertex)+offsetof(CardTransformVertex, rotationZ))
     );
 
     this->DrawElements(batchSize);
@@ -430,7 +426,7 @@ void CardGroup::Render(
   }
 
   // 3 for positions plus 1 for rotation
-  const int transformVertexSize = 3+1;
+  const int transformVertexSize = sizeof(CardTransformVertex)/sizeof(float);
 
   // if we need to update the
   // displayed position
@@ -451,7 +447,7 @@ void CardGroup::Render(
     }
 
 
-    this->transformBuffer.OverwriteData(buffer, 0, size*transformVertexSize*sizeof(GLfloat));
+    this->transformBuffer.OverwriteData(buffer, 0, size*sizeof(CardTransformVertex));
   }
 
   this->groupVao.Bind();
@@ -499,7 +495,7 @@ void CardGroup::Render(
         this->transformEndAttribID-1,
         3,
         GL_FLOAT,
-        sizeof(GLfloat)*transformVertexSize, 
+        sizeof(CardTransformVertex), 
         0
       );
 
@@ -507,15 +503,14 @@ void CardGroup::Render(
         this->transformEndAttribID,
         1,
         GL_FLOAT,
-        sizeof(GLfloat)*transformVertexSize, 
-        (const void*) (3*sizeof(GLfloat))
+        sizeof(CardTransformVertex), 
+        (const void*) (offsetof(CardTransformVertex, rotationZ))
       );
 
       this->DrawElements(size);
     } else {
       this->BindAndDrawAllFrontFaces(
         maxBindableTextures,
-        transformVertexSize,
         size
       );
     }
@@ -572,6 +567,10 @@ bool CardGroup::CheckCollision(
   // enforced by the fact that the transform in the
   // constructor only accepts x rotation
   
+  // In addition, we make the assumption that cards
+  // themselves are trapezoids with constant topHeight
+  // and bottomHeight, as a result of the fact that rotationZ
+  // is 0 when you hover over the card
 
   glm::vec4 bottomRight = glm::vec4(
     width, 

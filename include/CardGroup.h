@@ -21,7 +21,26 @@ typedef struct RenderData {
 typedef struct CardItem {
   Card card;
   CardRenderingData renderData;
-} CardItem ;
+} CardItem;
+
+typedef struct CardTransformVertex {
+  float x;
+  float y;
+  float z;
+  float rotationZ;
+} CardTransformVertex;
+
+typedef struct CardVertex {
+  float x;
+  float y;
+  float z;
+  float u;
+  float v;
+} CardVertex;
+
+typedef struct TextureVertex {
+  unsigned int index;
+} TextureVertex;
 
 class CardGroup
 {
@@ -86,7 +105,6 @@ private:
 
   void BindAndDrawAllFrontFaces(
     int maxBindableTextures,
-    int transformVertexSize,
     int size
   );
 

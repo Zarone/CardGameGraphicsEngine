@@ -34,13 +34,13 @@ void SimpleRenderObject::LoadIntoGPU() {
   this->iBuffer = IndexBuffer(indexData, triangleCount);
 }
 
-void SimpleRenderObject::Render(glm::mat4& transform, Renderer& renderer) {
+void SimpleRenderObject::Render(glm::mat4& transform, Renderer* renderer) {
   this->vArray.Bind();
   //this->vBuffer.Bind();
   this->iBuffer.Bind();
   this->shader.Bind();
-  this->shader.SetUniform4fv("projMatrix", false, glm::value_ptr(renderer.projMatrix));
-  this->shader.SetUniform4fv("cameraMatrix", false, glm::value_ptr(renderer.cameraMatrix));
+  this->shader.SetUniform4fv("projMatrix", false, glm::value_ptr(renderer->projMatrix));
+  this->shader.SetUniform4fv("cameraMatrix", false, glm::value_ptr(renderer->cameraMatrix));
   this->shader.SetUniform4fv("modelMatrix", false, glm::value_ptr(transform));
   this->shader.SetUniform4f("color", this->color);
   GLCall(glDrawElements(GL_TRIANGLES, triangleCount*3, GL_UNSIGNED_INT, 0));

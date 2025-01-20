@@ -26,5 +26,5 @@ public:
   virtual int GetVertexCount() = 0;
   virtual void FillData(float* vertexData, unsigned int* indexData) = 0;
   void LoadIntoGPU();
-  void Render(glm::mat4& transform, Renderer& renderer);
+  void Render(glm::mat4& transform, Renderer* renderer);
 };

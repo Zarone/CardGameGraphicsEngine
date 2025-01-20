@@ -31,13 +31,12 @@ void PrintVector(std::ostream& os, std::vector<T> const &map)
   }
 }
 
-template<typename K, typename V>
-void PrintMapToStream(std::ostream& os, std::unordered_map<K, V> const& map) {
-  os << "printing map: ({key}, {val})" << std::endl;
-  for (const auto& pair : map) {
-    os << "(" << pair.first << ", ";
-    PrintValue(os, pair.second);
-    os << ")" << std::endl;
+template<typename T>
+void PrintArray(std::ostream& os, T* array, int size)
+{
+  os << "printing vector: ({addr}, {val})" << std::endl;
+  for (int i = 0; i < size; ++i) {
+    os << "(" << &(array[i]) << ", " << array[i] << ")" << std::endl;
   }
 }
 
@@ -54,5 +53,15 @@ void PrintValue(std::ostream& os, std::__list_iterator<K, V> const& it) {
     os << &*it;
   } else {
     os << "Invalid Iterator";
+  }
+}
+
+template<typename K, typename V>
+void PrintMapToStream(std::ostream& os, std::unordered_map<K, V> const& map) {
+  os << "printing map: ({key}, {val})" << std::endl;
+  for (const auto& pair : map) {
+    os << "(" << pair.first << ", ";
+    PrintValue(os, pair.second);
+    os << ")" << std::endl;
   }
 }

@@ -38,14 +38,14 @@ void TextureMap::SetupCard(unsigned int id) {
   }
 }
 
-void TextureMap::RequestBind(unsigned int maxBindableTextures, const std::string& path) {
+int TextureMap::RequestBind(unsigned int maxBindableTextures, const std::string& path) {
   auto texture = this->map.find(path);
   if (texture != this->map.end()) {
     // if it's already bound, do nothing
     if (texture->second.GetIsBound()) {
       // update lru list by moving this element to front
       this->lru.Access(&(texture->second));
-      return;
+      return texture->second.GetBoundSlot();
     }
 
     // the default is just the currentlyBound because
@@ -64,26 +64,17 @@ void TextureMap::RequestBind(unsigned int maxBindableTextures, const std::string
     this->lru.Push(&(texture->second));
     texture->second.Bind(nextSlot);
     this->currentlyBound++;
+    return nextSlot;
   } else {
     std::cout << "Could not find texture of path " << path << std::endl;
     exit(EXIT_FAILURE);
   }
 }
 
-void TextureMap::RequestBind(unsigned int maxBindableTextures, unsigned int id) {
+int TextureMap::RequestBind(unsigned int maxBindableTextures, unsigned int id) {
   auto path = this->IDToPath.find(id);
   if (path != this->IDToPath.end()) {
-    TextureMap::RequestBind(maxBindableTextures, path->second);
-  } else {
-    std::cout << "Could not find card of id " << id << std::endl;
-    exit(EXIT_FAILURE);
-  }
-}
-
-int TextureMap::GetSlotOf(unsigned int id) {
-  auto path = this->IDToPath.find(id);
-  if (path != this->IDToPath.end()) {
-    return this->map.at(path->second).GetBoundSlot();
+    return TextureMap::RequestBind(maxBindableTextures, path->second);
   } else {
     std::cout << "Could not find card of id " << id << std::endl;
     exit(EXIT_FAILURE);
@@ -93,6 +84,8 @@ int TextureMap::GetSlotOf(unsigned int id) {
 std::ostream& operator<<(std::ostream& os, const TextureMap& t) {
   os << "Map: ";
   PrintMapToStream(os, t.map);
+  os << "IDToPath: ";
+  PrintMapToStream(os, t.IDToPath);
   return os;
 }
 

@@ -12,6 +12,7 @@ private:
   int bitsPerPixel;
   bool isBound;
   unsigned int boundTo;
+  bool hasSetup;
 public:
   Texture(const std::string& path);
   ~Texture();

@@ -108,13 +108,18 @@ public:
     TextureMap* textureMap, 
     glm::vec3 position, 
     float rotationX, 
-    float rotationZ, 
     float width, 
     bool zFlipped
   );
 
+  void GroupPositionToScreen(
+    Renderer* renderer, 
+    glm::vec4& src, 
+    glm::vec2& dest
+  ) const;
+
   bool GetInsideHandBoundary(
-    Renderer& renderer,
+    Renderer* renderer,
     const RenderData& renderData,
     double horizontalOffset,
     double verticalOffset,
@@ -123,7 +128,7 @@ public:
     double& projectedLeftBoundary
   );
 
-  void Render(Renderer& renderer, const RenderData& renderData);
+  void Render(Renderer* renderer, const RenderData& renderData);
 
   void AddCard(unsigned int id);
 
@@ -141,8 +146,16 @@ public:
   * @brief Checks for collision between this card group
   * and the cursor
   *
-  * @return the z coordinate of the collission
-  *
   */
-  double CheckCollision(Renderer& renderer, double x, double y) const;
+  bool CheckCollision(
+    Renderer* renderer, 
+    double x, 
+    double y, 
+    double* collisionZ,
+    int* collisionCardIndex
+  ) const;
+
+  void ProcessCardClick(
+    int cardIndex
+  );
 };

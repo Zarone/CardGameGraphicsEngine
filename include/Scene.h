@@ -13,5 +13,6 @@ public:
   Scene(Renderer* renderer);
   void AddObject(CardGroup* object);
   void OnClick(GLFWwindow* window, int button, int action, int mods);
+  bool CheckCollision(double x, double y, double* collisionZ);
   void SetupMouseClickCallback(WindowManager* window);
 };

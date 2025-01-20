@@ -12,7 +12,6 @@ CardGroup::CardGroup(
   TextureMap* textureMap, 
   glm::vec3 position, 
   float rotationX, 
-  float rotationZ, 
   float width, 
   bool zFlipped
 ) 
@@ -35,7 +34,6 @@ fullBackingPlane(SimplePlane(myShaders::basicVertex, myShaders::basicFragment, g
   this->transform = glm::translate(this->transform, position);
   this->transform = glm::translate(this->transform, glm::vec3(-width/2.0f, 0.0f, 0.0f));
   this->transform = glm::rotate(this->transform, glm::radians(rotationX), glm::vec3(1.0f, 0.0f, 0.0f));
-  this->transform = glm::rotate(this->transform, glm::radians(rotationZ), glm::vec3(0.0f, 0.0f, 1.0f));
   this->transform = glm::scale(this->transform, glm::vec3(1.0f, 1.0f, zFlipped ? -1.0f : 1.0f));
 
   this->groupVao = VertexArray();
@@ -87,8 +85,19 @@ void CardGroup::DrawElements(int size) {
   ));
 }
 
+void CardGroup::GroupPositionToScreen(
+  Renderer* renderer, 
+  glm::vec4& src, 
+  glm::vec2& dest
+) const {
+  glm::mat4& projMatrix = renderer->projMatrix;
+  glm::mat4& camMatrix = renderer->cameraMatrix;
+  glm::vec4 screenSpace = projMatrix * camMatrix * this->transform * src;
+  dest = renderer->GetScreenPositionFromCamera(screenSpace);
+}
+
 bool CardGroup::GetInsideHandBoundary(
-  Renderer& renderer,
+  Renderer* renderer,
   const RenderData& renderData,
   double horizontalOffset,
   double verticalOffset,
@@ -96,12 +105,12 @@ bool CardGroup::GetInsideHandBoundary(
   double& xScale,
   double& projectedLeftBoundary
 ) {
-  glm::mat4& projMatrix = renderer.projMatrix;
-  glm::mat4& camMatrix = renderer.cameraMatrix;
+  glm::mat4& projMatrix = renderer->projMatrix;
+  glm::mat4& camMatrix = renderer->cameraMatrix;
 
   // if the cursor moved
   if (
-    renderer.InsideWindowBounds(renderData.cursorX, renderData.cursorY) &&
+    renderer->InsideWindowBounds(renderData.cursorX, renderData.cursorY) &&
     (
       (int)renderData.cursorY != lastCursorY || 
       (int)renderData.cursorX != lastCursorX
@@ -114,8 +123,8 @@ bool CardGroup::GetInsideHandBoundary(
       0.0f, 
       1.0f
     );
-    glm::vec4 topLeftScreenSpace = projMatrix * camMatrix * this->transform * topLeft;
-    glm::vec2 projectedTopLeft = renderer.GetScreenPositionFromCamera(topLeftScreenSpace);
+    glm::vec2 projectedTopLeft;
+    this->GroupPositionToScreen(renderer, topLeft, projectedTopLeft);
     
     // project bottom bound to screen
     glm::vec4 bottomRight = glm::vec4(
@@ -124,8 +133,8 @@ bool CardGroup::GetInsideHandBoundary(
       0.0f, 
       1.0f
     );
-    glm::vec4 bottomRightScreenSpace = projMatrix * camMatrix * this->transform * bottomRight;
-    glm::vec2 projectedBottomRight = renderer.GetScreenPositionFromCamera(bottomRightScreenSpace);
+    glm::vec2 projectedBottomRight;
+    this->GroupPositionToScreen(renderer, bottomRight, projectedBottomRight);
     
     xScale = (projectedBottomRight.x - projectedTopLeft.x)/(this->width+2*(-horizontalOffset));
     projectedLeftBoundary = projectedTopLeft.x+(-horizontalOffset)*xScale;
@@ -260,7 +269,7 @@ void CardGroup::UpdateHandPosition(
         glm::vec3(
           (float)cardIndex*xGap+0.5f+margin,
           0.0f,
-          (float)cardIndex*zGap
+          (float)cardIndex*zGap+0.01f
         ),
         (float)(cardIndex-(float)(size-1)/2.0f)/size*rotationPerCard
       );
@@ -286,10 +295,8 @@ void CardGroup::BindAndDrawAllFrontFaces(
     for (int j = i; j < i+batchSize; ++j) {
       unsigned int cardID = this->cards[j].card.GetID();
 
-      this->textureMap->RequestBind(maxBindableTextures, cardID);
-      
       // update texture buffer using newly bound addresses
-      buffer[j] = this->textureMap->GetSlotOf(cardID);
+      buffer[j] = this->textureMap->RequestBind(maxBindableTextures, cardID);
     }
 
     // write data from buffer to gpu
@@ -334,7 +341,7 @@ void CardGroup::BindAndDrawAllFrontFaces(
 
 
 void CardGroup::Render(
-  Renderer& renderer,
+  Renderer* renderer,
   const RenderData& renderData
 ) {
   bool insideHandBoundary = false;
@@ -451,14 +458,17 @@ void CardGroup::Render(
   this->indexBuffer.Bind();
   this->transformBuffer.Bind();
   this->cardShader.Bind();
-  glm::mat4& projMatrix = renderer.projMatrix;
-  glm::mat4& camMatrix = renderer.cameraMatrix;
+  glm::mat4& projMatrix = renderer->projMatrix;
+  glm::mat4& camMatrix = renderer->cameraMatrix;
   cardShader.SetUniform4fv("projMatrix", false, glm::value_ptr(projMatrix));
   cardShader.SetUniform4fv("cameraMatrix", false, glm::value_ptr(camMatrix));
   cardShader.SetUniform4fv("modelMatrix", false, glm::value_ptr(this->transform));
 
+  this->PrepareTextures();
+
+
   // Pass texture units as an array to the shader.
-  int maxBindableTextures = renderer.maxBindableTextures;
+  int maxBindableTextures = renderer->maxBindableTextures;
   std::vector<int> textureUnits(maxBindableTextures);
   int mapSize = this->textureMap->Size();
   for (int i = 0; i < maxBindableTextures; ++i) {
@@ -472,23 +482,51 @@ void CardGroup::Render(
 
   // bind textures and shift buffer for
   // rendering
-  if (this->zFlipped) {
-    this->textureMap->RequestBind(maxBindableTextures, "back");
-    this->DrawElements(size);
-  } else {
-    this->BindAndDrawAllFrontFaces(
-      maxBindableTextures,
-      transformVertexSize,
-      size
-    );
+  if (size != 0) {
+    if (this->zFlipped) {
+      int boundTo = this->textureMap->RequestBind(maxBindableTextures, "back");
+      int boundToArray[size];
+      for (int i = 0; i < size; ++i) {
+        boundToArray[i] = boundTo;
+      }
+      this->textureIDBuffer.OverwriteData(
+        boundToArray, 
+        0, 
+        sizeof(GLint)*size
+      );
+
+      this->transformBuffer.OverwriteAttrib(
+        this->transformEndAttribID-1,
+        3,
+        GL_FLOAT,
+        sizeof(GLfloat)*transformVertexSize, 
+        0
+      );
+
+      this->transformBuffer.OverwriteAttrib(
+        this->transformEndAttribID,
+        1,
+        GL_FLOAT,
+        sizeof(GLfloat)*transformVertexSize, 
+        (const void*) (3*sizeof(GLfloat))
+      );
+
+      this->DrawElements(size);
+    } else {
+      this->BindAndDrawAllFrontFaces(
+        maxBindableTextures,
+        transformVertexSize,
+        size
+      );
+    }
   }
 
   if (this->dirtyPosition) {
-    this->strictBackingPlaneTransform = glm::translate(this->transform, glm::vec3(width/2.0f, 0, 0));
-    this->extendedBackingPlaneTransform = glm::translate(this->transform, glm::vec3(width/2.0f, 0, 0));
-    this->fullBackingPlaneTransform = glm::translate(this->transform, glm::vec3(width/2.0f, 0, 0));
+    this->strictBackingPlaneTransform = glm::translate(this->transform, glm::vec3(width/2.0f, 0, -0.01f));
+    this->extendedBackingPlaneTransform = glm::translate(this->transform, glm::vec3(width/2.0f, 0, -0.02f));
+    this->fullBackingPlaneTransform = glm::translate(this->transform, glm::vec3(width/2.0f, 0, -0.03f));
     this->strictBackingPlaneTransform = glm::scale(this->strictBackingPlaneTransform, glm::vec3(width-2*margin, CardRenderingData::cardHeightRatio, 1.0f));
-    this->extendedBackingPlaneTransform = glm::scale(this->extendedBackingPlaneTransform, glm::vec3(width-2*margin+2*horizontalMargin, CardRenderingData::cardHeightRatio, 1.0f));
+    this->extendedBackingPlaneTransform = glm::scale(this->extendedBackingPlaneTransform, glm::vec3(width-2*margin+2*horizontalMargin, CardRenderingData::cardHeightRatio+2*verticalMargin, 1.0f));
     this->fullBackingPlaneTransform = glm::scale(this->fullBackingPlaneTransform, glm::vec3(width, CardRenderingData::cardHeightRatio, 1.0f));
   }
   this->strictBackingPlane.Render(this->strictBackingPlaneTransform, renderer);
@@ -520,6 +558,87 @@ void CardGroup::UpdateTick(double deltaTime) {
   this->dirtyDisplay = true;
 }
 
-double CardGroup::CheckCollision(Renderer& renderer, double x, double y) const {
+bool CardGroup::CheckCollision(
+  Renderer* renderer, 
+  double x, 
+  double y, 
+  double* collisionZ, 
+  int* collisionCardIndex
+) const {
 
+  // This function makes the assumption that
+  // all cardgroups are projected onto the screen
+  // as isosceles trapezoids, which is actually
+  // enforced by the fact that the transform in the
+  // constructor only accepts x rotation
+  
+
+  glm::vec4 bottomRight = glm::vec4(
+    width, 
+    -0.5f*CardRenderingData::cardHeightRatio, 
+    0.0f, 
+    1.0f
+  );
+  glm::vec2 projectedBottomRight;
+  this->GroupPositionToScreen(renderer, bottomRight, projectedBottomRight);
+
+  glm::vec4 topRight = glm::vec4(
+    width, 
+    0.5f*CardRenderingData::cardHeightRatio, 
+    0.0f, 
+    1.0f
+  );
+  glm::vec2 projectedTopRight;
+  this->GroupPositionToScreen(renderer, topRight, projectedTopRight);
+
+  std::cout << "x: " << (x) << std::endl;
+  std::cout << "y: " << (y) << std::endl;
+  std::cout << "projectBottomRight: " << (projectedBottomRight.x) << ", " << projectedBottomRight.y << std::endl;
+  std::cout << "projectTopRight: " << (projectedTopRight.x) << ", " << projectedTopRight.y << std::endl;
+  std::cout << "is y inside: " << ((y < projectedBottomRight.y) && (y > projectedTopRight.y)) << std::endl;
+
+  // if y inside inside the box, then you can short circuit
+  // because the cursor definitely isn't in the group
+  if (y > projectedBottomRight.y || y < projectedTopRight.y) return false;
+
+  glm::vec4 bottomLeft = glm::vec4(
+    0, 
+    -0.5f*CardRenderingData::cardHeightRatio, 
+    0.0f, 
+    1.0f
+  );
+  glm::vec2 projectedBottomLeft;
+  this->GroupPositionToScreen(renderer, bottomLeft, projectedBottomLeft);
+
+  glm::vec4 topLeft = glm::vec4(
+    0, 
+    0.5f*CardRenderingData::cardHeightRatio, 
+    0.0f, 
+    1.0f
+  );
+  glm::vec2 projectedTopLeft;
+  this->GroupPositionToScreen(renderer, topLeft, projectedTopLeft);
+
+  std::cout << "projectBottomLeft: " << (projectedBottomLeft.x) << ", " << projectedBottomLeft.y << std::endl;
+  std::cout << "projectTopLeft: " << (projectedTopLeft.x) << ", " << projectedTopLeft.y << std::endl;
+
+  double t = (y-projectedTopLeft.y)/(projectedBottomLeft.y-projectedTopLeft.y);
+
+  // linear interpolate to find boundaries
+  double leftBoundary = t*projectedBottomLeft.x + (1-t)*(projectedTopLeft.x);
+  double rightBoundary = t*projectedBottomRight.x + (1-t)*(projectedTopRight.x);
+
+  std::cout << "left boundary: " << leftBoundary << std::endl;
+  std::cout << "right boundary: " << rightBoundary << std::endl;
+
+  bool inBounds = (x >= leftBoundary && x <= rightBoundary);
+  std::cout << "in bounds " << inBounds << std::endl;
+
+  *collisionZ = 1.0f;
+  *collisionCardIndex = 1;
+  return true;
+}
+
+void CardGroup::ProcessCardClick(int cardIndex) {
+  std::cout << "Processed card click at index " << cardIndex << std::endl;
 }

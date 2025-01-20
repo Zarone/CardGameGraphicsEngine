@@ -33,6 +33,8 @@ add_executable(${PROJECT_NAME}
     src/MemoryLayout.cpp
     src/Renderer.cpp
     src/Shader.cpp
+    src/SimplePlane.cpp
+    src/SimpleRenderObject.cpp
     src/Texture.cpp
     src/TextureLRU.cpp
     src/TextureMap.cpp

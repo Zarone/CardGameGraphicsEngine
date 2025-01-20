@@ -38,9 +38,9 @@ int main(void)
   TextureMap textureMap = TextureMap();
   CardGroup hand(
     &textureMap,
-    glm::vec3(0.0f, -2.0f, 4.0f),
-    //glm::vec3(0.0f, -0.5f, 7.0f),
-    0.0f, // rotateX
+    //glm::vec3(0.0f, -2.0f, 4.0f),
+    glm::vec3(0.0f, -0.5f, 6.0f),
+    -20.0f, // rotateX
     0.0f, // rotateZ
     4.0f, // width
     false // z flipped

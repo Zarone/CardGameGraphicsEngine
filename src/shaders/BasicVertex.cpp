@@ -8,11 +8,17 @@ out vec4 vertColor;
 
 uniform mat4 projMatrix;
 uniform mat4 cameraMatrix;
-uniform mat4 rotationMatrix;
+uniform mat4 modelMatrix;
+uniform vec4 color;
+
+float mod(float a, float b)
+{
+  return a - (b * floor(a/b));
+}
 
 void main()
 {
-  gl_Position = projMatrix * cameraMatrix * rotationMatrix * position;
-  vertColor = vec4(position.x+0.5, 0, position.y+0.5, 1);
+  gl_Position = projMatrix * cameraMatrix * modelMatrix * position;
+  vertColor = color;
 }
 )";

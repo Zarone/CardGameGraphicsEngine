@@ -26,7 +26,10 @@ width(width),
 lastCursorX(0),
 lastCursorY(0),
 wasInsideBoundary(false),
-lastClosestIndex(-1)
+lastClosestIndex(-1),
+strictBackingPlane(SimplePlane(myShaders::basicVertex, myShaders::basicFragment, glm::vec4(0.5f, 0, 0.5f, 0.5f))),
+extendedBackingPlane(SimplePlane(myShaders::basicVertex, myShaders::basicFragment, glm::vec4(0.0f, 0.5f, 0.0f, 0.5f))),
+fullBackingPlane(SimplePlane(myShaders::basicVertex, myShaders::basicFragment, glm::vec4(0.5f, 0.5f, 0.5f, 0.5f)))
 {
   this->transform = glm::mat4(1.0f); // setup to identity
   this->transform = glm::translate(this->transform, position);
@@ -56,6 +59,10 @@ lastClosestIndex(-1)
   this->textureEndAttribID = this->groupVao.AddBuffer(this->textureIDBuffer, this->textureIDBufferLayout);
 
   this->indexBuffer = IndexBuffer(CardRenderingData::cardIndices, 2);
+
+  this->strictBackingPlane.LoadIntoGPU();
+  this->extendedBackingPlane.LoadIntoGPU();
+  this->fullBackingPlane.LoadIntoGPU();
 }
 
 void CardGroup::PrepareTextures() {
@@ -192,11 +199,8 @@ void CardGroup::UpdateHandPosition(
   // if we need to display the cards
   // dynamically based on cursor position
   if (renderData.isHand && insideHandBoundary) {
-    
-    std::cout << "this->lastClosestIndex: " << this->lastClosestIndex << std::endl;
 
     double centerX = this->lastClosestIndex*xGap+0.5f+margin;
-    std::cout << "centerX: " << centerX << std::endl;
 
     int leftSize = this->lastClosestIndex;
     int rightSize = size-this->lastClosestIndex-1;
@@ -204,6 +208,11 @@ void CardGroup::UpdateHandPosition(
     double rightWidth = this->width-centerX-0.5f-whitespace;
     double leftGap = leftSize == 1 ? 0 : (leftWidth-1.0f)/(leftSize-1.0f);
     double rightGap = rightSize == 1 ? 0 : (rightWidth-1.0f)/(rightSize-1.0f);
+
+    // ensures z is always positive,
+    // which matters for rendering over 
+    // backing
+    int zOffset = fmax(1, rightSize - leftSize + 1); 
 
     // setup buffer info that depends
     // on left/right divide
@@ -216,7 +225,7 @@ void CardGroup::UpdateHandPosition(
           //(float)cardIndex*leftGap+0.5f,
           (float)(centerX - fmax(0.5f + whitespace + 0.5f, xGap) - (this->lastClosestIndex-cardIndex-1)*leftGap),
           0.0f,
-          (float)cardIndex*zGap
+          (float)(cardIndex+zOffset)*zGap
         ),
         (float)(cardIndex-(float)this->lastClosestIndex)/size*rotationPerCard
       );
@@ -224,7 +233,7 @@ void CardGroup::UpdateHandPosition(
 
     CardRenderingData& closestCard = cards[this->lastClosestIndex].renderData;
     closestCard.SetActualTransform(
-      glm::vec3(centerX, 0.0f, this->lastClosestIndex*zGap),
+      glm::vec3(centerX, 0.0f, (this->lastClosestIndex+zOffset)*zGap),
       0.0f
     );
 
@@ -236,7 +245,7 @@ void CardGroup::UpdateHandPosition(
         glm::vec3(
           (float)(centerX + fmax(0.5f + whitespace + 0.5f, xGap) + (cardIndex-this->lastClosestIndex-1)*rightGap),
           0.0f,
-          (float)(this->lastClosestIndex - (cardIndex-this->lastClosestIndex)) *zGap
+          (float)(this->lastClosestIndex - (cardIndex-this->lastClosestIndex) + zOffset) *zGap
         ),
         (float)(cardIndex-(float)(this->lastClosestIndex))/size*rotationPerCard
       );
@@ -346,10 +355,6 @@ void CardGroup::Render(
   // this makes sure the default card packing allows
   // room for whitespace
   double margin = 0.0f;
-  //double margin = renderData.isHand ? whitespace + 1.0f : 0.0f;
-  //double margin = renderData.isHand ? (
-    //size <= 3 ? 1.0f+whitespace : (size + size*whitespace - whitespace - width)/(size-3)
-  //): 0.0f;
 
   if (size == 1) {
     margin = (this->width-1.0f)/2.0f;
@@ -477,6 +482,18 @@ void CardGroup::Render(
       size
     );
   }
+
+  if (this->dirtyPosition) {
+    this->strictBackingPlaneTransform = glm::translate(this->transform, glm::vec3(width/2.0f, 0, 0));
+    this->extendedBackingPlaneTransform = glm::translate(this->transform, glm::vec3(width/2.0f, 0, 0));
+    this->fullBackingPlaneTransform = glm::translate(this->transform, glm::vec3(width/2.0f, 0, 0));
+    this->strictBackingPlaneTransform = glm::scale(this->strictBackingPlaneTransform, glm::vec3(width-2*margin, CardRenderingData::cardHeightRatio, 1.0f));
+    this->extendedBackingPlaneTransform = glm::scale(this->extendedBackingPlaneTransform, glm::vec3(width-2*margin+2*horizontalMargin, CardRenderingData::cardHeightRatio, 1.0f));
+    this->fullBackingPlaneTransform = glm::scale(this->fullBackingPlaneTransform, glm::vec3(width, CardRenderingData::cardHeightRatio, 1.0f));
+  }
+  this->strictBackingPlane.Render(this->strictBackingPlaneTransform, renderer);
+  this->extendedBackingPlane.Render(this->extendedBackingPlaneTransform, renderer);
+  this->fullBackingPlane.Render(this->fullBackingPlaneTransform, renderer);
 
   this->dirtyPosition = false;
   this->dirtyDisplay = false;

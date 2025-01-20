@@ -67,6 +67,11 @@ void Shader::SetUniform1i(const std::string& name, GLuint val) {
   GLCall(glUniform1i(thisID, val));
 }
 
+void Shader::SetUniform4f(const std::string& name, glm::vec4& vec) {
+  GLint thisID = this->GetUniformLocation(name);
+  GLCall(glUniform4f(thisID, vec.x, vec.y, vec.z, vec.w));
+}
+
 Shader::~Shader() {
   GLCall(glDeleteProgram(this->programID));
 }

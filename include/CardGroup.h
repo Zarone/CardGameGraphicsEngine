@@ -10,6 +10,7 @@
 #include "IndexBuffer.h"
 #include "Shader.h"
 #include "TextureMap.h"
+#include "SimplePlane.h"
 
 typedef struct RenderData {
   bool isHand;
@@ -63,25 +64,6 @@ private:
   int lastClosestIndex;
 
   void DrawElements(int size);
-public:
-  CardGroup(
-    TextureMap* textureMap, 
-    glm::vec3 position, 
-    float rotationX, 
-    float rotationZ, 
-    float width, 
-    bool zFlipped
-  );
-
-  bool GetInsideHandBoundary(
-    Renderer& renderer,
-    const RenderData& renderData,
-    double horizontalOffset,
-    double verticalOffset,
-    bool& mouseMovedInBoundary,
-    double& xScale,
-    double& projectedLeftBoundary
-  );
 
   int GetClosestCardIndex(
     double projectedLeftBoundary,
@@ -108,7 +90,41 @@ public:
     int size
   );
 
+  // just where the cards are
+  SimplePlane strictBackingPlane;
+  glm::mat4 strictBackingPlaneTransform;
+
+  // doesn't subtract margin
+  SimplePlane extendedBackingPlane;
+  glm::mat4 extendedBackingPlaneTransform;
+
+  // doesn't subtract spacing margin, includes
+  // horizontal/vectical margin
+  SimplePlane fullBackingPlane;
+  glm::mat4 fullBackingPlaneTransform;
+
+public:
+  CardGroup(
+    TextureMap* textureMap, 
+    glm::vec3 position, 
+    float rotationX, 
+    float rotationZ, 
+    float width, 
+    bool zFlipped
+  );
+
+  bool GetInsideHandBoundary(
+    Renderer& renderer,
+    const RenderData& renderData,
+    double horizontalOffset,
+    double verticalOffset,
+    bool& mouseMovedInBoundary,
+    double& xScale,
+    double& projectedLeftBoundary
+  );
+
   void Render(Renderer& renderer, const RenderData& renderData);
+
   void AddCard(unsigned int id);
 
   /*

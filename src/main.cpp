@@ -11,56 +11,31 @@
 #include "../include/CardGroup.h"
 #include "../include/TextureMap.h"
 #include "../include/Scene.h"
+#include "../include/GameScene.h"
 
 int main(void)
 {
-  WindowManager myWindow = WindowManager();
+  WindowManager myWindow;
 
   myWindow.SetupOpenGL();
 
-  GLint maxBindableTextures;
-  glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxBindableTextures);
-  Renderer myRenderer(&myWindow, maxBindableTextures);
-
-  myRenderer.Setup3DTransforms(
-    glm::vec3(0.0f, 0.0f, 10.f),
-    glm::vec3(0.0f, 0.0f, -1.0f)
+  GameScene scene(
+    &myWindow
   );
 
-  Scene scene(&myRenderer);
+  //scene.AddObject(&hand);
+  //scene.AddObject(&oppHand);
+  //oppHand.AddCard(0);
+  //oppHand.AddCard(2);
+  //oppHand.AddCard(3);
 
-  TextureMap textureMap = TextureMap();
-  CardGroup hand(
-    &textureMap,
-    glm::vec3(0.0f, -2.0f, 4.0f),
-    //glm::vec3(0.0f, -0.5f, 6.0f),
-    -20.0f, // rotateX
-    4.0f, // width
-    false // z flipped
-  );
-
-  CardGroup oppHand(
-    &textureMap,
-    glm::vec3(0.0f, 2.0f, 1.0f),
-    40.0f, // rotateX
-    4.0f, // width
-    true  // z flipped
-  );
-
-  scene.AddObject(&hand);
-  scene.AddObject(&oppHand);
-
-  oppHand.AddCard(0);
-  oppHand.AddCard(2);
-  oppHand.AddCard(3);
-
-  hand.AddCard(0);
-  hand.AddCard(1);
-  hand.AddCard(2);
-  hand.AddCard(3);
-  hand.AddCard(0);
-  hand.AddCard(1);
-  hand.AddCard(2);
+  //hand.AddCard(0);
+  //hand.AddCard(1);
+  //hand.AddCard(2);
+  //hand.AddCard(3);
+  //hand.AddCard(0);
+  //hand.AddCard(1);
+  //hand.AddCard(2);
   //hand.AddCard(3);
   //hand.AddCard(0);
   //hand.AddCard(1);
@@ -71,7 +46,6 @@ int main(void)
   glm::mat4 identity = glm::mat4(1.0f);
 
   RenderData handRenderingData = {
-    .isHand = true,
   };
 
   auto currentTime = std::chrono::high_resolution_clock::now();
@@ -95,11 +69,13 @@ int main(void)
     /* Render here */
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    hand.Render(&myRenderer, handRenderingData);
-    hand.UpdateTick(deltaTime);
+    //hand.Render(&myRenderer, handRenderingData);
+    //hand.UpdateTick(deltaTime);
 
-    oppHand.Render(&myRenderer, handRenderingData);
-    oppHand.UpdateTick(deltaTime);
+    //oppHand.Render(&myRenderer, handRenderingData);
+    //oppHand.UpdateTick(deltaTime);
+    scene.Render(handRenderingData);
+    scene.UpdateTick(deltaTime);
 
     /* Swap front and back buffers */
     myWindow.SwapBuffers();

@@ -15,6 +15,7 @@ WindowManager::WindowManager() {
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
+  std::cout << "initialized window" << std::endl;
   /* Create a windowed mode window and its OpenGL context */
   this->nx = 640;
   this->ny = 480;
@@ -79,6 +80,13 @@ GLFWwindow* WindowManager::GetRawPointer() {
   return this->window;
 }
 
+int WindowManager::GetMaxBindableTextures() {
+  int maxBindableTextures;
+  glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxBindableTextures);
+  return maxBindableTextures;
+}
+
 WindowManager::~WindowManager() {
+  std::cout << "un-initialized window" << std::endl;
   glfwTerminate();
 }

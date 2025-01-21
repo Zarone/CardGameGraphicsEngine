@@ -9,15 +9,15 @@
 const unsigned int CardGroup::estimatedMax = 60;
 
 CardGroup::CardGroup(
-  TextureMap* textureMap, 
   glm::vec3 position, 
   float rotationX, 
   float width, 
-  bool zFlipped
+  bool zFlipped,
+  bool isHand
 ) 
 : 
-textureMap(textureMap), 
-zFlipped(zFlipped), 
+zFlipped(zFlipped),
+isHand(isHand),
 dirtyDisplay(true), 
 dirtyPosition(true), 
 cardShader(myShaders::cardVertex, myShaders::cardFragment),
@@ -63,14 +63,14 @@ fullBackingPlane(SimplePlane(myShaders::basicVertex, myShaders::basicFragment, g
   this->fullBackingPlane.LoadIntoGPU();
 }
 
-void CardGroup::PrepareTextures() {
+void CardGroup::PrepareTextures(TextureMap* textureMap) {
   int size = this->cards.size();
 
   if (zFlipped) {
-    this->textureMap->SetupBack();
+    textureMap->SetupBack();
   } else {
     for (CardItem& cardItem : this->cards) {
-      this->textureMap->SetupCard(cardItem.card.GetID());
+      textureMap->SetupCard(cardItem.card.GetID());
     }
   }
 }
@@ -218,7 +218,7 @@ void CardGroup::UpdateHandPosition(
 
   // if we need to display the cards
   // dynamically based on cursor position
-  if (renderData.isHand && insideHandBoundary) {
+  if (this->isHand && insideHandBoundary) {
 
     double centerX = this->lastClosestIndex*xGap+0.5f+margin;
 
@@ -289,6 +289,7 @@ void CardGroup::UpdateHandPosition(
 }
 
 void CardGroup::BindAndDrawAllFrontFaces(
+  Renderer* renderer,
   int maxBindableTextures,
   int size
 ) {
@@ -303,7 +304,7 @@ void CardGroup::BindAndDrawAllFrontFaces(
       unsigned int cardID = this->cards[j].card.GetID();
 
       // update texture buffer using newly bound addresses
-      buffer[j] = this->textureMap->RequestBind(maxBindableTextures, cardID);
+      buffer[j] = renderer->textureMap.RequestBind(maxBindableTextures, cardID);
     }
 
     // write data from buffer to gpu
@@ -372,7 +373,7 @@ void CardGroup::Render(
 
   if (size == 1) {
     margin = (this->width-1.0f)/2.0f;
-  } else if (renderData.isHand) {
+  } else if (this->isHand) {
     if (size > 3) {
       // I got this equation by solving:
       //    xGap = (width-1-2*margin)/(size-1)
@@ -389,7 +390,7 @@ void CardGroup::Render(
   const float horizontalMargin = 0.15f;
 
   // if we need to know boundaries
-  if (renderData.isHand) {
+  if (this->isHand) {
 
     // check if cursor is near the card group
     insideHandBoundary = this->GetInsideHandBoundary(renderer, renderData, margin-horizontalMargin, -verticalMargin, mouseMovedInBoundary, xScale, projectedLeftBoundary);
@@ -471,13 +472,13 @@ void CardGroup::Render(
   cardShader.SetUniform4fv("cameraMatrix", false, glm::value_ptr(camMatrix));
   cardShader.SetUniform4fv("modelMatrix", false, glm::value_ptr(this->transform));
 
-  this->PrepareTextures();
+  this->PrepareTextures(&renderer->textureMap);
 
 
   // Pass texture units as an array to the shader.
   int maxBindableTextures = renderer->maxBindableTextures;
   std::vector<int> textureUnits(maxBindableTextures);
-  int mapSize = this->textureMap->Size();
+  int mapSize = renderer->textureMap.Size();
   for (int i = 0; i < maxBindableTextures; ++i) {
     if (i < mapSize) {
       textureUnits[i] = i;
@@ -491,7 +492,7 @@ void CardGroup::Render(
   // rendering
   if (size != 0) {
     if (this->zFlipped) {
-      int boundTo = this->textureMap->RequestBind(maxBindableTextures, "back");
+      int boundTo = renderer->textureMap.RequestBind(maxBindableTextures, "back");
       int boundToArray[size];
       for (int i = 0; i < size; ++i) {
         boundToArray[i] = boundTo;
@@ -521,6 +522,7 @@ void CardGroup::Render(
       this->DrawElements(size);
     } else {
       this->BindAndDrawAllFrontFaces(
+        renderer,
         maxBindableTextures,
         size
       );
@@ -542,7 +544,7 @@ void CardGroup::Render(
   this->dirtyPosition = false;
   this->dirtyDisplay = false;
 
-  if (renderData.isHand) {
+  if (this->isHand) {
     this->lastCursorX = (int)renderData.cursorX;
     this->lastCursorY = (int)renderData.cursorY;
     this->wasInsideBoundary = insideHandBoundary;
@@ -569,7 +571,7 @@ bool CardGroup::CheckCollision(
   double x, 
   double y, 
   double* collisionZ, 
-  int* collisionCardIndex
+  CollisionInfo* collisionInfo
 ) const {
   int size = this->cards.size();
   if (size == 0) return false;
@@ -650,7 +652,7 @@ bool CardGroup::CheckCollision(
        currentCardRightBound;
     if (x >= currentCardLeftBound && x <= rightBoundary) {
       *collisionZ = zAtCursor;
-      *collisionCardIndex = i;
+      collisionInfo->collisionIndex = i;
       return true;
     }
   }
@@ -658,6 +660,6 @@ bool CardGroup::CheckCollision(
   return false;
 }
 
-void CardGroup::ProcessCardClick(int cardIndex) {
-  std::cout << "Processed card click at index " << cardIndex << std::endl;
+void CardGroup::ProcessClick(CollisionInfo info) {
+  std::cout << "Processed card click at index " << info.collisionIndex << std::endl;
 }

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.31)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 project(GraphicsEngine LANGUAGES CXX)
 include(FetchContent)
 
@@ -28,6 +28,9 @@ add_executable(${PROJECT_NAME}
     src/CardGroup.cpp
     src/CardRenderingData.cpp
     src/ErrorHandling.cpp
+    src/GameObject.cpp
+    src/GameScene.cpp
+    src/GameState.cpp
     src/IndexBuffer.cpp
     src/main.cpp
     src/MemoryLayout.cpp

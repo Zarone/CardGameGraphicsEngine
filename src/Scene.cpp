@@ -1,14 +1,43 @@
 #include "../include/Scene.h"
 #include "../include/ErrorHandling.h"
 
-Scene::Scene(Renderer* renderer)
-:
-renderer(renderer) 
+Scene::Scene(
+  WindowManager* windowManager, 
+  const glm::vec3 cameraPosition,
+  const glm::vec3 cameraDirection
+):
+  renderer(windowManager, windowManager->GetMaxBindableTextures())
 {
+  renderer.Setup3DTransforms(cameraPosition, cameraDirection);
 }
 
-void Scene::AddObject(CardGroup* object) {
-  objects.push_back(object);
+bool Scene::CheckCollision(double x, double y, double* collisionZ) {
+  // since you can have multiple collisions
+  // you need to find the one closest to the
+  // camera (lowest z)
+
+  std::unique_ptr<SceneObject>* selectedObject = nullptr;
+  double minZ = MAXFLOAT;
+  CollisionInfo collisionInfo;
+  for (auto& object : this->objects) {
+    double z = MAXFLOAT;
+    CollisionInfo info;
+    bool objectCollision = object->CheckCollision(&this->renderer, x, y, &z, &info);
+
+    if (objectCollision && z < minZ) {
+      minZ = z;
+      selectedObject = &object;
+      collisionInfo = info;
+    }
+  }
+
+  if (selectedObject != nullptr) {
+    (*selectedObject)->ProcessClick(collisionInfo);
+
+    *collisionZ = minZ;
+    return true;
+  }
+  return false;
 }
 
 void Scene::OnClick(GLFWwindow* window, int button, int action, int mods) {
@@ -22,52 +51,35 @@ void Scene::OnClick(GLFWwindow* window, int button, int action, int mods) {
   }
 }
 
-bool Scene::CheckCollision(double x, double y, double* collisionZ) {
-  // since you can have multiple collisions
-  // you need to find the one closest to the
-  // camera (lowest z)
+void Scene::SetupMouseClickCallback(WindowManager* window) {
+  glfwSetWindowUserPointer(window->GetRawPointer(), this);
 
-  CardGroup* selectedObject = nullptr;
-  double minZ = MAXFLOAT;
-  int collisionCardIndex;
-  for (CardGroup* object : this->objects) {
-    double z = MAXFLOAT;
-    int thisCardIndex;
-    bool objectCollision = object->CheckCollision(this->renderer, x, y, &z, &thisCardIndex);
+  glfwSetMouseButtonCallback(window->GetRawPointer(), [](GLFWwindow* window, int button, int action, int mods) {
+    if (action == GLFW_PRESS) {
+      // Retrieve the Scene instance
+      Scene* scene = static_cast<Scene*>(glfwGetWindowUserPointer(window));
+      ASSERT(scene);
+      if (button == GLFW_MOUSE_BUTTON_LEFT) {
+        scene->OnClick(window, button, action, mods);
+      } else {
+        std::cout << "Right button press" << std::endl;
+      }
 
-    if (objectCollision && z < minZ) {
-      minZ = z;
-      selectedObject = object;
-      collisionCardIndex = thisCardIndex;
+    } else {
+      std::cout << "Mouse up" << std::endl;
     }
-  }
-
-  if (selectedObject != nullptr) {
-    selectedObject->ProcessCardClick(collisionCardIndex);
-
-    *collisionZ = minZ;
-    return true;
-  }
-  return false;
+      
+  });
 }
 
-void Scene::SetupMouseClickCallback(WindowManager* window) {
-    glfwSetWindowUserPointer(window->GetRawPointer(), this);
+void Scene::Render(const RenderData& renderData) {
+  for (auto& object : this->objects) {
+    object->Render(&this->renderer, renderData);
+  }
+}
 
-    glfwSetMouseButtonCallback(window->GetRawPointer(), [](GLFWwindow* window, int button, int action, int mods) {
-      if (action == GLFW_PRESS) {
-        // Retrieve the Scene instance
-        Scene* scene = static_cast<Scene*>(glfwGetWindowUserPointer(window));
-        ASSERT(scene);
-        if (button == GLFW_MOUSE_BUTTON_LEFT) {
-          scene->OnClick(window, button, action, mods);
-        } else {
-          std::cout << "Right button press" << std::endl;
-        }
-
-      } else {
-        std::cout << "Mouse up" << std::endl;
-      }
-        
-    });
+void Scene::UpdateTick(double deltaTime) {
+  for (auto& object : this->objects) {
+    object->UpdateTick(deltaTime);
+  }
 }

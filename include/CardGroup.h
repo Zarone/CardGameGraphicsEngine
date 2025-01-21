@@ -6,17 +6,12 @@
 #include "CardRenderingData.h"
 #include "Card.h"
 #include "Renderer.h"
+#include "SceneObject.h"
 #include "VertexArray.h"
 #include "IndexBuffer.h"
 #include "Shader.h"
 #include "TextureMap.h"
 #include "SimplePlane.h"
-
-typedef struct RenderData {
-  bool isHand;
-  double cursorX;
-  double cursorY;
-} RenderData;
 
 typedef struct CardItem {
   Card card;
@@ -69,6 +64,8 @@ private:
   // of the cards is shown
   bool zFlipped; 
 
+  bool isHand;
+
   float width;
   
   // keeps track of whether or not 
@@ -104,9 +101,17 @@ private:
   );
 
   void BindAndDrawAllFrontFaces(
+    Renderer* renderer,
     int maxBindableTextures,
     int size
   );
+
+  /*
+  *
+  * @brief Must be called after cards are added to group
+  *
+  */
+  void PrepareTextures(TextureMap* textureMap);
 
   // just where the cards are
   SimplePlane strictBackingPlane;
@@ -123,11 +128,11 @@ private:
 
 public:
   CardGroup(
-    TextureMap* textureMap, 
     glm::vec3 position, 
     float rotationX, 
     float width, 
-    bool zFlipped
+    bool zFlipped,
+    bool isHand
   );
 
   void GroupPositionToScreen(
@@ -156,13 +161,6 @@ public:
 
   void AddCard(unsigned int id);
 
-  /*
-  *
-  * @brief Must be called after cards are added to group
-  *
-  */
-  void PrepareTextures();
-
   void UpdateTick(double deltaTime);
 
   /*
@@ -176,10 +174,10 @@ public:
     double x, 
     double y, 
     double* collisionZ,
-    int* collisionCardIndex
+    CollisionInfo* collisioInfo
   ) const;
 
-  void ProcessCardClick(
-    int cardIndex
+  void ProcessClick(
+    CollisionInfo info
   );
 };

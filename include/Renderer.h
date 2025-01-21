@@ -3,12 +3,14 @@
 #include <GL/glew.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include "../include/WindowManager.h"
+#include "../include/TextureMap.h"
 
 class Renderer
 {
 private:
   WindowManager* window;
 public:
+  TextureMap textureMap;
   glm::mat4 projMatrix;
   glm::mat4 cameraMatrix;
   int maxBindableTextures;

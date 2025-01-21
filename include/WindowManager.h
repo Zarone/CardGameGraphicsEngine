@@ -27,6 +27,7 @@ public:
   int GetWidth();
   int GetHeight();
   GLFWwindow* GetRawPointer();
+  int GetMaxBindableTextures();
 
   ~WindowManager();
 };

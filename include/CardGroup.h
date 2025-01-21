@@ -177,7 +177,5 @@ public:
     CollisionInfo* collisioInfo
   ) const;
 
-  void ProcessClick(
-    CollisionInfo info
-  );
+  void MoveToGroup(int index, CardGroup* to);
 };

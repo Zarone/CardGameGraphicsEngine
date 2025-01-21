@@ -21,4 +21,5 @@ public:
     double* collisionZ, 
     CollisionInfo* info
   ) const;
+  void ProcessClick(CollisionInfo info);
 };

@@ -30,6 +30,7 @@ strictBackingPlane(SimplePlane(myShaders::basicVertex, myShaders::basicFragment,
 extendedBackingPlane(SimplePlane(myShaders::basicVertex, myShaders::basicFragment, glm::vec4(0.0f, 0.5f, 0.0f, 0.5f))),
 fullBackingPlane(SimplePlane(myShaders::basicVertex, myShaders::basicFragment, glm::vec4(0.5f, 0.5f, 0.5f, 0.5f)))
 {
+  ASSERT(width>3.0f);
   this->transform = glm::mat4(1.0f); // setup to identity
   this->transform = glm::translate(this->transform, position);
   this->transform = glm::translate(this->transform, glm::vec3(-width/2.0f, 0.0f, 0.0f));
@@ -67,7 +68,9 @@ void CardGroup::PrepareTextures(TextureMap* textureMap) {
   int size = this->cards.size();
 
   if (zFlipped) {
-    textureMap->SetupBack();
+    if (size != 0) {
+      textureMap->SetupBack();
+    }
   } else {
     for (CardItem& cardItem : this->cards) {
       textureMap->SetupCard(cardItem.card.GetID());
@@ -214,7 +217,9 @@ void CardGroup::UpdateHandPosition(
   double whitespace,
   double zGap
 ) {
-  float rotationPerCard = 0;//renderData.isHand ? glm::radians(10.0f) : 0;
+  if (size == 0) return;
+
+  float rotationPerCard = this->isHand ? glm::radians(10.0f) : 0;
 
   // if we need to display the cards
   // dynamically based on cursor position
@@ -226,8 +231,8 @@ void CardGroup::UpdateHandPosition(
     int rightSize = size-this->lastClosestIndex-1;
     double leftWidth = centerX-whitespace-0.5f;
     double rightWidth = this->width-centerX-0.5f-whitespace;
-    double leftGap = leftSize == 1 ? 0 : (leftWidth-1.0f)/(leftSize-1.0f);
-    double rightGap = rightSize == 1 ? 0 : (rightWidth-1.0f)/(rightSize-1.0f);
+    double leftGap = leftSize == 1 ? 0 : fmin(xGap, (leftWidth-1.0f)/(leftSize-1.0f));
+    double rightGap = rightSize == 1 ? 0 : fmin(xGap, (rightWidth-1.0f)/(rightSize-1.0f));
 
     // ensures z is always positive,
     // which matters for rendering over 
@@ -372,7 +377,13 @@ void CardGroup::Render(
   double margin = 0.0f;
 
   if (size == 1) {
+    // just enough to make sure the
+    // single card is centered
     margin = (this->width-1.0f)/2.0f;
+  } else if (size == 2) {
+    // makes sure the 2 cards take up
+    // only the required space
+    margin = (width - 2.0f - 2*whitespace)/2.0f;
   } else if (this->isHand) {
     if (size > 3) {
       // I got this equation by solving:
@@ -380,7 +391,11 @@ void CardGroup::Render(
       //    margin = whitespace + 1 - xGap
       margin = (size + size*whitespace - whitespace - width)/(size-3);
     } else {
-      margin = 1.0f + whitespace;
+      if (width > 3.0f + 2*whitespace) {
+        margin = (width - 3.0f - 2*whitespace)/2.0f;
+      } else {
+        margin = 0.0f;
+      }
     }
   } else {
     margin = 0.0f;
@@ -404,7 +419,7 @@ void CardGroup::Render(
 
   // check is the closest card changed.
   // if it didn't, we don't need to rerender
-  if (mouseMovedInBoundary) {
+  if (mouseMovedInBoundary && size != 0) {
     // find closest card
     
     int closestIndex = this->GetClosestCardIndex(
@@ -473,7 +488,6 @@ void CardGroup::Render(
   cardShader.SetUniform4fv("modelMatrix", false, glm::value_ptr(this->transform));
 
   this->PrepareTextures(&renderer->textureMap);
-
 
   // Pass texture units as an array to the shader.
   int maxBindableTextures = renderer->maxBindableTextures;
@@ -660,6 +674,22 @@ bool CardGroup::CheckCollision(
   return false;
 }
 
-void CardGroup::ProcessClick(CollisionInfo info) {
-  std::cout << "Processed card click at index " << info.collisionIndex << std::endl;
+void CardGroup::MoveToGroup(int index, CardGroup* to) {
+  this->dirtyPosition = true;
+  to->dirtyPosition = true;
+
+  glm::vec4 v = glm::vec4(
+    this->cards[index].renderData.displayedPosition.x,
+    this->cards[index].renderData.displayedPosition.y,
+    this->cards[index].renderData.displayedPosition.z,
+    1
+  );
+
+  CardItem cardCopy = {
+    .card = this->cards[index].card,
+  };
+  cardCopy.renderData.displayedPosition = glm::inverse(to->transform)*this->transform*v;
+
+  to->cards.push_back(cardCopy);
 }
+

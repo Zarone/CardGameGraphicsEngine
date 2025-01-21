@@ -1,4 +1,5 @@
 #include "../include/GameState.h"
+#include "../include/ErrorHandling.h"
 
 GameState::GameState() :
   hand(
@@ -17,17 +18,17 @@ GameState::GameState() :
     true
   )
 {
-  oppHand.AddCard(0);
-  oppHand.AddCard(2);
-  oppHand.AddCard(3);
+  //oppHand.AddCard(0);
+  //oppHand.AddCard(2);
+  //oppHand.AddCard(3);
 
   hand.AddCard(0);
-  hand.AddCard(1);
-  hand.AddCard(2);
-  hand.AddCard(3);
-  hand.AddCard(0);
-  hand.AddCard(1);
-  hand.AddCard(2);
+  //hand.AddCard(1);
+  //hand.AddCard(2);
+  //hand.AddCard(3);
+  //hand.AddCard(0);
+  //hand.AddCard(1);
+  //hand.AddCard(2);
 }
 
 void GameState::Render(Renderer* renderer, const RenderData& renderData) {
@@ -60,7 +61,7 @@ bool GameState::CheckCollision(Renderer* renderer, double x, double y, double* c
   if (objectCollission && tempZ < minZ) {
     minZ = tempZ;
     collisionInfo = tempInfo;
-    collisionInfo.groupPointer = (void*)&hand;
+    collisionInfo.groupPointer = (void*)&oppHand;
   }
 
   if (collisionInfo.groupPointer != nullptr) {
@@ -71,4 +72,17 @@ bool GameState::CheckCollision(Renderer* renderer, double x, double y, double* c
     return false;
   }
 
+}
+
+void GameState::ProcessClick(CollisionInfo info) {
+  CardGroup* src = (CardGroup*) info.groupPointer;
+  if (src == &this->hand) {
+    //std::cout << "hand collision recognized" << std::endl;
+    this->hand.MoveToGroup(info.collisionIndex, &this->oppHand);
+  } else if (src == &this->oppHand) {
+    //std::cout << "opp hand collision recognized" << std::endl;
+  } else {
+    std::cout << "couldn't recognize group pointer" << std::endl;
+    ASSERT(false);
+  }
 }

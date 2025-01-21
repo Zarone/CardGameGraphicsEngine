@@ -44,10 +44,9 @@ void Scene::OnClick(GLFWwindow* window, int button, int action, int mods) {
   double x;
   double y;
   glfwGetCursorPos(window, &x, &y);
-  std::cout << "here " << x << ", " << y << std::endl;
   double z;
   if (this->CheckCollision(x, y, &z)) {
-    std::cout << "colission at z = " << z << std::endl;
+    //std::cout << "colission at z = " << z << std::endl;
   }
 }
 
@@ -62,11 +61,11 @@ void Scene::SetupMouseClickCallback(WindowManager* window) {
       if (button == GLFW_MOUSE_BUTTON_LEFT) {
         scene->OnClick(window, button, action, mods);
       } else {
-        std::cout << "Right button press" << std::endl;
+        //std::cout << "Right button press" << std::endl;
       }
 
     } else {
-      std::cout << "Mouse up" << std::endl;
+      //std::cout << "Mouse up" << std::endl;
     }
       
   });

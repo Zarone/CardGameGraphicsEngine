@@ -13,5 +13,5 @@ bool GameObject::CheckCollision(Renderer* renderer, double x, double y, double* 
 }
 
 void GameObject::ProcessClick(CollisionInfo info) {
-  ((CardGroup*)info.groupPointer)->ProcessClick(info);
+  this->game.ProcessClick(info);
 }

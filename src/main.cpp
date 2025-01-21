@@ -23,25 +23,6 @@ int main(void)
     &myWindow
   );
 
-  //scene.AddObject(&hand);
-  //scene.AddObject(&oppHand);
-  //oppHand.AddCard(0);
-  //oppHand.AddCard(2);
-  //oppHand.AddCard(3);
-
-  //hand.AddCard(0);
-  //hand.AddCard(1);
-  //hand.AddCard(2);
-  //hand.AddCard(3);
-  //hand.AddCard(0);
-  //hand.AddCard(1);
-  //hand.AddCard(2);
-  //hand.AddCard(3);
-  //hand.AddCard(0);
-  //hand.AddCard(1);
-  //hand.AddCard(2);
-  //hand.AddCard(3);
-
   glm::mat4 modelMatrix;
   glm::mat4 identity = glm::mat4(1.0f);
 
@@ -69,11 +50,6 @@ int main(void)
     /* Render here */
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    //hand.Render(&myRenderer, handRenderingData);
-    //hand.UpdateTick(deltaTime);
-
-    //oppHand.Render(&myRenderer, handRenderingData);
-    //oppHand.UpdateTick(deltaTime);
     scene.Render(handRenderingData);
     scene.UpdateTick(deltaTime);
 

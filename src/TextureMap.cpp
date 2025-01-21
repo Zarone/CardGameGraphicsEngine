@@ -92,3 +92,7 @@ std::ostream& operator<<(std::ostream& os, const TextureMap& t) {
 int TextureMap::Size() {
   return this->map.size();
 }
+
+int TextureMap::CurrentlyBound() {
+  return this->currentlyBound;
+}

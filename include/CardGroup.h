@@ -17,7 +17,7 @@ typedef struct CardItem {
   Card card;
   CardRenderingData renderData;
 } CardItem;
-
+ 
 typedef struct CardTransformVertex {
   float x;
   float y;
@@ -106,13 +106,6 @@ private:
     int size
   );
 
-  /*
-  *
-  * @brief Must be called after cards are added to group
-  *
-  */
-  void PrepareTextures(TextureMap* textureMap);
-
   // just where the cards are
   SimplePlane strictBackingPlane;
   glm::mat4 strictBackingPlaneTransform;
@@ -156,6 +149,13 @@ public:
     double& xScale,
     double& projectedLeftBoundary
   );
+
+  /*
+  *
+  * @brief Must be called after cards are added to group
+  *
+  */
+  void PrepareTextures(TextureMap* textureMap);
 
   void Render(Renderer* renderer, const RenderData& renderData);
 

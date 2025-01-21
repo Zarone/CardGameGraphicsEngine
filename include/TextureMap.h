@@ -31,4 +31,5 @@ public:
 
   friend std::ostream& operator<<(std::ostream& os, const TextureMap& t);
   int Size();
+  int CurrentlyBound();
 };

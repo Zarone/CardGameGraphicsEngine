@@ -68,9 +68,7 @@ void CardGroup::PrepareTextures(TextureMap* textureMap) {
   int size = this->cards.size();
 
   if (zFlipped) {
-    if (size != 0) {
-      textureMap->SetupBack();
-    }
+    textureMap->SetupBack();
   } else {
     for (CardItem& cardItem : this->cards) {
       textureMap->SetupCard(cardItem.card.GetID());
@@ -492,7 +490,8 @@ void CardGroup::Render(
   // Pass texture units as an array to the shader.
   int maxBindableTextures = renderer->maxBindableTextures;
   std::vector<int> textureUnits(maxBindableTextures);
-  int mapSize = renderer->textureMap.Size();
+  //int mapSize = renderer->textureMap.Size();
+  int mapSize = renderer->textureMap.CurrentlyBound();
   for (int i = 0; i < maxBindableTextures; ++i) {
     if (i < mapSize) {
       textureUnits[i] = i;
@@ -678,6 +677,11 @@ void CardGroup::MoveToGroup(int index, CardGroup* to) {
   this->dirtyPosition = true;
   to->dirtyPosition = true;
 
+  // this just makes it so that
+  // in the next render we reset
+  // the selected index
+  this->wasInsideBoundary = false;
+
   glm::vec4 v = glm::vec4(
     this->cards[index].renderData.displayedPosition.x,
     this->cards[index].renderData.displayedPosition.y,
@@ -691,5 +695,6 @@ void CardGroup::MoveToGroup(int index, CardGroup* to) {
   cardCopy.renderData.displayedPosition = glm::inverse(to->transform)*this->transform*v;
 
   to->cards.push_back(cardCopy);
+  this->cards.erase(this->cards.begin() + index);
 }
 

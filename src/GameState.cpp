@@ -6,15 +6,15 @@ GameState::GameState() :
     glm::vec3(0.0f, -2.0f, 4.0f),
     //glm::vec3(0.0f, -0.5f, 6.0f),
     -20.0f, // rotateX
-    4.0f, // width
-    false,// z flipped
+    4.0f,   // width
+    false,  // z flipped
     true
   ),
   oppHand(
     glm::vec3(0.0f, 2.0f, 1.0f),
     40.0f, // rotateX
-    4.0f, // width
-    true,// z flipped
+    4.0f,  // width
+    true, // z flipped
     true
   )
 {
@@ -23,12 +23,12 @@ GameState::GameState() :
   //oppHand.AddCard(3);
 
   hand.AddCard(0);
-  //hand.AddCard(1);
-  //hand.AddCard(2);
-  //hand.AddCard(3);
-  //hand.AddCard(0);
-  //hand.AddCard(1);
-  //hand.AddCard(2);
+  hand.AddCard(1);
+  hand.AddCard(2);
+  hand.AddCard(3);
+  hand.AddCard(0);
+  hand.AddCard(1);
+  hand.AddCard(2);
 }
 
 void GameState::Render(Renderer* renderer, const RenderData& renderData) {

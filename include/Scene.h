@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "../include/SceneObject.h"
+#include "../include/CardDatabaseSingleton.h"
 
 class Scene
 {
@@ -13,7 +14,8 @@ public:
   Scene(
     WindowManager* windowManager, 
     const glm::vec3 cameraPosition,
-    const glm::vec3 cameraDirection
+    const glm::vec3 cameraDirection,
+    CardDatabaseSingleton* database = nullptr
   );
   bool CheckCollision(double x, double y, double* collisionZ);
   void OnClick(GLFWwindow* window, int button, int action, int mods);

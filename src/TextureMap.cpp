@@ -2,17 +2,17 @@
 #include "../include/TextureMap.h"
 #include "../include/ErrorHandling.h"
 
-TextureMap::TextureMap()
-:currentlyBound(0), lru()
+TextureMap::TextureMap(CardDatabaseSingleton* database)
+:currentlyBound(0), lru(), ID_Database(database)
 {}
 
 const std::string TextureMap::pathPrefix = "../assets/";
-const std::unordered_map<unsigned int, std::string> TextureMap::IDToPath = {
-  {0, "card1"},
-  {1, "card2"},
-  {2, "card3"},
-  {3, "card4"},
-};
+//const std::unordered_map<unsigned int, std::string> TextureMap::IDToPath = {
+  //{0, "card1"},
+  //{1, "card2"},
+  //{2, "card3"},
+  //{3, "card4"},
+//};
 
 void TextureMap::SetupTexturePath(const std::string& path) {
   auto texture = this->map.find(path);
@@ -29,9 +29,14 @@ void TextureMap::SetupBack() {
 }
 
 void TextureMap::SetupCard(unsigned int id) {
-  auto path = this->IDToPath.find(id);
-  if (path != this->IDToPath.end()) {
-    this->SetupTexturePath(path->second);
+  if (this->ID_Database == nullptr) {
+    std::cout << "No card database defined" << id << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  CardInfo* path = this->ID_Database->GetInfo(id);
+  if (path != nullptr) {
+    this->SetupTexturePath(path->imageName);
   } else {
     std::cout << "Could not find card of id " << id << std::endl;
     exit(EXIT_FAILURE);
@@ -72,9 +77,14 @@ int TextureMap::RequestBind(unsigned int maxBindableTextures, const std::string&
 }
 
 int TextureMap::RequestBind(unsigned int maxBindableTextures, unsigned int id) {
-  auto path = this->IDToPath.find(id);
-  if (path != this->IDToPath.end()) {
-    return TextureMap::RequestBind(maxBindableTextures, path->second);
+  if (this->ID_Database == nullptr) {
+    std::cout << "No card database defined" << id << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  CardInfo* path = this->ID_Database->GetInfo(id);
+  if (path != nullptr) {
+    return TextureMap::RequestBind(maxBindableTextures, path->imageName);
   } else {
     std::cout << "Could not find card of id " << id << std::endl;
     exit(EXIT_FAILURE);
@@ -84,8 +94,6 @@ int TextureMap::RequestBind(unsigned int maxBindableTextures, unsigned int id) {
 std::ostream& operator<<(std::ostream& os, const TextureMap& t) {
   os << "Map: ";
   PrintMapToStream(os, t.map);
-  os << "IDToPath: ";
-  PrintMapToStream(os, t.IDToPath);
   return os;
 }
 

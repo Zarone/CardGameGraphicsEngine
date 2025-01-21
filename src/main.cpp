@@ -13,14 +13,18 @@
 #include "../include/Scene.h"
 #include "../include/GameScene.h"
 
+#include "../example/TestCardDatabaseSingleton.h"
+
 int main(void)
 {
   WindowManager myWindow;
 
   myWindow.SetupOpenGL();
 
+  TestCardDatabaseSingleton database;
   GameScene scene(
-    &myWindow
+    &myWindow,
+    &database
   );
 
   glm::mat4 modelMatrix;

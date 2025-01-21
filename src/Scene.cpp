@@ -4,9 +4,10 @@
 Scene::Scene(
   WindowManager* windowManager, 
   const glm::vec3 cameraPosition,
-  const glm::vec3 cameraDirection
+  const glm::vec3 cameraDirection,
+  CardDatabaseSingleton* database
 ):
-  renderer(windowManager, windowManager->GetMaxBindableTextures())
+  renderer(windowManager, database)
 {
   renderer.Setup3DTransforms(cameraPosition, cameraDirection);
 }

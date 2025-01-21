@@ -19,6 +19,8 @@ find_package(GLEW)
 
 # Add the executable with all source files
 add_executable(${PROJECT_NAME}
+    example/TestCardDatabaseSingleton.cpp
+    example/TestCardInfo.cpp
     src/external/stb_image.cpp
     src/shaders/BasicVertex.cpp
     src/shaders/BasicFragment.cpp
@@ -26,6 +28,7 @@ add_executable(${PROJECT_NAME}
     src/shaders/CardFragment.cpp
     src/Card.cpp
     src/CardGroup.cpp
+    src/CardInfo.cpp
     src/CardRenderingData.cpp
     src/ErrorHandling.cpp
     src/GameObject.cpp

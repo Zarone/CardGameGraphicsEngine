@@ -4,6 +4,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include "../include/WindowManager.h"
 #include "../include/TextureMap.h"
+#include "../include/CardDatabaseSingleton.h"
 
 class Renderer
 {
@@ -14,7 +15,7 @@ public:
   glm::mat4 projMatrix;
   glm::mat4 cameraMatrix;
   int maxBindableTextures;
-  Renderer(WindowManager* window, int maxBindableTextures);
+  Renderer(WindowManager* window, CardDatabaseSingleton* database = nullptr);
   void Setup3DTransforms(const glm::vec3& cameraPosition, const glm::vec3& cameraDirection);
   bool InsideWindowBounds(double posX, double posY) const;
 

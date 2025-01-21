@@ -1,8 +1,9 @@
 #include "../include/Renderer.h"
 
-Renderer::Renderer(WindowManager* window, int maxBindableTextures): 
+Renderer::Renderer(WindowManager* window, CardDatabaseSingleton* database): 
   window(window),
-  maxBindableTextures(maxBindableTextures)
+  maxBindableTextures(window->GetMaxBindableTextures()),
+  textureMap(database)
 {
 }
 

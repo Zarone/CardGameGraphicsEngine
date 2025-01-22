@@ -21,6 +21,8 @@ find_package(GLEW)
 add_executable(${PROJECT_NAME}
     example/TestCardDatabaseSingleton.cpp
     example/TestCardInfo.cpp
+    example/TestGameState.cpp
+    example/TestScene.cpp
     src/external/stb_image.cpp
     src/shaders/BasicVertex.cpp
     src/shaders/BasicFragment.cpp
@@ -31,8 +33,6 @@ add_executable(${PROJECT_NAME}
     src/CardInfo.cpp
     src/CardRenderingData.cpp
     src/ErrorHandling.cpp
-    src/GameObject.cpp
-    src/GameScene.cpp
     src/GameState.cpp
     src/IndexBuffer.cpp
     src/main.cpp

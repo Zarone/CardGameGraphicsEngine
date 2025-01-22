@@ -9,7 +9,6 @@ private:
   static unsigned int CompileShader(unsigned int type, const std::string& source);
   unsigned int programID;
 public:
-  Shader();
   Shader(const std::string& vertexShader, const std::string& fragmentShader);
   void Bind();
   int GetUniformLocation(const std::string& name);

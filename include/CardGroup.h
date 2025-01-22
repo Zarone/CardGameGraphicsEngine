@@ -86,12 +86,12 @@ private:
     double margin,
     double xGap,
     double xScale,
-    const RenderData& renderData,
+    const CursorData& renderData,
     int size
   );
 
   void UpdateHandPosition(
-    const RenderData& renderData,
+    const CursorData& renderData,
     bool insideHandBoundary,
     double xGap,
     double margin,
@@ -142,7 +142,7 @@ public:
 
   bool GetInsideHandBoundary(
     Renderer* renderer,
-    const RenderData& renderData,
+    const CursorData& renderData,
     double horizontalOffset,
     double verticalOffset,
     bool& mouseMovedInBoundary,
@@ -157,7 +157,7 @@ public:
   */
   void PrepareTextures(TextureMap* textureMap);
 
-  void Render(Renderer* renderer, const RenderData& renderData);
+  void Render(Renderer* renderer);
 
   void AddCard(unsigned int id);
 

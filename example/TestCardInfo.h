@@ -8,8 +8,6 @@ public:
     BASIC_CHARACTER_CARD
   } type;
 
-  //std::string imageName;  
-
   TestCardInfo(
     TestCardInfo::CardType,
     const std::string& imageName

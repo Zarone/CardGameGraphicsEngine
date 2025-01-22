@@ -5,6 +5,7 @@
 #include "../include/WindowManager.h"
 #include "../include/TextureMap.h"
 #include "../include/CardDatabaseSingleton.h"
+#include "../include/CursorData.h"
 
 class Renderer
 {
@@ -15,8 +16,13 @@ public:
   glm::mat4 projMatrix;
   glm::mat4 cameraMatrix;
   int maxBindableTextures;
-  Renderer(WindowManager* window, CardDatabaseSingleton* database = nullptr);
+
+  Renderer(WindowManager* window);
+
   void Setup3DTransforms(const glm::vec3& cameraPosition, const glm::vec3& cameraDirection);
+
+  void SetupDatabaseForTexturing(CardDatabaseSingleton* database);
+
   bool InsideWindowBounds(double posX, double posY) const;
 
   /*
@@ -29,4 +35,6 @@ public:
   glm::vec2 GetScreenPositionFromCamera(glm::vec4 screenCoords);
 
   glm::vec3 Get3DScreenPositionFromCamera(glm::vec4 screenCoords);
+
+  void GetCursorPosition(CursorData* cursorData);
 };

@@ -2,17 +2,27 @@
 #include "../include/ErrorHandling.h"
 
 Scene::Scene(
-  WindowManager* windowManager, 
-  const glm::vec3 cameraPosition,
-  const glm::vec3 cameraDirection,
-  CardDatabaseSingleton* database
-):
-  renderer(windowManager, database)
+  WindowManager* windowManager
+): renderer(windowManager)
 {
+}
+
+void Scene::SetupCamera(
+  const glm::vec3 cameraPosition,
+  const glm::vec3 cameraDirection
+) {
   renderer.Setup3DTransforms(cameraPosition, cameraDirection);
 }
 
-bool Scene::CheckCollision(double x, double y, double* collisionZ) {
+void Scene::SetupCardDataBase(CardDatabaseSingleton* database) {
+  this->renderer.SetupDatabaseForTexturing(database);
+}
+
+void Scene::Reset() {
+  this->objects = std::vector<std::unique_ptr<SceneObject>>();
+}
+
+void Scene::ProcessCollision(double x, double y, double* collisionZ) {
   // since you can have multiple collisions
   // you need to find the one closest to the
   // camera (lowest z)
@@ -33,12 +43,14 @@ bool Scene::CheckCollision(double x, double y, double* collisionZ) {
   }
 
   if (selectedObject != nullptr) {
-    (*selectedObject)->ProcessClick(collisionInfo);
-
     *collisionZ = minZ;
-    return true;
+    ClickEvent event = (*selectedObject)->ProcessClick(collisionInfo);
+    if (event.sceneSwap) {
+      this->Swap(event.sceneIndex);
+    }
+    return;
   }
-  return false;
+  return;
 }
 
 void Scene::OnClick(GLFWwindow* window, int button, int action, int mods) {
@@ -46,9 +58,7 @@ void Scene::OnClick(GLFWwindow* window, int button, int action, int mods) {
   double y;
   glfwGetCursorPos(window, &x, &y);
   double z;
-  if (this->CheckCollision(x, y, &z)) {
-    //std::cout << "colission at z = " << z << std::endl;
-  }
+  this->ProcessCollision(x, y, &z);
 }
 
 void Scene::SetupMouseClickCallback(WindowManager* window) {
@@ -72,9 +82,9 @@ void Scene::SetupMouseClickCallback(WindowManager* window) {
   });
 }
 
-void Scene::Render(const RenderData& renderData) {
+void Scene::Render() {
   for (auto& object : this->objects) {
-    object->Render(&this->renderer, renderData);
+    object->Render(&this->renderer);
   }
 }
 

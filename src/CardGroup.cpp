@@ -110,7 +110,7 @@ void CardGroup::GroupPositionTo3DScreen(
 
 bool CardGroup::GetInsideHandBoundary(
   Renderer* renderer,
-  const RenderData& renderData,
+  const CursorData& renderData,
   double horizontalOffset,
   double verticalOffset,
   bool& mouseMovedInBoundary,
@@ -172,7 +172,7 @@ int CardGroup::GetClosestCardIndex(
   double margin,
   double xGap,
   double xScale,
-  const RenderData& renderData,
+  const CursorData& renderData,
   int size
 ) {
   int closestIndex = 0;
@@ -207,7 +207,7 @@ int CardGroup::GetClosestCardIndex(
 }
 
 void CardGroup::UpdateHandPosition(
-  const RenderData& renderData,
+  const CursorData& renderData,
   bool insideHandBoundary,
   double xGap,
   double margin,
@@ -352,9 +352,11 @@ void CardGroup::BindAndDrawAllFrontFaces(
 
 
 void CardGroup::Render(
-  Renderer* renderer,
-  const RenderData& renderData
+  Renderer* renderer
 ) {
+  CursorData cursor;
+  renderer->GetCursorPosition(&cursor);
+
   bool insideHandBoundary = false;
   bool mouseMovedInBoundary = false;
 
@@ -406,7 +408,7 @@ void CardGroup::Render(
   if (this->isHand) {
 
     // check if cursor is near the card group
-    insideHandBoundary = this->GetInsideHandBoundary(renderer, renderData, margin-horizontalMargin, -verticalMargin, mouseMovedInBoundary, xScale, projectedLeftBoundary);
+    insideHandBoundary = this->GetInsideHandBoundary(renderer, cursor, margin-horizontalMargin, -verticalMargin, mouseMovedInBoundary, xScale, projectedLeftBoundary);
   }
 
   if (this->wasInsideBoundary != insideHandBoundary) this->dirtyPosition = true;
@@ -425,7 +427,7 @@ void CardGroup::Render(
       margin,
       xGap,
       xScale,
-      renderData,
+      cursor,
       size
     );
 
@@ -440,7 +442,7 @@ void CardGroup::Render(
   // card positions
   if (this->dirtyPosition) {
     this->UpdateHandPosition(
-      renderData,
+      cursor,
       insideHandBoundary,
       xGap,
       margin,
@@ -558,8 +560,8 @@ void CardGroup::Render(
   this->dirtyDisplay = false;
 
   if (this->isHand) {
-    this->lastCursorX = (int)renderData.cursorX;
-    this->lastCursorY = (int)renderData.cursorY;
+    this->lastCursorX = (int)cursor.cursorX;
+    this->lastCursorY = (int)cursor.cursorY;
     this->wasInsideBoundary = insideHandBoundary;
   }
 }

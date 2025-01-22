@@ -17,7 +17,9 @@ private:
   void SetupTexturePath(const std::string& path);
   CardDatabaseSingleton* ID_Database;
 public:
-  TextureMap(CardDatabaseSingleton* database);
+  TextureMap();
+  void SetupCardDataBase(CardDatabaseSingleton* database);
+
   void SetupCard(unsigned int id);
   void SetupBack();
 

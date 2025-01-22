@@ -2,17 +2,15 @@
 #include "../include/TextureMap.h"
 #include "../include/ErrorHandling.h"
 
-TextureMap::TextureMap(CardDatabaseSingleton* database)
-:currentlyBound(0), lru(), ID_Database(database)
+TextureMap::TextureMap()
+:currentlyBound(0), lru(), ID_Database(nullptr)
 {}
 
 const std::string TextureMap::pathPrefix = "../assets/";
-//const std::unordered_map<unsigned int, std::string> TextureMap::IDToPath = {
-  //{0, "card1"},
-  //{1, "card2"},
-  //{2, "card3"},
-  //{3, "card4"},
-//};
+
+void TextureMap::SetupCardDataBase(CardDatabaseSingleton* database) {
+  this->ID_Database = database;
+}
 
 void TextureMap::SetupTexturePath(const std::string& path) {
   auto texture = this->map.find(path);

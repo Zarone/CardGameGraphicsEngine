@@ -1,18 +1,16 @@
 #pragma once
 
 #include "../include/Renderer.h"
-#include "../include/RenderData.h"
 #include "../include/CardGroup.h"
 
-class GameState
+class GameState : public SceneObject
 {
 private:
-  //std::vector<Action> actionStack;
-  CardGroup hand;
-  CardGroup oppHand;
+  std::vector<CardGroup*> allGroups;
 public:
   GameState();
-  void Render(Renderer* renderer, const RenderData& renderData);
+  void AddObject(CardGroup* group);
+  void Render(Renderer* renderer);
   void UpdateTick(double deltaTime);
   bool CheckCollision(
     Renderer* renderer, 
@@ -21,5 +19,5 @@ public:
     double* collisionZ, 
     CollisionInfo* info
   ) const;
-  void ProcessClick(CollisionInfo info);
+  virtual ClickEvent ProcessClick(CollisionInfo info) = 0;
 };

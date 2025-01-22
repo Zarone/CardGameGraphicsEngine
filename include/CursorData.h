@@ -1,7 +1,7 @@
 #pragma once
 
-typedef struct RenderData {
+typedef struct CursorData {
   double cursorX;
   double cursorY;
-} RenderData;
+} CursorData;
 

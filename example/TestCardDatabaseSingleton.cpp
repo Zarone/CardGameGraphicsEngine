@@ -15,7 +15,7 @@ TestCardInfo TestCardDatabaseSingleton::IDToInfo[] = {
   },
   {
     TestCardInfo::CardType::BASIC_CHARACTER_CARD,
-    "card3"
+    "card4"
   },
 };
 

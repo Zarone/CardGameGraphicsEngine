@@ -25,8 +25,6 @@ unsigned int Shader::CompileShader(unsigned int type, const std::string& source 
   return id;
 }
 
-Shader::Shader() {}
-
 Shader::Shader(const std::string& vertexShader, const std::string& fragmentShader) {
   GLCall(this->programID = glCreateProgram());
   unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexShader);

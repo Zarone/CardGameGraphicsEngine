@@ -1,9 +1,9 @@
 #include "../include/Renderer.h"
 
-Renderer::Renderer(WindowManager* window, CardDatabaseSingleton* database): 
+Renderer::Renderer(WindowManager* window): 
   window(window),
   maxBindableTextures(window->GetMaxBindableTextures()),
-  textureMap(database)
+  textureMap()
 {
 }
 
@@ -17,6 +17,10 @@ void Renderer::Setup3DTransforms(const glm::vec3& cameraPosition, const glm::vec
     cameraPosition+cameraDirection,
     glm::vec3(0.0f, 1.0f, 0.0f)
   );
+}
+
+void Renderer::SetupDatabaseForTexturing(CardDatabaseSingleton* database) {
+  this->textureMap.SetupCardDataBase(database);
 }
 
 bool Renderer::InsideWindowBounds(double posX, double posY) const {
@@ -36,4 +40,8 @@ glm::vec3 Renderer::Get3DScreenPositionFromCamera(glm::vec4 screenCoords) {
     (-screenCoords.y/screenCoords.w+1)/2*window->GetHeight(),
     screenCoords.z/screenCoords.w
   );
+}
+
+void Renderer::GetCursorPosition(CursorData* cursorData) {
+  this->window->GetCursorPosition(&cursorData->cursorX, &cursorData->cursorY);
 }

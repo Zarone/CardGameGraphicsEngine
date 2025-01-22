@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../include/Renderer.h"
-#include "../include/CursorData.h"
 
 typedef struct CollisionInfo {
   // if the scene object has multiple items
@@ -39,5 +38,7 @@ public:
     CollisionInfo* info
   ) const = 0;
   virtual ClickEvent ProcessClick(CollisionInfo info) = 0;
+  virtual ClickEvent ProcessPreClick(CollisionInfo info) = 0;
+  virtual void ReleaseClick() = 0;
   virtual ~SceneObject() = default;
 };

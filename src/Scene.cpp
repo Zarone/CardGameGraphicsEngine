@@ -2,9 +2,11 @@
 #include "../include/ErrorHandling.h"
 
 Scene::Scene(
-  WindowManager* windowManager
+  WindowManager* windowManager,
+  CardDatabaseSingleton* database
 ): renderer(windowManager)
 {
+  this->renderer.SetupDatabaseForTexturing(database);
 }
 
 void Scene::SetupCamera(
@@ -14,15 +16,15 @@ void Scene::SetupCamera(
   renderer.Setup3DTransforms(cameraPosition, cameraDirection);
 }
 
-void Scene::SetupCardDataBase(CardDatabaseSingleton* database) {
-  this->renderer.SetupDatabaseForTexturing(database);
+void Scene::ClearScreen() {
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void Scene::Reset() {
   this->objects = std::vector<std::unique_ptr<SceneObject>>();
 }
 
-void Scene::ProcessCollision(double x, double y, double* collisionZ) {
+void Scene::ProcessCollision(double x, double y, double* collisionZ, bool preClick) {
   // since you can have multiple collisions
   // you need to find the one closest to the
   // camera (lowest z)
@@ -40,11 +42,22 @@ void Scene::ProcessCollision(double x, double y, double* collisionZ) {
       selectedObject = &object;
       collisionInfo = info;
     }
+
+    if (!preClick) {
+      object->ReleaseClick();
+    }
   }
 
   if (selectedObject != nullptr) {
     *collisionZ = minZ;
-    ClickEvent event = (*selectedObject)->ProcessClick(collisionInfo);
+    ClickEvent event;
+
+    if (preClick) {
+      ClickEvent event = (*selectedObject)->ProcessPreClick(collisionInfo);
+    } else {
+      ClickEvent event = (*selectedObject)->ProcessClick(collisionInfo);
+    }
+
     if (event.sceneSwap) {
       this->Swap(event.sceneIndex);
     }
@@ -53,12 +66,12 @@ void Scene::ProcessCollision(double x, double y, double* collisionZ) {
   return;
 }
 
-void Scene::OnClick(GLFWwindow* window, int button, int action, int mods) {
+void Scene::OnClick(GLFWwindow* window, int button, int action, int mods, bool preClick) {
   double x;
   double y;
   glfwGetCursorPos(window, &x, &y);
   double z;
-  this->ProcessCollision(x, y, &z);
+  this->ProcessCollision(x, y, &z, preClick);
 }
 
 void Scene::SetupMouseClickCallback(WindowManager* window) {
@@ -66,17 +79,21 @@ void Scene::SetupMouseClickCallback(WindowManager* window) {
 
   glfwSetMouseButtonCallback(window->GetRawPointer(), [](GLFWwindow* window, int button, int action, int mods) {
     if (action == GLFW_PRESS) {
-      // Retrieve the Scene instance
       Scene* scene = static_cast<Scene*>(glfwGetWindowUserPointer(window));
       ASSERT(scene);
       if (button == GLFW_MOUSE_BUTTON_LEFT) {
-        scene->OnClick(window, button, action, mods);
+        scene->OnClick(window, button, action, mods, true);
       } else {
         //std::cout << "Right button press" << std::endl;
       }
-
-    } else {
-      //std::cout << "Mouse up" << std::endl;
+    } else if (action == GLFW_RELEASE) {
+      Scene* scene = static_cast<Scene*>(glfwGetWindowUserPointer(window));
+      ASSERT(scene);
+      if (button == GLFW_MOUSE_BUTTON_LEFT) {
+        scene->OnClick(window, button, action, mods, false);
+      } else {
+        //std::cout << "Right button release" << std::endl;
+      }
     }
       
   });

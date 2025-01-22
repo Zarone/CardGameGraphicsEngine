@@ -15,9 +15,11 @@ const unsigned int SimplePlane::indexData[] = {
 SimplePlane::SimplePlane(
   const std::string& vertShader, 
   const std::string& fragShader,
+  glm::mat4 transform,
   glm::vec4 color
-): SimpleRenderObject(vertShader, fragShader, color)
+): SimpleRenderObject(vertShader, fragShader, transform, color)
 {
+  this->LoadIntoGPU();
 }
 
 int SimplePlane::GetVertexCount() {

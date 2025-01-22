@@ -8,6 +8,8 @@ private:
 public:
   TestGameState();
   ClickEvent ProcessClick(CollisionInfo info);
+  ClickEvent ProcessPreClick(CollisionInfo info);
+  void ReleaseClick();
   ~TestGameState() {
     std::cout << "delete game state" << std::endl;
   }

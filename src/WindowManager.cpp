@@ -85,6 +85,15 @@ int WindowManager::GetMaxBindableTextures() {
   return maxBindableTextures;
 }
 
+double WindowManager::DeltaTime() {
+  this->currentTime = std::chrono::high_resolution_clock::now();
+  this->diffTime = std::chrono::duration_cast<std::chrono::duration<float, std::milli>>(currentTime - lastTime);
+  this->deltaTime = diffTime.count()/1000.0f;
+  this->lastTime = currentTime;
+
+  return this->deltaTime;
+}
+
 WindowManager::~WindowManager() {
   glfwTerminate();
 }

@@ -1,5 +1,6 @@
 #include "../include/ErrorHandling.h"
 #include "./TestGameState.h"
+#include "./TestSceneData.h"
 
 TestGameState::TestGameState():
   hand(
@@ -47,6 +48,13 @@ ClickEvent TestGameState::ProcessClick(CollisionInfo info) {
   }
   return {
     .sceneSwap = true,
-    .sceneIndex = 1
+    .sceneIndex = TestSceneID::GAME_SCREEN_2_TEST
   };
+}
+
+ClickEvent TestGameState::ProcessPreClick(CollisionInfo info) {
+  return {};
+}
+
+void TestGameState::ReleaseClick() {
 }

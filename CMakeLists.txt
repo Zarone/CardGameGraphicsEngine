@@ -36,10 +36,12 @@ add_executable(${PROJECT_NAME}
     src/GameState.cpp
     src/IndexBuffer.cpp
     src/main.cpp
+    src/MathHelper.cpp
     src/MemoryLayout.cpp
     src/Renderer.cpp
     src/Scene.cpp
     src/Shader.cpp
+    src/SimpleButton.cpp
     src/SimplePlane.cpp
     src/SimpleRenderObject.cpp
     src/Texture.cpp

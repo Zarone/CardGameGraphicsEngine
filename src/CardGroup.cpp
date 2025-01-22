@@ -26,9 +26,9 @@ lastCursorX(0),
 lastCursorY(0),
 wasInsideBoundary(false),
 lastClosestIndex(-1),
-strictBackingPlane(SimplePlane(myShaders::basicVertex, myShaders::basicFragment, glm::vec4(0.5f, 0, 0.5f, 0.5f))),
-extendedBackingPlane(SimplePlane(myShaders::basicVertex, myShaders::basicFragment, glm::vec4(0.0f, 0.5f, 0.0f, 0.5f))),
-fullBackingPlane(SimplePlane(myShaders::basicVertex, myShaders::basicFragment, glm::vec4(0.5f, 0.5f, 0.5f, 0.5f)))
+strictBackingPlane(SimplePlane(myShaders::basicVertex, myShaders::basicFragment, glm::identity<glm::mat4>(), glm::vec4(0.5f, 0, 0.5f, 0.5f))),
+extendedBackingPlane(SimplePlane(myShaders::basicVertex, myShaders::basicFragment, glm::identity<glm::mat4>(), glm::vec4(0.0f, 0.5f, 0.0f, 0.5f))),
+fullBackingPlane(SimplePlane(myShaders::basicVertex, myShaders::basicFragment, glm::identity<glm::mat4>(), glm::vec4(0.5f, 0.5f, 0.5f, 0.5f)))
 {
   ASSERT(width>3.0f);
   this->transform = glm::mat4(1.0f); // setup to identity
@@ -58,10 +58,6 @@ fullBackingPlane(SimplePlane(myShaders::basicVertex, myShaders::basicFragment, g
   this->textureEndAttribID = this->groupVao.AddBuffer(this->textureIDBuffer, this->textureIDBufferLayout);
 
   this->indexBuffer = IndexBuffer(CardRenderingData::cardIndices, 2);
-
-  this->strictBackingPlane.LoadIntoGPU();
-  this->extendedBackingPlane.LoadIntoGPU();
-  this->fullBackingPlane.LoadIntoGPU();
 }
 
 void CardGroup::PrepareTextures(TextureMap* textureMap) {
@@ -552,9 +548,12 @@ void CardGroup::Render(
     this->extendedBackingPlaneTransform = glm::scale(this->extendedBackingPlaneTransform, glm::vec3(width-2*margin+2*horizontalMargin, CardRenderingData::cardHeightRatio+2*verticalMargin, 1.0f));
     this->fullBackingPlaneTransform = glm::scale(this->fullBackingPlaneTransform, glm::vec3(width, CardRenderingData::cardHeightRatio, 1.0f));
   }
-  this->strictBackingPlane.Render(this->strictBackingPlaneTransform, renderer);
-  this->extendedBackingPlane.Render(this->extendedBackingPlaneTransform, renderer);
-  this->fullBackingPlane.Render(this->fullBackingPlaneTransform, renderer);
+  this->strictBackingPlane.SetTransform(&this->strictBackingPlaneTransform);
+  this->extendedBackingPlane.SetTransform(&this->extendedBackingPlaneTransform);
+  this->fullBackingPlane.SetTransform(&this->fullBackingPlaneTransform);
+  this->strictBackingPlane.Render(renderer);
+  this->extendedBackingPlane.Render(renderer);
+  this->fullBackingPlane.Render(renderer);
 
   this->dirtyPosition = false;
   this->dirtyDisplay = false;

@@ -5,6 +5,7 @@
 #include "../example/TestCardDatabaseSingleton.h"
 #include "../example/TestGameState.h"
 #include "../example/TestScene.h"
+#include "../example/TestSceneData.h"
 
 int main(void)
 {
@@ -13,35 +14,18 @@ int main(void)
 
   TestCardDatabaseSingleton database;
 
-  TestScene scene(&myWindow);
-  scene.SetupCamera(
-    glm::vec3(0.0f, 0.0f, 10.f),
-    glm::vec3(0.0f, 0.0f, -1.0f)
-  );
-  scene.SetupCardDataBase(&database);
-  scene.AddObject<TestGameState>();
-
-  auto currentTime = std::chrono::high_resolution_clock::now();
-  auto lastTime = currentTime;
-  auto diffTime = std::chrono::duration_cast<std::chrono::duration<float, std::milli>>(currentTime - lastTime);
-  double deltaTime = 0;
+  TestScene scene(&myWindow, &database);
+  scene.Swap(TestSceneID::MAIN_MENU);
 
   scene.SetupMouseClickCallback(&myWindow);
 
   /* Loop until the user closes the window */
   while (!myWindow.ShouldClose())
   {
-    
-    currentTime = std::chrono::high_resolution_clock::now();
-    diffTime = std::chrono::duration_cast<std::chrono::duration<float, std::milli>>(currentTime - lastTime);
-    deltaTime = diffTime.count()/1000.0f;
-    lastTime = currentTime;
-
-    /* Render here */
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    scene.ClearScreen();
 
     scene.Render();
-    scene.UpdateTick(deltaTime);
+    scene.UpdateTick(myWindow.DeltaTime());
 
     /* Swap front and back buffers */
     myWindow.SwapBuffers();

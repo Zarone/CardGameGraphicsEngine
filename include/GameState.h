@@ -6,10 +6,10 @@
 class GameState : public SceneObject
 {
 private:
-  std::vector<CardGroup*> allGroups;
+  std::vector<SceneObject*> allGroups;
 public:
   GameState();
-  void AddObject(CardGroup* group);
+  void AddObject(SceneObject* group);
   void Render(Renderer* renderer);
   void UpdateTick(double deltaTime);
   bool CheckCollision(

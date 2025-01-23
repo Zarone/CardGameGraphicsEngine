@@ -41,15 +41,14 @@ bool SimpleButton::CheckCollision(
     // If the cross product is positive, the point is outside this edge
     // (usually the opposite is true, but screen space is y-flipped)
     if (determinant(v1ToPoint, v2ToPoint) > 0) {
-      //std::cout << "outside" << std::endl;
       return false;
     }
   }
 
-  //// If we reach here, the point is inside the rectangle
-  //// Find the collision Z value by interpolating from the Z values of the rectangle's plane
+  // If we reach here, the point is inside the rectangle
+  // Find the collision Z value by interpolating from the Z values of the rectangle's plane
 
-  //// Use the first three vertices to compute the plane equation: Ax + By + Cz + D = 0
+  // Use the first three vertices to compute the plane equation: Ax + By + Cz + D = 0
   const glm::vec3& v0 = this->projectedVertices[0];
   const glm::vec3& v1 = this->projectedVertices[1];
   const glm::vec3& v2 = this->projectedVertices[2];

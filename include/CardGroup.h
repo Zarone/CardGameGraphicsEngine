@@ -12,6 +12,7 @@
 #include "Shader.h"
 #include "TextureMap.h"
 #include "SimplePlane.h"
+#include "ErrorHandling.h"
 
 typedef struct CardItem {
   Card card;
@@ -37,7 +38,7 @@ typedef struct TextureVertex {
   unsigned int index;
 } TextureVertex;
 
-class CardGroup
+class CardGroup : public SceneObject
 {
 private:
   const static unsigned int estimatedMax;
@@ -106,6 +107,8 @@ private:
     int size
   );
 
+  #ifdef DEBUG
+
   // just where the cards are
   SimplePlane strictBackingPlane;
   glm::mat4 strictBackingPlaneTransform;
@@ -114,11 +117,12 @@ private:
   SimplePlane extendedBackingPlane;
   glm::mat4 extendedBackingPlaneTransform;
 
+  #endif
+
   // doesn't subtract spacing margin, includes
   // horizontal/vectical margin
   SimplePlane fullBackingPlane;
   glm::mat4 fullBackingPlaneTransform;
-
 public:
   CardGroup(
     glm::vec3 position, 
@@ -180,4 +184,8 @@ public:
   ) const;
 
   void MoveToGroup(int index, CardGroup* to);
+
+  ClickEvent ProcessClick(CollisionInfo info) {return {};}
+  ClickEvent ProcessPreClick(CollisionInfo info) {return {};};
+  void ReleaseClick() {};
 };

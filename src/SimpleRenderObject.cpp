@@ -6,7 +6,7 @@ SimpleRenderObject::SimpleRenderObject(
   const std::string& vertexShader,
   const std::string& fragmentShader,
   glm::mat4 transform,
-  glm::vec4 color
+  Material material
 ):
   shader(vertexShader, fragmentShader),
   color(color)

@@ -26,8 +26,10 @@ lastCursorX(0),
 lastCursorY(0),
 wasInsideBoundary(false),
 lastClosestIndex(-1),
+#ifdef DEBUG
 strictBackingPlane(SimplePlane(myShaders::basicVertex, myShaders::basicFragment, glm::identity<glm::mat4>(), glm::vec4(0.5f, 0, 0.5f, 0.5f))),
 extendedBackingPlane(SimplePlane(myShaders::basicVertex, myShaders::basicFragment, glm::identity<glm::mat4>(), glm::vec4(0.0f, 0.5f, 0.0f, 0.5f))),
+#endif
 fullBackingPlane(SimplePlane(myShaders::basicVertex, myShaders::basicFragment, glm::identity<glm::mat4>(), glm::vec4(0.5f, 0.5f, 0.5f, 0.5f)))
 {
   ASSERT(width>3.0f);
@@ -394,7 +396,11 @@ void CardGroup::Render(
       }
     }
   } else {
-    margin = 0.0f;
+    if (width > (float)size + 2*whitespace) {
+      margin = (width - size - 2*whitespace)/2.0f;
+    } else {
+      margin = 0.0f;
+    }
   }
 
   const float verticalMargin = 0.15f;
@@ -541,19 +547,27 @@ void CardGroup::Render(
   }
 
   if (this->dirtyPosition) {
+    #ifdef DEBUG
     this->strictBackingPlaneTransform = glm::translate(this->transform, glm::vec3(width/2.0f, 0, -0.01f));
     this->extendedBackingPlaneTransform = glm::translate(this->transform, glm::vec3(width/2.0f, 0, -0.02f));
-    this->fullBackingPlaneTransform = glm::translate(this->transform, glm::vec3(width/2.0f, 0, -0.03f));
     this->strictBackingPlaneTransform = glm::scale(this->strictBackingPlaneTransform, glm::vec3(width-2*margin, CardRenderingData::cardHeightRatio, 1.0f));
     this->extendedBackingPlaneTransform = glm::scale(this->extendedBackingPlaneTransform, glm::vec3(width-2*margin+2*horizontalMargin, CardRenderingData::cardHeightRatio+2*verticalMargin, 1.0f));
-    this->fullBackingPlaneTransform = glm::scale(this->fullBackingPlaneTransform, glm::vec3(width, CardRenderingData::cardHeightRatio, 1.0f));
+    #endif
+    if (!this->isHand) {
+      this->fullBackingPlaneTransform = glm::translate(this->transform, glm::vec3(width/2.0f, 0, -0.03f));
+      this->fullBackingPlaneTransform = glm::scale(this->fullBackingPlaneTransform, glm::vec3(width, CardRenderingData::cardHeightRatio, 1.0f));
+    }
   }
+  #ifdef DEBUG
   this->strictBackingPlane.SetTransform(&this->strictBackingPlaneTransform);
   this->extendedBackingPlane.SetTransform(&this->extendedBackingPlaneTransform);
-  this->fullBackingPlane.SetTransform(&this->fullBackingPlaneTransform);
-  //this->strictBackingPlane.Render(renderer);
-  //this->extendedBackingPlane.Render(renderer);
-  //this->fullBackingPlane.Render(renderer);
+  this->strictBackingPlane.Render(renderer);
+  this->extendedBackingPlane.Render(renderer);
+  #endif
+  if (!this->isHand) {
+    this->fullBackingPlane.SetTransform(&this->fullBackingPlaneTransform);
+    this->fullBackingPlane.Render(renderer);
+  }
 
   this->dirtyPosition = false;
   this->dirtyDisplay = false;

@@ -28,6 +28,7 @@ add_executable(${PROJECT_NAME}
     src/shaders/BasicFragment.cpp
     src/shaders/CardVertex.cpp
     src/shaders/CardFragment.cpp
+    src/BoundButton.cpp
     src/Card.cpp
     src/CardGroup.cpp
     src/CardInfo.cpp
@@ -41,7 +42,6 @@ add_executable(${PROJECT_NAME}
     src/Renderer.cpp
     src/Scene.cpp
     src/Shader.cpp
-    src/SceneSwapButton.cpp
     src/SimpleButton.cpp
     src/SimplePlane.cpp
     src/SimpleRenderObject.cpp

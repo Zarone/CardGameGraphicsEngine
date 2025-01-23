@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../include/SimpleRenderObject.h"
+#include "../include/Material.h"
 
 class SimplePlane : public SimpleRenderObject
 {
@@ -15,6 +16,6 @@ public:
     const std::string& vertShader, 
     const std::string& fragShader, 
     glm::mat4 transform, 
-    glm::vec4 color
+    Material mat
   );
 };

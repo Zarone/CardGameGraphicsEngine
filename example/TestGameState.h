@@ -1,6 +1,7 @@
 #pragma once
 #include "../include/GameState.h"
 #include "../example/TestCardDatabaseSingleton.h"
+#include "../include/BoundButton.h"
 
 class TestGameState : public GameState
 {
@@ -13,9 +14,11 @@ private:
   CardGroup oppReserve;
   CardGroup oppBatlefield;
   CardGroup oppSpecials;
+  BoundButton passTurn;
   TestCardDatabaseSingleton* database;
+  void test();
 public:
-  TestGameState(TestCardDatabaseSingleton* database);
+  TestGameState(Renderer* renderer, TestCardDatabaseSingleton* database);
   ClickEvent ProcessClick(CollisionInfo info);
   ClickEvent ProcessPreClick(CollisionInfo info);
   void ReleaseClick();

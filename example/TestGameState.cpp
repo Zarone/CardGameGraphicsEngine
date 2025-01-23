@@ -3,7 +3,7 @@
 #include "./TestSceneData.h"
 #include "./TestCardInfo.h"
 
-TestGameState::TestGameState(TestCardDatabaseSingleton* database):
+TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* database):
   hand(
     glm::vec3(0.0f, -1.5f, 6.25f),
     //glm::vec3(0.0f, -0.5f, 6.0f),
@@ -13,7 +13,7 @@ TestGameState::TestGameState(TestCardDatabaseSingleton* database):
     true
   ),
   oppHand(
-    glm::vec3(0.0f, -1.5f, -6.25f),
+    glm::vec3(0.0f, -1.5f, -5.5f),
     10.0f, // rotateX
     4.0f,  // width
     true, // z flipped
@@ -23,7 +23,7 @@ TestGameState::TestGameState(TestCardDatabaseSingleton* database):
     glm::vec3(0.0f, -2.0f, 4.5f),
     //glm::vec3(0.0f, -0.5f, 6.0f),
     -90.0f, // rotateX
-    8.0f,   // width
+    7.0f,   // width
     false,  // z flipped
     false
   ),
@@ -31,7 +31,7 @@ TestGameState::TestGameState(TestCardDatabaseSingleton* database):
     glm::vec3(0.0f, -2.0f, -4.5f),
     //glm::vec3(0.0f, -0.5f, 6.0f),
     -90.0f, // rotateX
-    8.0f,   // width
+    7.0f,   // width
     false,  // z flipped
     false
   ),
@@ -39,7 +39,7 @@ TestGameState::TestGameState(TestCardDatabaseSingleton* database):
     glm::vec3(0.0f, -2.0f, 2.75f),
     //glm::vec3(0.0f, -0.5f, 6.0f),
     -90.0f, // rotateX
-    8.0f,   // width
+    7.0f,   // width
     false,  // z flipped
     false
   ),
@@ -47,7 +47,7 @@ TestGameState::TestGameState(TestCardDatabaseSingleton* database):
     glm::vec3(0.0f, -2.0f, -2.75f),
     //glm::vec3(0.0f, -0.5f, 6.0f),
     -90.0f, // rotateX
-    8.0f,   // width
+    7.0f,   // width
     false,  // z flipped
     false
   ),
@@ -55,7 +55,7 @@ TestGameState::TestGameState(TestCardDatabaseSingleton* database):
     glm::vec3(0.0f, -2.0f, 1.f),
     //glm::vec3(0.0f, -0.5f, 6.0f),
     -90.0f, // rotateX
-    8.0f,   // width
+    7.0f,   // width
     false,  // z flipped
     false
   ),
@@ -63,23 +63,43 @@ TestGameState::TestGameState(TestCardDatabaseSingleton* database):
     glm::vec3(0.0f, -2.0f, -1.f),
     //glm::vec3(0.0f, -0.5f, 6.0f),
     -90.0f, // rotateX
-    8.0f,   // width
+    7.0f,   // width
     false,  // z flipped
     false
+  ),
+  passTurn(
+    renderer,
+    glm::rotate(
+      glm::translate(
+        glm::identity<glm::mat4>(), 
+        glm::vec3(4.0f, -1.999f, 1.f)
+      ),
+      glm::radians(-90.0f), 
+      glm::vec3(1.0f, 0, 0)
+    ),
+    glm::vec4(1,0,0,1),
+    std::bind(&TestGameState::test, this)
   ),
   database(database)
 {
   oppHand.AddCard(0);
-  //oppHand.AddCard(2);
-  //oppHand.AddCard(3);
+  oppHand.AddCard(2);
+  oppHand.AddCard(3);
+  oppHand.AddCard(0);
+  oppHand.AddCard(2);
+  oppHand.AddCard(3);
 
-  hand.AddCard(0);
-  hand.AddCard(1);
-  hand.AddCard(2);
+  hand.AddCard(3);
+  hand.AddCard(3);
+  hand.AddCard(3);
+  hand.AddCard(3);
+  hand.AddCard(3);
+  hand.AddCard(3);
+  hand.AddCard(3);
+  hand.AddCard(3);
+  hand.AddCard(3);
   hand.AddCard(3);
   hand.AddCard(0);
-  hand.AddCard(1);
-  hand.AddCard(2);
 
   AddObject(&hand);
   AddObject(&oppHand);
@@ -89,10 +109,11 @@ TestGameState::TestGameState(TestCardDatabaseSingleton* database):
   AddObject(&oppBatlefield);
   AddObject(&specials);
   AddObject(&oppSpecials);
+  AddObject(&passTurn);
 }
 
 ClickEvent TestGameState::ProcessClick(CollisionInfo info) {
-  CardGroup* src = (CardGroup*) info.groupPointer;
+  SceneObject* src = (SceneObject*) info.groupPointer;
 
   if (src == &this->hand) {
     std::cout << "hand collision recognized" << std::endl;
@@ -112,8 +133,7 @@ ClickEvent TestGameState::ProcessClick(CollisionInfo info) {
   } else if (src == &this->reserve) {
     std::cout << "reserve click recognized" << std::endl;
   } else {
-    std::cout << "couldn't recognize group pointer" << std::endl;
-    ASSERT(false);
+    src->ProcessClick(info);
   }
 
   return {
@@ -126,4 +146,8 @@ ClickEvent TestGameState::ProcessPreClick(CollisionInfo info) {
 }
 
 void TestGameState::ReleaseClick() {
+}
+
+void TestGameState::test() {
+  std::cout << "test" << std::endl;
 }

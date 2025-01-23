@@ -4,9 +4,15 @@
 #include <list>
 #include <iostream>
 
+//#define DEBUG
+#ifdef DEBUG
 #define ASSERT(x) if (!(x)) {\
   std::cout << "FAILED ASSERT: " << #x << ", file: " << __FILE__ << ", line: " << __LINE__ << std::endl;raise(SIGTRAP);\
 }
+#else
+#define ASSERT(x) {}
+#endif
+
 #define GLCall(x) GLClearError();\
   x;\
   ASSERT(GLLogCall(#x, __FILE__, __LINE__))

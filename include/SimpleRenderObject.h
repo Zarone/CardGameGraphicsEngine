@@ -4,9 +4,9 @@
 
 #include "../include/VertexArray.h"
 #include "../include/IndexBuffer.h"
-#include "../include/Shader.h"
 #include "../include/Renderer.h"
 #include "../include/SceneObject.h"
+#include "../include/Material.h"
 
 class SimpleRenderObject : public SceneObject
 {
@@ -15,19 +15,18 @@ private:
   VertexArray vArray;
   VertexBuffer vBuffer;
   IndexBuffer iBuffer;
-  Shader shader;
   int triangleCount;
 protected:
   void LoadIntoGPU();
   virtual int GetVertexCount() = 0;
   virtual void FillData(float* vertexData, unsigned int* indexData) = 0;
-  glm::vec4 color;
+  Material material;
 public:
   SimpleRenderObject(
     const std::string& vertexShader, 
     const std::string& fragmentShader,
     glm::mat4 transform,
-    glm::vec4 color
+    Material material
   );
 
   virtual void SetTransform(glm::mat4* transform);

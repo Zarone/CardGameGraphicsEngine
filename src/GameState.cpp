@@ -3,18 +3,18 @@
 GameState::GameState() {
 }
 
-void GameState::AddObject(CardGroup* group) {
+void GameState::AddObject(SceneObject* group) { 
   allGroups.push_back(group);
 }
 
 void GameState::Render(Renderer* renderer) {
-  for (CardGroup* group : this->allGroups) {
+  for (SceneObject* group : this->allGroups) {
     group->Render(renderer);
   }
 }
 
 void GameState::UpdateTick(double deltaTime) {
-  for (CardGroup* group : this->allGroups) {
+  for (SceneObject* group : this->allGroups) {
     group->UpdateTick(deltaTime);
   }
 }
@@ -29,7 +29,7 @@ bool GameState::CheckCollision(Renderer* renderer, double x, double y, double* c
   CollisionInfo tempInfo;
   bool objectCollision = false;
 
-  for (CardGroup* group : allGroups) {
+  for (SceneObject* group : allGroups) {
     objectCollision = group->CheckCollision(renderer, x, y, &tempZ, &tempInfo);
     if (objectCollision && tempZ < minZ) {
       minZ = tempZ;

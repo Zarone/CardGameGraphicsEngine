@@ -12,7 +12,7 @@ private:
   TestCardDatabaseSingleton* database;
 
   // I want to put these into a mapping system later
-  Shader buttonShader = Shader(myShaders::basicVertex, myShaders::basicFragment);
+  Shader buttonShader;
 public:
   TestScene(WindowManager* windowManager, TestCardDatabaseSingleton* database);
   void Swap(unsigned int sceneIndex);

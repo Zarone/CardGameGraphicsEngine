@@ -514,7 +514,7 @@ void CardGroup::Render(
     //}
   //}
   //cardShader.SetUniform1iv("textures", maxBindableTextures, textureUnits.data());
-  cardShader.SetInstancedTextures(maxBindableTextures, this->textureMap);
+  cardShader.SetInstancedTextures(maxBindableTextures, &renderer->textureMap);
 
   // bind textures and shift buffer for
   // rendering

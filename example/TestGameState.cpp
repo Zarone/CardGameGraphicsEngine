@@ -78,7 +78,11 @@ TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* data
       glm::radians(-90.0f), 
       glm::vec3(1.0f, 0, 0)
     ),
-    Material({.hasTexture=false,.color=glm::vec4(1.0f, 0, 0, 1.0f)}),
+    Material({
+      .hasTexture=false,
+      .shader=&buttonShader,
+      .color=glm::vec4(1.0f, 0, 0, 1.0f),
+    }),
     std::bind(&TestGameState::test, this)
   ),
   database(database)

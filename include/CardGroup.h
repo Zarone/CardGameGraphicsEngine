@@ -61,8 +61,6 @@ private:
   Shader cardShader;
   Shader planeShader = Shader(myShaders::basicVertex, myShaders::basicFragment);
 
-  TextureMap* textureMap;
-
   // if this is true, only the back 
   // of the cards is shown
   bool zFlipped; 

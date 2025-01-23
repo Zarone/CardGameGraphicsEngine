@@ -10,12 +10,11 @@ TestScene::TestScene(WindowManager* windowManager, TestCardDatabaseSingleton* da
 }
 
 void TestScene::Swap(unsigned int sceneIndex) {
-  Shader buttonShader(myShaders::basicVertex, myShaders::basicFragment);
   Material buttonMaterial = {
-    .textureMap = &this->renderer.textureMap,
     .hasTexture = false,
+    .textureMap = &this->renderer.textureMap,
+    .shader = &this->buttonShader,
     .color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f),
-    .shader = &this->buttonShader
   };
   
   switch ((TestSceneID)sceneIndex) {
@@ -37,8 +36,6 @@ void TestScene::Swap(unsigned int sceneIndex) {
         glm::vec3(0.0f, 0.0f, 10.f),
         glm::vec3(0.0f, 0.0f, -1.0f)
       );
-
-      // setup sceneData sharedpointer
 
       //this->AddObject<SceneSwapButton>(
         //&this->renderer,

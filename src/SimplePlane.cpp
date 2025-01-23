@@ -13,11 +13,9 @@ const unsigned int SimplePlane::indexData[] = {
 };
 
 SimplePlane::SimplePlane(
-  const std::string& vertShader, 
-  const std::string& fragShader,
   glm::mat4 transform,
   Material material
-): SimpleRenderObject(vertShader, fragShader, transform, color)
+): SimpleRenderObject(transform, material)
 {
   this->LoadIntoGPU();
 }

@@ -23,8 +23,6 @@ protected:
   Material material;
 public:
   SimpleRenderObject(
-    const std::string& vertexShader, 
-    const std::string& fragmentShader,
     glm::mat4 transform,
     Material material
   );

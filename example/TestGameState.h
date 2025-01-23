@@ -2,6 +2,7 @@
 #include "../include/GameState.h"
 #include "../example/TestCardDatabaseSingleton.h"
 #include "../include/BoundButton.h"
+#include "../include/shaders/allShaders.h"
 
 class TestGameState : public GameState
 {
@@ -16,6 +17,9 @@ private:
   CardGroup oppSpecials;
   BoundButton passTurn;
   TestCardDatabaseSingleton* database;
+
+  Shader buttonShader;
+
   void test();
 public:
   TestGameState(Renderer* renderer, TestCardDatabaseSingleton* database);

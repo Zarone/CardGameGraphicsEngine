@@ -3,6 +3,8 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 
+#include "./TextureMap.h"
+
 class Shader 
 {
 private:
@@ -15,6 +17,8 @@ public:
   void SetUniform4fv(const std::string& name, bool transpose, GLfloat* pointer);
   void SetUniform4f(const std::string& name, glm::vec4& vec);
   void SetUniform1iv(const std::string& name, unsigned int count, GLint* data);
-  void SetUniform1i(const std::string& name, GLuint val);
+  void SetUniform1i(const std::string& name, GLint val);
+  void SetInstancedTextures(int maxBindableTextures, TextureMap* textureMap);
+  void SetTexture(int maxBindableTextures, const std::string& texture, TextureMap* textureMap);
   ~Shader();
 };

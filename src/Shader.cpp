@@ -60,7 +60,7 @@ void Shader::SetUniform1iv(const std::string& name, unsigned int count, GLint* d
   GLCall(glUniform1iv(thisID, count, data));
 }
 
-void Shader::SetUniform1i(const std::string& name, GLuint val) {
+void Shader::SetUniform1i(const std::string& name, GLint val) {
   GLint thisID = this->GetUniformLocation(name);
   GLCall(glUniform1i(thisID, val));
 }
@@ -68,6 +68,23 @@ void Shader::SetUniform1i(const std::string& name, GLuint val) {
 void Shader::SetUniform4f(const std::string& name, glm::vec4& vec) {
   GLint thisID = this->GetUniformLocation(name);
   GLCall(glUniform4f(thisID, vec.x, vec.y, vec.z, vec.w));
+}
+
+void Shader::SetInstancedTextures(int maxBindableTextures, TextureMap* textureMap) {
+  std::vector<int> textureUnits(maxBindableTextures);
+  int mapSize = textureMap->CurrentlyBound();
+  for (int i = 0; i < maxBindableTextures; ++i) {
+    if (i < mapSize) {
+      textureUnits[i] = i;
+    } else {
+      textureUnits[i] = 0;
+    }
+  }
+  this->SetUniform1iv("textures", maxBindableTextures, textureUnits.data());
+}
+
+void Shader::SetTexture(int maxBindableTextures, const std::string& texture, TextureMap* textureMap) {
+  this->SetUniform1i("texture", textureMap->RequestBind(maxBindableTextures, texture));
 }
 
 Shader::~Shader() {

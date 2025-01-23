@@ -13,6 +13,7 @@
 #include "TextureMap.h"
 #include "SimplePlane.h"
 #include "ErrorHandling.h"
+#include "../include/shaders/allShaders.h"
 
 typedef struct CardItem {
   Card card;
@@ -58,6 +59,7 @@ private:
   MemoryLayout textureIDBufferLayout;
   unsigned int textureEndAttribID;
   Shader cardShader;
+  Shader planeShader = Shader(myShaders::basicVertex, myShaders::basicFragment);
 
   TextureMap* textureMap;
 

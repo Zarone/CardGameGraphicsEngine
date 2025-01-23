@@ -7,13 +7,11 @@
 SimpleButton::SimpleButton(
   Renderer* renderer,
   glm::mat4 transform,
-  glm::vec4 color
+  Material material
 ):
   SimplePlane(
-    myShaders::basicVertex, 
-    myShaders::basicFragment, 
     transform,
-    color
+    material
   ),
   renderer(renderer)
 {
@@ -112,7 +110,7 @@ void SimpleButton::SetTransform(glm::mat4* transform) {
 }
 
 ClickEvent SimpleButton::ProcessPreClick(CollisionInfo info) {
-  this->color.w *= 0.5f;
+  this->material.color.w *= 0.5f;
   this->pressedDown = true;
   return {};
 }
@@ -120,6 +118,6 @@ ClickEvent SimpleButton::ProcessPreClick(CollisionInfo info) {
 void SimpleButton::ReleaseClick() {
   if (this->pressedDown){
     this->pressedDown = false;
-    this->color.w *= 2.f;
+    this->material.color.w *= 2.f;
   }
 }

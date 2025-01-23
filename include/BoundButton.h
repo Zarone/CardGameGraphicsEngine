@@ -9,7 +9,7 @@ public:
   BoundButton(
     Renderer* renderer,
     glm::mat4 transform,
-    glm::vec4 color,
+    Material material,
     std::function<void()> func
   );
 

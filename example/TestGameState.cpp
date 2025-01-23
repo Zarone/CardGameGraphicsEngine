@@ -4,6 +4,7 @@
 #include "./TestCardInfo.h"
 
 TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* database):
+  buttonShader(myShaders::basicVertex, myShaders::basicFragment),
   hand(
     glm::vec3(0.0f, -1.5f, 6.25f),
     //glm::vec3(0.0f, -0.5f, 6.0f),
@@ -77,7 +78,7 @@ TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* data
       glm::radians(-90.0f), 
       glm::vec3(1.0f, 0, 0)
     ),
-    glm::vec4(1,0,0,1),
+    Material({.hasTexture=false,.color=glm::vec4(1.0f, 0, 0, 1.0f)}),
     std::bind(&TestGameState::test, this)
   ),
   database(database)

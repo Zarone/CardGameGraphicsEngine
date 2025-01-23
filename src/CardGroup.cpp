@@ -30,7 +30,18 @@ lastClosestIndex(-1),
 strictBackingPlane(SimplePlane(myShaders::basicVertex, myShaders::basicFragment, glm::identity<glm::mat4>(), glm::vec4(0.5f, 0, 0.5f, 0.5f))),
 extendedBackingPlane(SimplePlane(myShaders::basicVertex, myShaders::basicFragment, glm::identity<glm::mat4>(), glm::vec4(0.0f, 0.5f, 0.0f, 0.5f))),
 #endif
-fullBackingPlane(SimplePlane(myShaders::basicVertex, myShaders::basicFragment, glm::identity<glm::mat4>(), glm::vec4(0.5f, 0.5f, 0.5f, 0.5f)))
+fullBackingPlane(
+    SimplePlane(
+      glm::identity<glm::mat4>(), 
+      Material(
+        {
+          .hasTexture=false,
+          .shader=&this->planeShader,
+          .color=glm::vec4(0.5f,0.5f,0.5f,0.5f)
+        }
+      )
+    )
+  )
 {
   ASSERT(width>3.0f);
   this->transform = glm::mat4(1.0f); // setup to identity
@@ -493,17 +504,17 @@ void CardGroup::Render(
 
   // Pass texture units as an array to the shader.
   int maxBindableTextures = renderer->maxBindableTextures;
-  std::vector<int> textureUnits(maxBindableTextures);
-  //int mapSize = renderer->textureMap.Size();
-  int mapSize = renderer->textureMap.CurrentlyBound();
-  for (int i = 0; i < maxBindableTextures; ++i) {
-    if (i < mapSize) {
-      textureUnits[i] = i;
-    } else {
-      textureUnits[i] = 0;
-    }
-  }
-  cardShader.SetUniform1iv("textures", maxBindableTextures, textureUnits.data());
+  //std::vector<int> textureUnits(maxBindableTextures);
+  //int mapSize = renderer->textureMap.CurrentlyBound();
+  //for (int i = 0; i < maxBindableTextures; ++i) {
+    //if (i < mapSize) {
+      //textureUnits[i] = i;
+    //} else {
+      //textureUnits[i] = 0;
+    //}
+  //}
+  //cardShader.SetUniform1iv("textures", maxBindableTextures, textureUnits.data());
+  cardShader.SetInstancedTextures(maxBindableTextures, this->textureMap);
 
   // bind textures and shift buffer for
   // rendering

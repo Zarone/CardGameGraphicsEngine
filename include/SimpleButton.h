@@ -1,5 +1,7 @@
 #pragma once
+
 #include "./SimplePlane.h"
+#include "../include/Material.h"
 
 class SimpleButton : public SimplePlane
 {
@@ -11,7 +13,7 @@ public:
   SimpleButton(
     Renderer* renderer,
     glm::mat4 transform,
-    glm::vec4 color
+    Material material
   );
   bool CheckCollision(
     Renderer* renderer, 

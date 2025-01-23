@@ -3,13 +3,10 @@
 #include "../include/ErrorHandling.h"
 
 SimpleRenderObject::SimpleRenderObject(
-  const std::string& vertexShader,
-  const std::string& fragmentShader,
   glm::mat4 transform,
   Material material
 ):
-  shader(vertexShader, fragmentShader),
-  color(color)
+  material(material)
 {
   this->SetTransform(&transform);
 }
@@ -37,17 +34,20 @@ void SimpleRenderObject::LoadIntoGPU() {
 }
 
 void SimpleRenderObject::SetTransform(glm::mat4* transform) {
-  this->shader.Bind();
-  this->shader.SetUniform4fv("modelMatrix", false, glm::value_ptr(*transform));
+  this->material.shader->Bind();
+  this->material.shader->SetUniform4fv("modelMatrix", false, glm::value_ptr(*transform));
 }
 
 void SimpleRenderObject::Render(Renderer* renderer) {
   this->vArray.Bind();
   this->iBuffer.Bind();
-  this->shader.Bind();
-  this->shader.SetUniform4fv("projMatrix", false, glm::value_ptr(renderer->projMatrix));
-  this->shader.SetUniform4fv("cameraMatrix", false, glm::value_ptr(renderer->cameraMatrix));
-  this->shader.SetUniform4f("color", this->color);
+  this->material.shader->Bind();
+  this->material.shader->SetUniform4fv("projMatrix", false, glm::value_ptr(renderer->projMatrix));
+  this->material.shader->SetUniform4fv("cameraMatrix", false, glm::value_ptr(renderer->cameraMatrix));
+  this->material.shader->SetUniform4f("color", this->material.color);
+  if (this->material.hasTexture) {
+    this->material.shader->SetTexture(renderer->maxBindableTextures, this->material.textureAddr, &renderer->textureMap);
+  }
   GLCall(glDrawElements(GL_TRIANGLES, triangleCount*3, GL_UNSIGNED_INT, 0));
 }
 

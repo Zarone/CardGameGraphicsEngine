@@ -13,8 +13,6 @@ protected:
   void FillData(float* vertexData, unsigned int* indexData);
 public:
   SimplePlane(
-    const std::string& vertShader, 
-    const std::string& fragShader, 
     glm::mat4 transform, 
     Material mat
   );

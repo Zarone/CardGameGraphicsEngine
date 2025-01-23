@@ -4,11 +4,20 @@
 #include "../include/BoundButton.h"
 
 TestScene::TestScene(WindowManager* windowManager, TestCardDatabaseSingleton* database):
+  buttonShader(myShaders::basicVertex, myShaders::basicFragment),
   Scene(windowManager, database), database(database)
 {
 }
 
 void TestScene::Swap(unsigned int sceneIndex) {
+  Shader buttonShader(myShaders::basicVertex, myShaders::basicFragment);
+  Material buttonMaterial = {
+    .textureMap = &this->renderer.textureMap,
+    .hasTexture = false,
+    .color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f),
+    .shader = &this->buttonShader
+  };
+  
   switch ((TestSceneID)sceneIndex) {
     case TestSceneID::GAME_SCREEN: {
       this->Reset();
@@ -52,7 +61,7 @@ void TestScene::Swap(unsigned int sceneIndex) {
           ), 0.1f, 
           glm::vec3(0, 0, 1.0f)
         ), 
-        glm::vec4(1.0, 1.0, 1.0, 1.0),
+        buttonMaterial,
         std::bind(&TestScene::Swap, this, TestSceneID::GAME_SCREEN)
       );
 

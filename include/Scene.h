@@ -12,7 +12,7 @@ protected:
   Renderer renderer;
   std::vector<std::unique_ptr<SceneObject>> objects;
   unsigned int currentScene = 0;
-  std::unique_ptr<SceneData> sceneData;
+  std::shared_ptr<SceneData> sceneData;
 public:
   Scene(
     WindowManager* windowManager,

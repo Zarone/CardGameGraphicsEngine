@@ -21,7 +21,7 @@ public:
     CollisionInfo* info
   ) const;
   ClickEvent ProcessPreClick(CollisionInfo info);
-  ClickEvent ProcessClick(CollisionInfo info);
+  virtual ClickEvent ProcessClick(CollisionInfo info);
   void SetupProjectedVertices(glm::mat4* transform);
   void SetTransform(glm::mat4* transform);
   void ReleaseClick();

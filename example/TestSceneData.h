@@ -4,9 +4,8 @@
 
 enum TestSceneID {
   UNINITIALIZED = 0,
-  GAME_SCREEN = 1,
-  GAME_SCREEN_2_TEST = 2,
-  MAIN_MENU = 3
+  GAME_SCREEN,
+  MAIN_MENU 
 };
 
 struct GameInitData : public SceneData

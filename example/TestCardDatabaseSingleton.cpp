@@ -23,7 +23,7 @@ TestCardDatabaseSingleton::TestCardDatabaseSingleton() {
   this->size = sizeof(TestCardDatabaseSingleton::IDToInfo)/sizeof(TestCardInfo);
 }
 
-CardInfo* TestCardDatabaseSingleton::GetInfo(unsigned int id) {
+TestCardInfo* TestCardDatabaseSingleton::GetInfo(unsigned int id) {
   if (id >= size || id < 0) return nullptr;
   else {
     return &(IDToInfo[id]);

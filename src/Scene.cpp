@@ -36,6 +36,7 @@ void Scene::ProcessCollision(double x, double y, double* collisionZ, bool preCli
     double z = MAXFLOAT;
     CollisionInfo info;
     bool objectCollision = object->CheckCollision(&this->renderer, x, y, &z, &info);
+    if (objectCollision) std::cout << "Collision at z = " << z << std::endl;
 
     if (objectCollision && z < minZ) {
       minZ = z;
@@ -53,12 +54,12 @@ void Scene::ProcessCollision(double x, double y, double* collisionZ, bool preCli
     ClickEvent event;
 
     if (preClick) {
-      ClickEvent event = (*selectedObject)->ProcessPreClick(collisionInfo);
+      event = (*selectedObject)->ProcessPreClick(collisionInfo);
     } else {
-      ClickEvent event = (*selectedObject)->ProcessClick(collisionInfo);
+      event = (*selectedObject)->ProcessClick(collisionInfo);
     }
 
-    if (event.sceneSwap) {
+    if (!preClick && event.sceneSwap) {
       this->Swap(event.sceneIndex);
     }
     return;

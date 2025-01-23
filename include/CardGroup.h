@@ -161,6 +161,8 @@ public:
 
   void AddCard(unsigned int id);
 
+  Card GetCard(unsigned int index);
+
   void UpdateTick(double deltaTime);
 
   /*

@@ -41,6 +41,7 @@ add_executable(${PROJECT_NAME}
     src/Renderer.cpp
     src/Scene.cpp
     src/Shader.cpp
+    src/SceneSwapButton.cpp
     src/SimpleButton.cpp
     src/SimplePlane.cpp
     src/SimpleRenderObject.cpp

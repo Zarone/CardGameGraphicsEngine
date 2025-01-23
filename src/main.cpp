@@ -15,6 +15,7 @@ int main(void)
   TestCardDatabaseSingleton database;
 
   TestScene scene(&myWindow, &database);
+
   scene.Swap(TestSceneID::MAIN_MENU);
 
   scene.SetupMouseClickCallback(&myWindow);

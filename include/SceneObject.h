@@ -6,7 +6,7 @@ typedef struct CollisionInfo {
   // if the scene object has multiple items
   // inside it, this identifies which one
   // was actually hit
-  int collisionIndex; 
+  unsigned int collisionIndex; 
 
   // if the scene object has multiple groups
   // inside it, this identifies which one was 

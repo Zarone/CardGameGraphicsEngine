@@ -1,3 +1,4 @@
+#pragma once
 #include "../include/CardDatabaseSingleton.h"
 #include "./TestCardInfo.h"
 
@@ -6,6 +7,6 @@ private:
   static TestCardInfo IDToInfo[];
   unsigned int size;
 public:
-  CardInfo* GetInfo(unsigned int id);
+  TestCardInfo* GetInfo(unsigned int id);
   TestCardDatabaseSingleton();
 };

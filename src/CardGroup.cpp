@@ -551,9 +551,9 @@ void CardGroup::Render(
   this->strictBackingPlane.SetTransform(&this->strictBackingPlaneTransform);
   this->extendedBackingPlane.SetTransform(&this->extendedBackingPlaneTransform);
   this->fullBackingPlane.SetTransform(&this->fullBackingPlaneTransform);
-  this->strictBackingPlane.Render(renderer);
-  this->extendedBackingPlane.Render(renderer);
-  this->fullBackingPlane.Render(renderer);
+  //this->strictBackingPlane.Render(renderer);
+  //this->extendedBackingPlane.Render(renderer);
+  //this->fullBackingPlane.Render(renderer);
 
   this->dirtyPosition = false;
   this->dirtyDisplay = false;
@@ -570,6 +570,10 @@ void CardGroup::AddCard(unsigned int id) {
     .card = Card(id),
     .renderData = CardRenderingData()
   });
+}
+
+Card CardGroup::GetCard(unsigned int index) {
+  return this->cards[index].card;
 }
 
 void CardGroup::UpdateTick(double deltaTime) {

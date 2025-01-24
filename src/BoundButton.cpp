@@ -11,9 +11,7 @@ BoundButton::BoundButton(
   onPress = func;
 }
 
-#include <iostream>
 ClickEvent BoundButton::ProcessClick(CollisionInfo info) {
-  std::cout << "bound button process click" << std::endl;
   onPress();
 
   return {

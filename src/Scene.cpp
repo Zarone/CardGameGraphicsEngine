@@ -36,7 +36,7 @@ void Scene::ProcessCollision(double x, double y, double* collisionZ, bool preCli
     double z = MAXFLOAT;
     CollisionInfo info;
     bool objectCollision = object->CheckCollision(&this->renderer, x, y, &z, &info);
-    if (objectCollision) std::cout << "Collision at z = " << z << std::endl;
+    //if (objectCollision) std::cout << "Collision at z = " << z << std::endl;
 
     if (objectCollision && z < minZ) {
       minZ = z;

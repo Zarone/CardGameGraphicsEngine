@@ -3,6 +3,8 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 
+#include "Material.h"
+
 class CardRenderingData
 {
 private:
@@ -23,6 +25,8 @@ public:
   static GLfloat cardPositions[];
   static GLuint cardIndices[];
   static float cardHeightRatio;
+
+  Shader* shader = nullptr;
 
   glm::vec3 displayedPosition;
   double displayedRotationZ;

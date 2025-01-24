@@ -22,7 +22,9 @@ void TestScene::Swap(unsigned int sceneIndex) {
       
       // setup shader for card and button
       this->renderer.SetupShader("buttonShader", myShaders::textureVertex, myShaders::textureFragment);
-      this->renderer.SetupShader("cardShader", myShaders::highlightedCardVertex, myShaders::highlightedCardFragment);
+      this->renderer.SetupShader("cardShader", myShaders::cardVertex, myShaders::cardFragment);
+      this->renderer.SetupShader("highlightCardShader", myShaders::highlightedCardVertex, myShaders::highlightedCardFragment);
+      this->renderer.SetupShader("basicShader", myShaders::basicVertex, myShaders::basicFragment);
       
       this->AddObject<TestGameState>(&this->renderer, this->database);
 

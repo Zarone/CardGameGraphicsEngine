@@ -18,7 +18,7 @@ void TextureMap::SetupTexturePath(const std::string& path) {
     this->map.emplace(
       std::piecewise_construct,
       std::forward_as_tuple(path),
-      std::forward_as_tuple(TextureMap::pathPrefix + path + ".png"));
+      std::forward_as_tuple(TextureMap::pathPrefix + path + ".jpg"));
   }
 }
 

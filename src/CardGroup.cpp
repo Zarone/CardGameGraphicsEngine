@@ -9,6 +9,7 @@
 const unsigned int CardGroup::estimatedMax = 60;
 
 CardGroup::CardGroup(
+  Renderer* renderer,
   glm::vec3 position, 
   float rotationX, 
   float width, 
@@ -20,13 +21,13 @@ zFlipped(zFlipped),
 isHand(isHand),
 dirtyDisplay(true), 
 dirtyPosition(true), 
-cardShader(myShaders::highlightedCardVertex, myShaders::highlightedCardFragment),
+//cardShader(myShaders::highlightedCardVertex, myShaders::highlightedCardFragment),
 width(width),
 lastCursorX(0),
 lastCursorY(0),
 wasInsideBoundary(false),
 lastClosestIndex(-1),
-strictBackingPlaneShader(myShaders::basicVertex, myShaders::basicFragment),
+//strictBackingPlaneShader(myShaders::basicVertex, myShaders::basicFragment),
 #ifdef DEBUG
 strictBackingPlane(
   SimplePlane(
@@ -34,7 +35,7 @@ strictBackingPlane(
     Material(
       {
         .hasTexture=false,
-        .shader=&this->strictBackingPlaneShader,
+        .shader=renderer->GetShader("basicShader"),
         .color=glm::vec4(0.5f, 0.0f, 0.5f, 0.5f)
       }
     )
@@ -46,7 +47,7 @@ extendedBackingPlane(
     Material(
       {
         .hasTexture=false,
-        .shader=&this->strictBackingPlaneShader,
+        .shader=renderer->GetShader("basicShader"),
         .color=glm::vec4(0.0f, 0.5f, 0.0f, 0.5f)
       }
     )
@@ -59,7 +60,7 @@ fullBackingPlane(
     Material(
       {
         .hasTexture=false,
-        .shader=&this->strictBackingPlaneShader,
+        .shader=renderer->GetShader("basicShader"),
         .color=glm::vec4(0.5f,0.5f,0.5f,0.5f)
       }
     )
@@ -386,6 +387,9 @@ void CardGroup::BindAndDrawAllFrontFaces(
 void CardGroup::Render(
   Renderer* renderer
 ) {
+
+
+
   CursorData cursor;
   renderer->GetCursorPosition(&cursor);
 
@@ -488,6 +492,8 @@ void CardGroup::Render(
     );
   }
 
+
+
   // 3 for positions plus 1 for rotation
   const int transformVertexSize = sizeof(CardTransformVertex)/sizeof(float);
 
@@ -512,21 +518,24 @@ void CardGroup::Render(
     this->transformBuffer.OverwriteData(buffer, 0, size*sizeof(CardTransformVertex));
   }
 
+  int maxBindableTextures = renderer->maxBindableTextures;
+  glm::mat4& projMatrix = renderer->projMatrix;
+  glm::mat4& camMatrix = renderer->cameraMatrix;
+
   this->groupVao.Bind();
   this->indexBuffer.Bind();
   this->transformBuffer.Bind();
-  this->cardShader.Bind();
-  glm::mat4& projMatrix = renderer->projMatrix;
-  glm::mat4& camMatrix = renderer->cameraMatrix;
-  cardShader.SetUniform4fv("u_projMatrix", false, glm::value_ptr(projMatrix));
-  cardShader.SetUniform4fv("u_cameraMatrix", false, glm::value_ptr(camMatrix));
-  cardShader.SetUniform4fv("u_modelMatrix", false, glm::value_ptr(this->transform));
+
+  Shader* cardShader = renderer->GetShader("cardShader");
+  cardShader->Bind();
+  cardShader->SetUniform4fv("u_projMatrix", false, glm::value_ptr(projMatrix));
+  cardShader->SetUniform4fv("u_cameraMatrix", false, glm::value_ptr(camMatrix));
+  cardShader->SetUniform4fv("u_modelMatrix", false, glm::value_ptr(this->transform));
+  cardShader->SetInstancedTextures(maxBindableTextures, &renderer->textureMap);
 
   this->PrepareTextures(&renderer->textureMap);
 
   // Pass texture units as an array to the shader.
-  int maxBindableTextures = renderer->maxBindableTextures;
-  cardShader.SetInstancedTextures(maxBindableTextures, &renderer->textureMap);
 
   // bind textures and shift buffer for
   // rendering
@@ -600,6 +609,7 @@ void CardGroup::Render(
     this->lastCursorY = (int)cursor.cursorY;
     this->wasInsideBoundary = insideHandBoundary;
   }
+
 }
 
 void CardGroup::AddCard(unsigned int id) {
@@ -611,6 +621,10 @@ void CardGroup::AddCard(unsigned int id) {
 
 Card CardGroup::GetCard(unsigned int index) {
   return this->cards[index].card;
+}
+
+std::vector<CardItem> CardGroup::GetCards() {
+  return this->cards;
 }
 
 void CardGroup::UpdateTick(double deltaTime) {

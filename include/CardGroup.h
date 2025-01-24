@@ -58,7 +58,6 @@ private:
   VertexBuffer textureIDBuffer;
   MemoryLayout textureIDBufferLayout;
   unsigned int textureEndAttribID;
-  Shader cardShader;
 
   // if this is true, only the back 
   // of the cards is shown
@@ -109,7 +108,7 @@ private:
   #ifdef DEBUG
 
   // just where the cards are
-  Shader strictBackingPlaneShader;
+  //Shader strictBackingPlaneShader;
   SimplePlane strictBackingPlane;
   glm::mat4 strictBackingPlaneTransform;
 
@@ -125,6 +124,7 @@ private:
   glm::mat4 fullBackingPlaneTransform;
 public:
   CardGroup(
+    Renderer* renderer,
     glm::vec3 position, 
     float rotationX, 
     float width, 
@@ -166,6 +166,8 @@ public:
   void AddCard(unsigned int id);
 
   Card GetCard(unsigned int index);
+
+  std::vector<CardItem> GetCards();
 
   void UpdateTick(double deltaTime);
 

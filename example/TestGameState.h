@@ -27,4 +27,5 @@ public:
   ~TestGameState() {
     std::cout << "delete game state" << std::endl;
   }
+  void Render(Renderer* renderer);
 };

@@ -5,6 +5,7 @@
 
 TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* database):
   hand(
+    renderer,
     glm::vec3(0.0f, -1.5f, 6.25f),
     //glm::vec3(0.0f, -0.5f, 6.0f),
     -30.0f, // rotateX
@@ -13,6 +14,7 @@ TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* data
     true
   ),
   oppHand(
+    renderer,
     glm::vec3(0.0f, -1.5f, -5.5f),
     10.0f, // rotateX
     4.0f,  // width
@@ -20,6 +22,7 @@ TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* data
     true
   ),
   specials(
+    renderer,
     glm::vec3(0.0f, -2.0f, 4.5f),
     //glm::vec3(0.0f, -0.5f, 6.0f),
     -90.0f, // rotateX
@@ -28,6 +31,7 @@ TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* data
     false
   ),
   oppSpecials(
+    renderer,
     glm::vec3(0.0f, -2.0f, -4.5f),
     //glm::vec3(0.0f, -0.5f, 6.0f),
     -90.0f, // rotateX
@@ -36,6 +40,7 @@ TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* data
     false
   ),
   reserve(
+    renderer,
     glm::vec3(0.0f, -2.0f, 2.75f),
     //glm::vec3(0.0f, -0.5f, 6.0f),
     -90.0f, // rotateX
@@ -44,6 +49,7 @@ TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* data
     false
   ),
   oppReserve(
+    renderer,
     glm::vec3(0.0f, -2.0f, -2.75f),
     //glm::vec3(0.0f, -0.5f, 6.0f),
     -90.0f, // rotateX
@@ -52,6 +58,7 @@ TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* data
     false
   ),
   battlefield(
+    renderer,
     glm::vec3(0.0f, -2.0f, 1.f),
     //glm::vec3(0.0f, -0.5f, 6.0f),
     -90.0f, // rotateX
@@ -60,6 +67,7 @@ TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* data
     false
   ),
   oppBatlefield(
+    renderer,
     glm::vec3(0.0f, -2.0f, -1.f),
     //glm::vec3(0.0f, -0.5f, 6.0f),
     -90.0f, // rotateX
@@ -88,7 +96,7 @@ TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* data
   ),
   database(database)
 {
-  renderer->textureMap.SetupTexturePath("endturn");
+
   oppHand.AddCard(0);
   oppHand.AddCard(2);
   oppHand.AddCard(3);
@@ -116,6 +124,8 @@ TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* data
   AddObject(&oppBatlefield);
   AddObject(&specials);
   AddObject(&oppSpecials);
+
+  renderer->textureMap.SetupTexturePath("endturn");
   AddObject(&passTurn);
 }
 
@@ -157,4 +167,15 @@ void TestGameState::ReleaseClick() {
 
 void TestGameState::test() {
   std::cout << "test" << std::endl;
+}
+
+void TestGameState::Render(Renderer* renderer) {
+  for (auto& card : this->hand.GetCards()) {
+    if (database->GetInfo(card.card.GetID())->type == TestCardInfo::CardType::BASIC_CHARACTER_CARD) {
+      card.renderData.shader = renderer->GetShader("highlightCardShader");
+    } else {
+      card.renderData.shader = renderer->GetShader("cardShader");
+    }
+  }
+  GameState::Render(renderer);
 }

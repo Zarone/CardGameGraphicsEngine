@@ -114,7 +114,6 @@ private:
   glm::mat4 strictBackingPlaneTransform;
 
   // doesn't subtract margin
-  //Shader extendedBackingPlaneShader;
   SimplePlane extendedBackingPlane;
   glm::mat4 extendedBackingPlaneTransform;
 
@@ -122,7 +121,6 @@ private:
 
   // doesn't subtract spacing margin, includes
   // horizontal/vectical margin
-  //Shader fullBackingPlaneShader;
   SimplePlane fullBackingPlane;
   glm::mat4 fullBackingPlaneTransform;
 public:

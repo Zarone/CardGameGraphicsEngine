@@ -20,7 +20,6 @@ private:
   BoundButton passTurn;
   TestCardDatabaseSingleton* database;
 
-
   void test();
 public:
   TestGameState(Renderer* renderer, TestCardDatabaseSingleton* database);

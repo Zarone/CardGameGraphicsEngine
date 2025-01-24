@@ -75,7 +75,7 @@ TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* data
         glm::identity<glm::mat4>(), 
         glm::vec3(4.1f, -1.999f, 1.f)
       ),
-      glm::radians(0.0f), 
+      glm::radians(-90.0f), 
       glm::vec3(1.0f, 0, 0)
     ),
     Material({

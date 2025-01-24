@@ -37,18 +37,6 @@ void TestScene::Swap(unsigned int sceneIndex) {
         glm::vec3(0.0f, 0.0f, -1.0f)
       );
 
-      //this->AddObject<SceneSwapButton>(
-        //&this->renderer,
-        //glm::rotate(
-          //glm::scale(
-            //glm::identity<glm::mat4>(), 
-            //glm::vec3(5, 5, 0)
-          //), 0.1f, 
-          //glm::vec3(0, 0, 1.0f)
-        //), 
-        //glm::vec4(1.0, 1.0, 1.0, 1.0),
-        //TestSceneID::GAME_SCREEN
-      //);
       this->AddObject<BoundButton>(
         &this->renderer,
         glm::rotate(
@@ -62,7 +50,6 @@ void TestScene::Swap(unsigned int sceneIndex) {
         std::bind(&TestScene::Swap, this, TestSceneID::GAME_SCREEN)
       );
 
-      // make button, sending them sceneData if needed
       break;
     }
     default: {

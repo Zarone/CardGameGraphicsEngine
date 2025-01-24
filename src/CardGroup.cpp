@@ -20,7 +20,7 @@ zFlipped(zFlipped),
 isHand(isHand),
 dirtyDisplay(true), 
 dirtyPosition(true), 
-cardShader(myShaders::cardVertex, myShaders::cardFragment),
+cardShader(myShaders::highlightedCardVertex, myShaders::highlightedCardFragment),
 width(width),
 lastCursorX(0),
 lastCursorY(0),
@@ -249,7 +249,7 @@ void CardGroup::UpdateHandPosition(
 ) {
   if (size == 0) return;
 
-  float rotationPerCard = 0;//this->isHand ? glm::radians(10.0f) : 0;
+  float rotationPerCard = this->isHand ? glm::radians(10.0f) : 0;
 
   // if we need to display the cards
   // dynamically based on cursor position
@@ -288,7 +288,7 @@ void CardGroup::UpdateHandPosition(
 
     CardRenderingData& closestCard = cards[this->lastClosestIndex].renderData;
     closestCard.SetActualTransform(
-      glm::vec3(centerX, 0.0f, (this->lastClosestIndex+zOffset)*zGap),
+      glm::vec3(centerX, 0.1f, (this->lastClosestIndex+zOffset)*zGap+0.1f),
       0.0f
     );
 
@@ -509,7 +509,6 @@ void CardGroup::Render(
       buffer[i+3] = thisCard.displayedRotationZ;
     }
 
-
     this->transformBuffer.OverwriteData(buffer, 0, size*sizeof(CardTransformVertex));
   }
 
@@ -519,9 +518,9 @@ void CardGroup::Render(
   this->cardShader.Bind();
   glm::mat4& projMatrix = renderer->projMatrix;
   glm::mat4& camMatrix = renderer->cameraMatrix;
-  cardShader.SetUniform4fv("projMatrix", false, glm::value_ptr(projMatrix));
-  cardShader.SetUniform4fv("cameraMatrix", false, glm::value_ptr(camMatrix));
-  cardShader.SetUniform4fv("modelMatrix", false, glm::value_ptr(this->transform));
+  cardShader.SetUniform4fv("u_projMatrix", false, glm::value_ptr(projMatrix));
+  cardShader.SetUniform4fv("u_cameraMatrix", false, glm::value_ptr(camMatrix));
+  cardShader.SetUniform4fv("u_modelMatrix", false, glm::value_ptr(this->transform));
 
   this->PrepareTextures(&renderer->textureMap);
 

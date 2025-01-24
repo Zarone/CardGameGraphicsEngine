@@ -2,15 +2,19 @@
 
 #include <GL/glew.h>
 #include <glm/gtc/matrix_transform.hpp>
+#include <iostream>
+
 #include "../include/WindowManager.h"
 #include "../include/TextureMap.h"
 #include "../include/CardDatabaseSingleton.h"
 #include "../include/CursorData.h"
+#include "../include/Shader.h"
 
 class Renderer
 {
 private:
   WindowManager* window;
+  std::unordered_map<std::string, Shader> shaderMap;
 public:
   TextureMap textureMap;
   glm::mat4 projMatrix;
@@ -37,4 +41,10 @@ public:
   glm::vec3 Get3DScreenPositionFromCamera(glm::vec4 screenCoords);
 
   void GetCursorPosition(CursorData* cursorData);
+
+  void SetupShader(const std::string& shaderName, const std::string& vertex, const std::string& fragment);
+
+  void ResetShaders();
+
+  Shader* GetShader(const std::string& name);
 };

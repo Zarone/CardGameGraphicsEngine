@@ -7,8 +7,6 @@
 class TestGameState : public GameState
 {
 private:
-  Shader buttonShader;
-
   CardGroup hand;
   CardGroup oppHand;
   CardGroup reserve;

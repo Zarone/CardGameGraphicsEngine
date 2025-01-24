@@ -45,3 +45,25 @@ glm::vec3 Renderer::Get3DScreenPositionFromCamera(glm::vec4 screenCoords) {
 void Renderer::GetCursorPosition(CursorData* cursorData) {
   this->window->GetCursorPosition(&cursorData->cursorX, &cursorData->cursorY);
 }
+
+void Renderer::SetupShader(const std::string& shaderName, const std::string& vertex, const std::string& fragment) {
+  this->shaderMap.emplace(
+    std::piecewise_construct,
+    std::forward_as_tuple(shaderName),
+    std::forward_as_tuple(vertex, fragment)
+  );
+}
+
+void Renderer::ResetShaders() {
+  this->shaderMap = std::unordered_map<std::string, Shader>();
+}
+
+Shader* Renderer::GetShader(const std::string& name) {
+  auto shader = this->shaderMap.find(name);
+  if (shader == this->shaderMap.end()) {
+    std::cout << "Could not find shader " << name << std::endl;
+    return nullptr;
+  } else {
+    return &(shader->second);
+  }
+}

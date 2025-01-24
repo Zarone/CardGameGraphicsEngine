@@ -10,13 +10,13 @@ uniform sampler2D textureSampler;
 
 void main()
 {
-  //color = vec4(texture(textureSampler, vec2(
-    //1-fragmentTextureCoordinates.x,
-    //fragmentTextureCoordinates.y
-  //)).xyz, color.w);
-  color = texture(textureSampler, vec2(
-    1-fragmentTextureCoordinates.x,
+  color = vec4(texture(textureSampler, vec2(
+    fragmentTextureCoordinates.x,
     fragmentTextureCoordinates.y
-  ));
+  )).xyz, color.w);
+  //color = texture(textureSampler, vec2(
+    //fragmentTextureCoordinates.x,
+    //fragmentTextureCoordinates.y
+  //));
 }
 )";

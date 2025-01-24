@@ -34,14 +34,13 @@ void SimpleRenderObject::LoadIntoGPU() {
 }
 
 void SimpleRenderObject::SetTransform(glm::mat4* transform) {
-  this->vArray.Bind();
-  this->iBuffer.Bind();
   this->material.shader->Bind();
   this->material.shader->SetUniform4fv("modelMatrix", false, glm::value_ptr(*transform));
 }
 
 void SimpleRenderObject::Render(Renderer* renderer) {
   this->vArray.Bind();
+  this->vBuffer.Bind();
   this->iBuffer.Bind();
   this->material.shader->Bind();
   this->material.shader->SetUniform4fv("projMatrix", false, glm::value_ptr(renderer->projMatrix));

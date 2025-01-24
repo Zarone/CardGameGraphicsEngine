@@ -26,7 +26,7 @@ lastCursorX(0),
 lastCursorY(0),
 wasInsideBoundary(false),
 lastClosestIndex(-1),
-planeShader(myShaders::basicVertex, myShaders::basicFragment),
+strictBackingPlaneShader(myShaders::basicVertex, myShaders::basicFragment),
 #ifdef DEBUG
 strictBackingPlane(
   SimplePlane(
@@ -34,7 +34,7 @@ strictBackingPlane(
     Material(
       {
         .hasTexture=false,
-        .shader=&this->planeShader,
+        .shader=&this->strictBackingPlaneShader,
         .color=glm::vec4(0.5f, 0.0f, 0.5f, 0.5f)
       }
     )
@@ -46,7 +46,7 @@ extendedBackingPlane(
     Material(
       {
         .hasTexture=false,
-        .shader=&this->planeShader,
+        .shader=&this->strictBackingPlaneShader,
         .color=glm::vec4(0.0f, 0.5f, 0.0f, 0.5f)
       }
     )
@@ -59,7 +59,7 @@ fullBackingPlane(
     Material(
       {
         .hasTexture=false,
-        .shader=&this->planeShader,
+        .shader=&this->strictBackingPlaneShader,
         .color=glm::vec4(0.5f,0.5f,0.5f,0.5f)
       }
     )
@@ -249,7 +249,7 @@ void CardGroup::UpdateHandPosition(
 ) {
   if (size == 0) return;
 
-  float rotationPerCard = this->isHand ? glm::radians(10.0f) : 0;
+  float rotationPerCard = 0;//this->isHand ? glm::radians(10.0f) : 0;
 
   // if we need to display the cards
   // dynamically based on cursor position
@@ -573,25 +573,25 @@ void CardGroup::Render(
   if (this->dirtyPosition) {
     #ifdef DEBUG
     this->strictBackingPlaneTransform = glm::translate(this->transform, glm::vec3(width/2.0f, 0, -0.01f));
-    //this->extendedBackingPlaneTransform = glm::translate(this->transform, glm::vec3(width/2.0f, 0, -0.02f));
+    this->extendedBackingPlaneTransform = glm::translate(this->transform, glm::vec3(width/2.0f, 0, -0.02f));
     this->strictBackingPlaneTransform = glm::scale(this->strictBackingPlaneTransform, glm::vec3(width-2*margin, CardRenderingData::cardHeightRatio, 1.0f));
-    //this->extendedBackingPlaneTransform = glm::scale(this->extendedBackingPlaneTransform, glm::vec3(width-2*margin+2*horizontalMargin, CardRenderingData::cardHeightRatio+2*verticalMargin, 1.0f));
+    this->extendedBackingPlaneTransform = glm::scale(this->extendedBackingPlaneTransform, glm::vec3(width-2*margin+2*horizontalMargin, CardRenderingData::cardHeightRatio+2*verticalMargin, 1.0f));
     #endif
-    //if (!this->isHand) {
-      //this->fullBackingPlaneTransform = glm::translate(this->transform, glm::vec3(width/2.0f, 0, -0.03f));
-      //this->fullBackingPlaneTransform = glm::scale(this->fullBackingPlaneTransform, glm::vec3(width, CardRenderingData::cardHeightRatio, 1.0f));
-    //}
+    if (!this->isHand) {
+      this->fullBackingPlaneTransform = glm::translate(this->transform, glm::vec3(width/2.0f, 0, -0.03f));
+      this->fullBackingPlaneTransform = glm::scale(this->fullBackingPlaneTransform, glm::vec3(width, CardRenderingData::cardHeightRatio, 1.0f));
+    }
   }
   #ifdef DEBUG
   this->strictBackingPlane.SetTransform(&this->strictBackingPlaneTransform);
-  //this->extendedBackingPlane.SetTransform(&this->extendedBackingPlaneTransform);
   this->strictBackingPlane.Render(renderer);
-  //this->extendedBackingPlane.Render(renderer);
+  this->extendedBackingPlane.SetTransform(&this->extendedBackingPlaneTransform);
+  this->extendedBackingPlane.Render(renderer);
   #endif
-  //if (!this->isHand) {
-    //this->fullBackingPlane.SetTransform(&this->fullBackingPlaneTransform);
-    //this->fullBackingPlane.Render(renderer);
-  //}
+  if (!this->isHand) {
+    this->fullBackingPlane.SetTransform(&this->fullBackingPlaneTransform);
+    this->fullBackingPlane.Render(renderer);
+  }
 
   this->dirtyPosition = false;
   this->dirtyDisplay = false;

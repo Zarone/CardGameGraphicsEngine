@@ -4,15 +4,26 @@
 #include "../include/ErrorHandling.h"
 
 VertexBuffer::VertexBuffer() {
+  #ifdef DEBUG
+  this->tmpUnwritten = true;
+  #endif
 }
 
 VertexBuffer::VertexBuffer(void* data, unsigned int size, bool dynamicDraw) {
+  #ifdef DEBUG
+  this->tmpUnwritten = false;
+  #endif
   GLCall(glGenBuffers(1, &(this->bufferID)));
   GLCall(glBindBuffer(GL_ARRAY_BUFFER, this->bufferID));
   GLCall(glBufferData(GL_ARRAY_BUFFER, size, data, dynamicDraw ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW));
 }
 
 void VertexBuffer::Bind() {
+  #ifdef DEBUG
+  if (this->tmpUnwritten) 
+    std::cout << "unsafe VertexBuffer bind" << std::endl;
+    ASSERT(!this->tmpUnwritten);
+  #endif
   GLCall(glBindBuffer(GL_ARRAY_BUFFER, this->bufferID));
 }
 

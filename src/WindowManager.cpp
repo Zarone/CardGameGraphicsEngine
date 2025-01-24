@@ -18,8 +18,8 @@ WindowManager::WindowManager() {
   /* Create a windowed mode window and its OpenGL context */
   //this->nx = 640;
   //this->ny = 480;
-  this->nx = 1280;
-  this->ny = 960;
+  this->nx = 960;
+  this->ny = 720;
   this->window = glfwCreateWindow(this->nx, this->ny, "My Window", NULL, NULL);
   if (!this->window)
   {

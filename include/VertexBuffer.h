@@ -1,10 +1,15 @@
 #pragma once
 
 #include <GL/glew.h>
+#include "ErrorHandling.h"
 
 class VertexBuffer
 {
 private:
+  #ifdef DEBUG
+  bool tmpUnwritten = false;
+  #endif
+
   unsigned int bufferID;
 public:
   VertexBuffer();

@@ -59,7 +59,6 @@ private:
   MemoryLayout textureIDBufferLayout;
   unsigned int textureEndAttribID;
   Shader cardShader;
-  Shader planeShader = Shader(myShaders::basicVertex, myShaders::basicFragment);
 
   // if this is true, only the back 
   // of the cards is shown
@@ -110,10 +109,12 @@ private:
   #ifdef DEBUG
 
   // just where the cards are
+  Shader strictBackingPlaneShader;
   SimplePlane strictBackingPlane;
   glm::mat4 strictBackingPlaneTransform;
 
   // doesn't subtract margin
+  //Shader extendedBackingPlaneShader;
   SimplePlane extendedBackingPlane;
   glm::mat4 extendedBackingPlaneTransform;
 
@@ -121,6 +122,7 @@ private:
 
   // doesn't subtract spacing margin, includes
   // horizontal/vectical margin
+  //Shader fullBackingPlaneShader;
   SimplePlane fullBackingPlane;
   glm::mat4 fullBackingPlaneTransform;
 public:

@@ -83,7 +83,7 @@ GLFWwindow* WindowManager::GetRawPointer() {
 
 int WindowManager::GetMaxBindableTextures() {
   int maxBindableTextures;
-  glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxBindableTextures);
+  GLCall(glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxBindableTextures));
   return maxBindableTextures;
 }
 

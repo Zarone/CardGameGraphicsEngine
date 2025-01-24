@@ -28,6 +28,8 @@ add_executable(${PROJECT_NAME}
     src/shaders/BasicFragment.cpp
     src/shaders/CardVertex.cpp
     src/shaders/CardFragment.cpp
+    src/shaders/TextureVertex.cpp
+    src/shaders/TextureFragment.cpp
     src/BoundButton.cpp
     src/Card.cpp
     src/CardGroup.cpp

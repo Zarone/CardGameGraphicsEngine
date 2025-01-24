@@ -7,6 +7,8 @@
 class TestGameState : public GameState
 {
 private:
+  Shader buttonShader;
+
   CardGroup hand;
   CardGroup oppHand;
   CardGroup reserve;
@@ -18,7 +20,6 @@ private:
   BoundButton passTurn;
   TestCardDatabaseSingleton* database;
 
-  Shader buttonShader;
 
   void test();
 public:

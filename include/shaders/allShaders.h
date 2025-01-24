@@ -6,4 +6,6 @@ namespace myShaders {
   extern std::string basicFragment;
   extern std::string cardVertex;
   extern std::string cardFragment;
+  extern std::string textureVertex;
+  extern std::string textureFragment;
 }

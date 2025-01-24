@@ -4,7 +4,7 @@
 #include "./TestCardInfo.h"
 
 TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* database):
-  buttonShader(myShaders::basicVertex, myShaders::basicFragment),
+  buttonShader(myShaders::textureVertex, myShaders::textureFragment),
   hand(
     glm::vec3(0.0f, -1.5f, 6.25f),
     //glm::vec3(0.0f, -0.5f, 6.0f),
@@ -79,7 +79,9 @@ TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* data
       glm::vec3(1.0f, 0, 0)
     ),
     Material({
-      .hasTexture=false,
+      .hasTexture=true,
+      .textureMap=&renderer->textureMap,
+      .textureAddr="endturn",
       .shader=&buttonShader,
       .color=glm::vec4(1.0f, 0, 0, 1.0f),
     }),
@@ -87,6 +89,7 @@ TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* data
   ),
   database(database)
 {
+  renderer->textureMap.SetupTexturePath("endturn");
   oppHand.AddCard(0);
   oppHand.AddCard(2);
   oppHand.AddCard(3);

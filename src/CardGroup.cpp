@@ -26,22 +26,45 @@ lastCursorX(0),
 lastCursorY(0),
 wasInsideBoundary(false),
 lastClosestIndex(-1),
+planeShader(myShaders::basicVertex, myShaders::basicFragment),
 #ifdef DEBUG
-strictBackingPlane(SimplePlane(myShaders::basicVertex, myShaders::basicFragment, glm::identity<glm::mat4>(), glm::vec4(0.5f, 0, 0.5f, 0.5f))),
-extendedBackingPlane(SimplePlane(myShaders::basicVertex, myShaders::basicFragment, glm::identity<glm::mat4>(), glm::vec4(0.0f, 0.5f, 0.0f, 0.5f))),
-#endif
-fullBackingPlane(
-    SimplePlane(
-      glm::identity<glm::mat4>(), 
-      Material(
-        {
-          .hasTexture=false,
-          .shader=&this->planeShader,
-          .color=glm::vec4(0.5f,0.5f,0.5f,0.5f)
-        }
-      )
+strictBackingPlane(
+  SimplePlane(
+    glm::identity<glm::mat4>(), 
+    Material(
+      {
+        .hasTexture=false,
+        .shader=&this->planeShader,
+        .color=glm::vec4(0.5f, 0.0f, 0.5f, 0.5f)
+      }
     )
   )
+),
+extendedBackingPlane(
+  SimplePlane(
+    glm::identity<glm::mat4>(), 
+    Material(
+      {
+        .hasTexture=false,
+        .shader=&this->planeShader,
+        .color=glm::vec4(0.0f, 0.5f, 0.0f, 0.5f)
+      }
+    )
+  )
+),
+#endif
+fullBackingPlane(
+  SimplePlane(
+    glm::identity<glm::mat4>(), 
+    Material(
+      {
+        .hasTexture=false,
+        .shader=&this->planeShader,
+        .color=glm::vec4(0.5f,0.5f,0.5f,0.5f)
+      }
+    )
+  )
+)
 {
   ASSERT(width>3.0f);
   this->transform = glm::mat4(1.0f); // setup to identity
@@ -504,16 +527,6 @@ void CardGroup::Render(
 
   // Pass texture units as an array to the shader.
   int maxBindableTextures = renderer->maxBindableTextures;
-  //std::vector<int> textureUnits(maxBindableTextures);
-  //int mapSize = renderer->textureMap.CurrentlyBound();
-  //for (int i = 0; i < maxBindableTextures; ++i) {
-    //if (i < mapSize) {
-      //textureUnits[i] = i;
-    //} else {
-      //textureUnits[i] = 0;
-    //}
-  //}
-  //cardShader.SetUniform1iv("textures", maxBindableTextures, textureUnits.data());
   cardShader.SetInstancedTextures(maxBindableTextures, &renderer->textureMap);
 
   // bind textures and shift buffer for
@@ -560,25 +573,25 @@ void CardGroup::Render(
   if (this->dirtyPosition) {
     #ifdef DEBUG
     this->strictBackingPlaneTransform = glm::translate(this->transform, glm::vec3(width/2.0f, 0, -0.01f));
-    this->extendedBackingPlaneTransform = glm::translate(this->transform, glm::vec3(width/2.0f, 0, -0.02f));
+    //this->extendedBackingPlaneTransform = glm::translate(this->transform, glm::vec3(width/2.0f, 0, -0.02f));
     this->strictBackingPlaneTransform = glm::scale(this->strictBackingPlaneTransform, glm::vec3(width-2*margin, CardRenderingData::cardHeightRatio, 1.0f));
-    this->extendedBackingPlaneTransform = glm::scale(this->extendedBackingPlaneTransform, glm::vec3(width-2*margin+2*horizontalMargin, CardRenderingData::cardHeightRatio+2*verticalMargin, 1.0f));
+    //this->extendedBackingPlaneTransform = glm::scale(this->extendedBackingPlaneTransform, glm::vec3(width-2*margin+2*horizontalMargin, CardRenderingData::cardHeightRatio+2*verticalMargin, 1.0f));
     #endif
-    if (!this->isHand) {
-      this->fullBackingPlaneTransform = glm::translate(this->transform, glm::vec3(width/2.0f, 0, -0.03f));
-      this->fullBackingPlaneTransform = glm::scale(this->fullBackingPlaneTransform, glm::vec3(width, CardRenderingData::cardHeightRatio, 1.0f));
-    }
+    //if (!this->isHand) {
+      //this->fullBackingPlaneTransform = glm::translate(this->transform, glm::vec3(width/2.0f, 0, -0.03f));
+      //this->fullBackingPlaneTransform = glm::scale(this->fullBackingPlaneTransform, glm::vec3(width, CardRenderingData::cardHeightRatio, 1.0f));
+    //}
   }
   #ifdef DEBUG
   this->strictBackingPlane.SetTransform(&this->strictBackingPlaneTransform);
-  this->extendedBackingPlane.SetTransform(&this->extendedBackingPlaneTransform);
+  //this->extendedBackingPlane.SetTransform(&this->extendedBackingPlaneTransform);
   this->strictBackingPlane.Render(renderer);
-  this->extendedBackingPlane.Render(renderer);
+  //this->extendedBackingPlane.Render(renderer);
   #endif
-  if (!this->isHand) {
-    this->fullBackingPlane.SetTransform(&this->fullBackingPlaneTransform);
-    this->fullBackingPlane.Render(renderer);
-  }
+  //if (!this->isHand) {
+    //this->fullBackingPlane.SetTransform(&this->fullBackingPlaneTransform);
+    //this->fullBackingPlane.Render(renderer);
+  //}
 
   this->dirtyPosition = false;
   this->dirtyDisplay = false;

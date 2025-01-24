@@ -84,7 +84,7 @@ void Shader::SetInstancedTextures(int maxBindableTextures, TextureMap* textureMa
 }
 
 void Shader::SetTexture(int maxBindableTextures, const std::string& texture, TextureMap* textureMap) {
-  this->SetUniform1i("texture", textureMap->RequestBind(maxBindableTextures, texture));
+  this->SetUniform1i("textureSampler", textureMap->RequestBind(maxBindableTextures, texture));
 }
 
 Shader::~Shader() {

@@ -14,10 +14,10 @@ private:
   std::unordered_map<std::string, Texture> map;
   TextureLRU lru;
   unsigned int currentlyBound;
-  void SetupTexturePath(const std::string& path);
   CardDatabaseSingleton* ID_Database;
 public:
   TextureMap();
+  void SetupTexturePath(const std::string& path);
   void SetupCardDataBase(CardDatabaseSingleton* database);
 
   void SetupCard(unsigned int id);

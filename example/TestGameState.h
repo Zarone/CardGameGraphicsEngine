@@ -3,18 +3,19 @@
 #include "../example/TestCardDatabaseSingleton.h"
 #include "../include/BoundButton.h"
 #include "../include/shaders/allShaders.h"
+#include "../include/FannedCardGroup.h"
 
 class TestGameState : public GameState
 {
 private:
-  CardGroup hand;
-  CardGroup oppHand;
-  CardGroup reserve;
-  CardGroup battlefield;
-  CardGroup specials;
-  CardGroup oppReserve;
-  CardGroup oppBatlefield;
-  CardGroup oppSpecials;
+  FannedCardGroup hand;
+  FannedCardGroup oppHand;
+  FannedCardGroup reserve;
+  FannedCardGroup battlefield;
+  FannedCardGroup specials;
+  FannedCardGroup oppReserve;
+  FannedCardGroup oppBatlefield;
+  FannedCardGroup oppSpecials;
   BoundButton passTurn;
   TestCardDatabaseSingleton* database;
 

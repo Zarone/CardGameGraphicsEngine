@@ -41,119 +41,19 @@ typedef struct TextureVertex {
 
 class CardGroup : public SceneObject
 {
-private:
+protected:
   const static unsigned int estimatedMax;
 
-  glm::mat4 transform;
-
   std::vector<CardItem> cards = {};
-
-  VertexArray groupVao;
-  VertexBuffer staticBuffer;
-  IndexBuffer indexBuffer;
-  MemoryLayout staticBufferLayout;
-  VertexBuffer transformBuffer;
-  MemoryLayout transformBufferLayout;
-  unsigned int transformEndAttribID;
-  VertexBuffer textureIDBuffer;
-  MemoryLayout textureIDBufferLayout;
-  unsigned int textureEndAttribID;
 
   // if this is true, only the back 
   // of the cards is shown
   bool zFlipped; 
-
-  bool isHand;
-
-  float width;
-  
-  // keeps track of whether or not 
-  // we need to update position info 
-  // before the next render.
-  bool dirtyDisplay; 
-  bool dirtyPosition;
-
-  int lastCursorX;
-  int lastCursorY;
-  bool wasInsideBoundary;
-  int lastClosestIndex;
-
-  void DrawElements(int size);
-
-  int GetClosestCardIndex(
-    double projectedLeftBoundary,
-    double margin,
-    double xGap,
-    double xScale,
-    const CursorData& renderData,
-    int size
-  );
-
-  void UpdateHandPosition(
-    const CursorData& renderData,
-    bool insideHandBoundary,
-    double xGap,
-    double margin,
-    int size,
-    double whitespace,
-    double zGap
-  );
-
-  void BindAndDrawAllFrontFaces(
-    Renderer* renderer,
-    Shader* shader,
-    int maxBindableTextures,
-    int offset,
-    int groupSize,
-    int totalSize
-  );
-
-  #ifdef DEBUG
-
-  // just where the cards are
-  SimplePlane strictBackingPlane;
-  glm::mat4 strictBackingPlaneTransform;
-
-  // doesn't subtract margin
-  SimplePlane extendedBackingPlane;
-  glm::mat4 extendedBackingPlaneTransform;
-
-  #endif
-
-  // doesn't subtract spacing margin, includes
-  // horizontal/vectical margin
-  SimplePlane fullBackingPlane;
-  glm::mat4 fullBackingPlaneTransform;
 public:
+  int highlightedCards = 0;
+
   CardGroup(
-    Renderer* renderer,
-    glm::vec3 position, 
-    float rotationX, 
-    float width, 
-    bool zFlipped,
-    bool isHand
-  );
-
-  void GroupPositionToScreen(
-    Renderer* renderer, 
-    glm::vec4& src, 
-    glm::vec2& dest
-  ) const;
-
-  void GroupPositionTo3DScreen(
-    Renderer* renderer, 
-    glm::vec4& src, 
-    glm::vec3& dest
-  ) const;
-
-  bool GetInsideHandBoundary(
-    Renderer* renderer,
-    const CursorData& renderData,
-    double horizontalOffset,
-    double verticalOffset,
-    bool& mouseMovedInBoundary,
-    double& xScale,
-    double& projectedLeftBoundary
+    bool zFlipped
   );
 
   /*
@@ -163,15 +63,15 @@ public:
   */
   void PrepareTextures(TextureMap* textureMap);
 
-  void Render(Renderer* renderer);
-
   void AddCard(unsigned int id);
 
   Card GetCard(unsigned int index);
 
   std::vector<CardItem>* GetCards();
 
-  void UpdateTick(double deltaTime);
+  virtual void UpdateTick(double deltaTime) = 0;
+
+  virtual void Render(Renderer* renderer) = 0;
 
   /*
   *
@@ -179,18 +79,18 @@ public:
   * and the cursor
   *
   */
-  bool CheckCollision(
+  virtual bool CheckCollision(
     Renderer* renderer, 
     double x, 
     double y, 
     double* collisionZ,
     CollisionInfo* collisioInfo
-  ) const;
+  ) const = 0;
 
-  void MoveToGroup(int index, CardGroup* to);
-
+  // Game state should perform operations on the card group,
+  // so that it can correctly manipulate data. So these can just
+  // be blank unless I need them for something else.
   ClickEvent ProcessClick(CollisionInfo info) {return {};}
   ClickEvent ProcessPreClick(CollisionInfo info) {return {};};
   void ReleaseClick() {};
-  int highlightedCards = 0;
 };

@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.31)
 set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_BUILD_TYPE "DEBUG")
+set(CMAKE_EXPORT_COMPILE_COMMANDS "ON")
 project(GraphicsEngine LANGUAGES CXX)
 include(FetchContent)
 
@@ -19,42 +21,43 @@ find_package(GLEW)
 
 # Add the executable with all source files
 add_executable(${PROJECT_NAME}
-    example/TestCardDatabaseSingleton.cpp
-    example/TestCardInfo.cpp
-    example/TestGameState.cpp
-    example/TestScene.cpp
-    src/external/stb_image.cpp
-    src/shaders/BasicVertex.cpp
-    src/shaders/BasicFragment.cpp
-    src/shaders/CardVertex.cpp
-    src/shaders/CardFragment.cpp
-    src/shaders/HighlightedCardVertex.cpp
-    src/shaders/HighlightedCardFragment.cpp
-    src/shaders/TextureVertex.cpp
-    src/shaders/TextureFragment.cpp
-    src/BoundButton.cpp
-    src/Card.cpp
-    src/CardGroup.cpp
-    src/CardInfo.cpp
-    src/CardRenderingData.cpp
-    src/ErrorHandling.cpp
-    src/GameState.cpp
-    src/IndexBuffer.cpp
-    src/main.cpp
-    src/MathHelper.cpp
-    src/MemoryLayout.cpp
-    src/Renderer.cpp
-    src/Scene.cpp
-    src/Shader.cpp
-    src/SimpleButton.cpp
-    src/SimplePlane.cpp
-    src/SimpleRenderObject.cpp
-    src/Texture.cpp
-    src/TextureLRU.cpp
-    src/TextureMap.cpp
-    src/VertexArray.cpp
-    src/VertexBuffer.cpp
-    src/WindowManager.cpp
+  example/TestCardDatabaseSingleton.cpp
+  example/TestCardInfo.cpp
+  example/TestGameState.cpp
+  example/TestScene.cpp
+  src/external/stb_image.cpp
+  src/shaders/BasicVertex.cpp
+  src/shaders/BasicFragment.cpp
+  src/shaders/CardVertex.cpp
+  src/shaders/CardFragment.cpp
+  src/shaders/HighlightedCardVertex.cpp
+  src/shaders/HighlightedCardFragment.cpp
+  src/shaders/TextureVertex.cpp
+  src/shaders/TextureFragment.cpp
+  src/BoundButton.cpp
+  src/Card.cpp
+  src/CardGroup.cpp
+  src/CardInfo.cpp
+  src/CardRenderingData.cpp
+  src/ErrorHandling.cpp
+  src/FannedCardGroup.cpp
+  src/GameState.cpp
+  src/IndexBuffer.cpp
+  src/main.cpp
+  src/MathHelper.cpp
+  src/MemoryLayout.cpp
+  src/Renderer.cpp
+  src/Scene.cpp
+  src/Shader.cpp
+  src/SimpleButton.cpp
+  src/SimplePlane.cpp
+  src/SimpleRenderObject.cpp
+  src/Texture.cpp
+  src/TextureLRU.cpp
+  src/TextureMap.cpp
+  src/VertexArray.cpp
+  src/VertexBuffer.cpp
+  src/WindowManager.cpp
 )
 
 add_executable(test

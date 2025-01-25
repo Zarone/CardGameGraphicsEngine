@@ -21,13 +21,11 @@ zFlipped(zFlipped),
 isHand(isHand),
 dirtyDisplay(true), 
 dirtyPosition(true), 
-//cardShader(myShaders::highlightedCardVertex, myShaders::highlightedCardFragment),
 width(width),
 lastCursorX(0),
 lastCursorY(0),
 wasInsideBoundary(false),
 lastClosestIndex(-1),
-//strictBackingPlaneShader(myShaders::basicVertex, myShaders::basicFragment),
 #ifdef DEBUG
 strictBackingPlane(
   SimplePlane(
@@ -161,7 +159,33 @@ bool CardGroup::GetInsideHandBoundary(
       (int)renderData.cursorX != lastCursorX
     )
   ) {
-    // project top bound to screen
+    glm::vec4 bottomRight = glm::vec4(
+      width-horizontalOffset, 
+      -0.5f*CardRenderingData::cardHeightRatio+verticalOffset, 
+      0.0f, 
+      1.0f
+    );
+    glm::vec3 projectedBottomRight;
+    this->GroupPositionTo3DScreen(renderer, bottomRight, projectedBottomRight);
+
+    glm::vec4 topRight = glm::vec4(
+      width-horizontalOffset, 
+      0.5f*CardRenderingData::cardHeightRatio-verticalOffset, 
+      0.0f, 
+      1.0f
+    );
+    glm::vec3 projectedTopRight;
+    this->GroupPositionTo3DScreen(renderer, topRight, projectedTopRight);
+
+    glm::vec4 bottomLeft = glm::vec4(
+      horizontalOffset, 
+      -0.5f*CardRenderingData::cardHeightRatio+verticalOffset, 
+      0.0f, 
+      1.0f
+    );
+    glm::vec2 projectedBottomLeft;
+    this->GroupPositionToScreen(renderer, bottomLeft, projectedBottomLeft);
+
     glm::vec4 topLeft = glm::vec4(
       horizontalOffset, 
       0.5f*CardRenderingData::cardHeightRatio-verticalOffset, 
@@ -170,25 +194,25 @@ bool CardGroup::GetInsideHandBoundary(
     );
     glm::vec2 projectedTopLeft;
     this->GroupPositionToScreen(renderer, topLeft, projectedTopLeft);
+
+    double t = (renderData.cursorY-projectedTopLeft.y)/(projectedBottomLeft.y-projectedTopLeft.y);
+
+    // linear interpolate to find boundaries
+    double leftBoundary = t*projectedBottomLeft.x + (1-t)*(projectedTopLeft.x);
+    double halfWayLeftBoundary = 0.5f*projectedBottomLeft.x + (0.5f)*(projectedTopLeft.x);
+    double rightBoundary = t*projectedBottomRight.x + (1-t)*(projectedTopRight.x);
+    double zAtCursor = t*projectedBottomRight.z + (1-t)*projectedTopRight.z;
+
+    xScale = (rightBoundary - leftBoundary)/(this->width+2*(-horizontalOffset));
     
-    // project bottom bound to screen
-    glm::vec4 bottomRight = glm::vec4(
-      width-horizontalOffset, 
-      -0.5f*CardRenderingData::cardHeightRatio+verticalOffset, 
-      0.0f, 
-      1.0f
-    );
-    glm::vec2 projectedBottomRight;
-    this->GroupPositionToScreen(renderer, bottomRight, projectedBottomRight);
-    
-    xScale = (projectedBottomRight.x - projectedTopLeft.x)/(this->width+2*(-horizontalOffset));
-    projectedLeftBoundary = projectedTopLeft.x+(-horizontalOffset)*xScale;
+    //xScale = (projectedBottomRight.x - projectedTopLeft.x)/(this->width+2*(-horizontalOffset));
+    projectedLeftBoundary = halfWayLeftBoundary+(-horizontalOffset)*xScale;
 
     // see if cursor is below top left boundary and 
     // above bottom right boundary
     if (
-      renderData.cursorX > projectedTopLeft.x && renderData.cursorY > projectedTopLeft.y &&
-      renderData.cursorX < projectedBottomRight.x && renderData.cursorY < projectedBottomRight.y 
+      renderData.cursorX > leftBoundary && renderData.cursorY > projectedTopLeft.y &&
+      renderData.cursorX < rightBoundary && renderData.cursorY < projectedBottomRight.y 
     ) {
       mouseMovedInBoundary = true;
       return true;
@@ -624,13 +648,13 @@ void CardGroup::Render(
 
   if (this->dirtyPosition) {
     #ifdef DEBUG
-    this->strictBackingPlaneTransform = glm::translate(this->transform, glm::vec3(width/2.0f, 0, -0.01f));
-    this->extendedBackingPlaneTransform = glm::translate(this->transform, glm::vec3(width/2.0f, 0, -0.02f));
+    this->strictBackingPlaneTransform = glm::translate(this->transform, glm::vec3(width/2.0f, 0, -0.001f));
+    this->extendedBackingPlaneTransform = glm::translate(this->transform, glm::vec3(width/2.0f, 0, -0.002f));
     this->strictBackingPlaneTransform = glm::scale(this->strictBackingPlaneTransform, glm::vec3(width-2*margin, CardRenderingData::cardHeightRatio, 1.0f));
     this->extendedBackingPlaneTransform = glm::scale(this->extendedBackingPlaneTransform, glm::vec3(width-2*margin+2*horizontalMargin, CardRenderingData::cardHeightRatio+2*verticalMargin, 1.0f));
     #endif
     if (!this->isHand) {
-      this->fullBackingPlaneTransform = glm::translate(this->transform, glm::vec3(width/2.0f, 0, -0.03f));
+      this->fullBackingPlaneTransform = glm::translate(this->transform, glm::vec3(width/2.0f, 0, -0.003f));
       this->fullBackingPlaneTransform = glm::scale(this->fullBackingPlaneTransform, glm::vec3(width, CardRenderingData::cardHeightRatio, 1.0f));
     }
   }

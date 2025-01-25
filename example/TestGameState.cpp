@@ -157,7 +157,7 @@ ClickEvent TestGameState::ProcessClick(CollisionInfo info) {
 }
 
 void TestGameState::test() {
-  std::cout << "test" << std::endl;
+  std::cout << "end turn click" << std::endl;
 }
 
 void TestGameState::LoadProperShader(Renderer* renderer, CardGroup* group) {

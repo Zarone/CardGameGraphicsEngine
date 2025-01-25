@@ -72,7 +72,7 @@ bool SimpleButton::CheckCollision(
 }
 
 ClickEvent SimpleButton::ProcessClick(CollisionInfo info) {
-  std::cout << "Process button Click" << std::endl;
+  std::cout << "simpleButton ProcessClick, which does nothing..." << std::endl;
   return {};
 }
 
@@ -110,7 +110,6 @@ void SimpleButton::SetTransform(glm::mat4* transform) {
 }
 
 ClickEvent SimpleButton::ProcessPreClick(CollisionInfo info) {
-  std::cout << "preclick call" << std::endl;
   this->material.color.w *= 0.5f;
   this->pressedDown = true;
   return {};

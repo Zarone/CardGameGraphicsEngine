@@ -26,7 +26,6 @@ unsigned int Shader::CompileShader(unsigned int type, const std::string& source 
 }
 
 Shader::Shader(const std::string& vertexShader, const std::string& fragmentShader) {
-  std::cout << "Init shader" << std::endl;
   GLCall(this->programID = glCreateProgram());
   unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexShader);
   unsigned int fs = CompileShader(GL_FRAGMENT_SHADER, fragmentShader);
@@ -86,6 +85,11 @@ void Shader::SetInstancedTextures(int maxBindableTextures, TextureMap* textureMa
 
 void Shader::SetTexture(int maxBindableTextures, const std::string& texture, TextureMap* textureMap) {
   this->SetUniform1i("textureSampler", textureMap->RequestBind(maxBindableTextures, texture));
+}
+
+std::ostream& operator<<(std::ostream& os, const Shader& s) {
+  os << "Shader: " << s.programID;
+  return os;
 }
 
 Shader::~Shader() {

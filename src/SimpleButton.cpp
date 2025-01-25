@@ -110,6 +110,7 @@ void SimpleButton::SetTransform(glm::mat4* transform) {
 }
 
 ClickEvent SimpleButton::ProcessPreClick(CollisionInfo info) {
+  std::cout << "preclick call" << std::endl;
   this->material.color.w *= 0.5f;
   this->pressedDown = true;
   return {};

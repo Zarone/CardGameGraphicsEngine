@@ -326,27 +326,37 @@ void CardGroup::UpdateHandPosition(
 
 void CardGroup::BindAndDrawAllFrontFaces(
   Renderer* renderer,
+  Shader* shader,
   int maxBindableTextures,
-  int size
+  int offset,
+  int groupSize,
+  int totalSize
 ) {
-  int buffer[sizeof(TextureVertex)/sizeof(unsigned int)*size];
+  int buffer[sizeof(TextureVertex)/sizeof(unsigned int)*groupSize];
 
   int i = 0;
-  while (i < size) {
-    int batchSize = fmin(maxBindableTextures, size-i);
+  while (i < groupSize) {
+    int batchSize = fmin(maxBindableTextures, groupSize-i);
+
+    int cardIndex = i;
 
     // bind all textures about to be used
     for (int j = i; j < i+batchSize; ++j) {
-      unsigned int cardID = this->cards[j].card.GetID();
+      // find the next card with the type of
+      // shader we're trying to render
+      for (; cardIndex < totalSize && this->cards[cardIndex].renderData.shader != shader; cardIndex++);
+
+      unsigned int cardID = this->cards[cardIndex].card.GetID();
 
       // update texture buffer using newly bound addresses
       buffer[j] = renderer->textureMap.RequestBind(maxBindableTextures, cardID);
+      cardIndex++;
     }
 
     // write data from buffer to gpu
     this->textureIDBuffer.OverwriteData(
       buffer+i*(sizeof(TextureVertex)/sizeof(unsigned int)), 
-      i*sizeof(TextureVertex), 
+      (offset+i)*sizeof(TextureVertex), 
       batchSize*sizeof(TextureVertex)
     );
 
@@ -358,7 +368,7 @@ void CardGroup::BindAndDrawAllFrontFaces(
       1, 
       GL_UNSIGNED_INT, 
       sizeof(TextureVertex), 
-      (const void*)(i*sizeof(TextureVertex))
+      (const void*)((offset+i)*sizeof(TextureVertex))
     );
 
     this->transformBuffer.OverwriteAttrib(
@@ -366,7 +376,7 @@ void CardGroup::BindAndDrawAllFrontFaces(
       3,
       GL_FLOAT,
       sizeof(CardTransformVertex), 
-      (const void*)(i*sizeof(CardTransformVertex))
+      (const void*)((i+offset)*sizeof(CardTransformVertex))
     );
 
     this->transformBuffer.OverwriteAttrib(
@@ -374,7 +384,7 @@ void CardGroup::BindAndDrawAllFrontFaces(
       1,
       GL_FLOAT,
       sizeof(CardTransformVertex), 
-      (const void*)(i*sizeof(CardTransformVertex)+offsetof(CardTransformVertex, rotationZ))
+      (const void*)((offset+i)*sizeof(CardTransformVertex)+offsetof(CardTransformVertex, rotationZ))
     );
 
     this->DrawElements(batchSize);
@@ -387,9 +397,6 @@ void CardGroup::BindAndDrawAllFrontFaces(
 void CardGroup::Render(
   Renderer* renderer
 ) {
-
-
-
   CursorData cursor;
   renderer->GetCursorPosition(&cursor);
 
@@ -505,14 +512,33 @@ void CardGroup::Render(
     float buffer[transformVertexSize*size];
 
     // load display info from cards into buffer
-    for (int i = 0; i < size*transformVertexSize; i+=transformVertexSize) {
-      int cardIndex = i/transformVertexSize;
+    Shader* cardShader = renderer->GetShader("cardShader");
+    int cardIndex = 0;
+    int i = 0;
+    for (; i < (size-this->highlightedCards)*transformVertexSize; i+=transformVertexSize) {
+      for (; cardIndex<size && cards[cardIndex].renderData.shader != cardShader; ++cardIndex) {
+      }
       CardRenderingData& thisCard = cards[cardIndex].renderData;
 
       buffer[i] = thisCard.displayedPosition.x;
       buffer[i+1] = thisCard.displayedPosition.y;
       buffer[i+2] = thisCard.displayedPosition.z;
       buffer[i+3] = thisCard.displayedRotationZ;
+
+      cardIndex++;
+    }
+    cardShader = renderer->GetShader("highlightCardShader");
+    cardIndex = 0;
+    for (; i < size*transformVertexSize; i+=transformVertexSize) {
+      for (; cardIndex<size && cards[cardIndex].renderData.shader != cardShader; ++cardIndex);
+      CardRenderingData& thisCard = cards[cardIndex].renderData;
+
+      buffer[i] = thisCard.displayedPosition.x;
+      buffer[i+1] = thisCard.displayedPosition.y;
+      buffer[i+2] = thisCard.displayedPosition.z;
+      buffer[i+3] = thisCard.displayedRotationZ;
+
+      cardIndex++;
     }
 
     this->transformBuffer.OverwriteData(buffer, 0, size*sizeof(CardTransformVertex));
@@ -572,9 +598,27 @@ void CardGroup::Render(
     } else {
       this->BindAndDrawAllFrontFaces(
         renderer,
+        cardShader,
         maxBindableTextures,
+        0,
+        size-this->highlightedCards,
         size
       );
+      if (this->highlightedCards != 0) {
+        cardShader = renderer->GetShader("highlightCardShader");
+        cardShader->SetUniform4fv("u_projMatrix", false, glm::value_ptr(projMatrix));
+        cardShader->SetUniform4fv("u_cameraMatrix", false, glm::value_ptr(camMatrix));
+        cardShader->SetUniform4fv("u_modelMatrix", false, glm::value_ptr(this->transform));
+        cardShader->SetInstancedTextures(maxBindableTextures, &renderer->textureMap);
+        this->BindAndDrawAllFrontFaces(
+          renderer,
+          cardShader,
+          maxBindableTextures,
+          size-this->highlightedCards,
+          this->highlightedCards,
+          size
+        );
+      }
     }
   }
 
@@ -623,8 +667,8 @@ Card CardGroup::GetCard(unsigned int index) {
   return this->cards[index].card;
 }
 
-std::vector<CardItem> CardGroup::GetCards() {
-  return this->cards;
+std::vector<CardItem>* CardGroup::GetCards() {
+  return &this->cards;
 }
 
 void CardGroup::UpdateTick(double deltaTime) {

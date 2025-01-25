@@ -14,8 +14,8 @@ class Renderer
 {
 private:
   WindowManager* window;
-  std::unordered_map<std::string, Shader> shaderMap;
 public:
+  std::unordered_map<std::string, Shader> shaderMap;
   TextureMap textureMap;
   glm::mat4 projMatrix;
   glm::mat4 cameraMatrix;

@@ -4,17 +4,27 @@ GameState::GameState() {
 }
 
 void GameState::AddObject(SceneObject* group) { 
-  allGroups.push_back(group);
+  nonCardGroups.push_back(group);
+}
+
+void GameState::AddObject(CardGroup* group) { 
+  cardGroups.push_back(group);
 }
 
 void GameState::Render(Renderer* renderer) {
-  for (SceneObject* group : this->allGroups) {
+  for (SceneObject* group : this->nonCardGroups) {
+    group->Render(renderer);
+  }
+  for (SceneObject* group : this->cardGroups) {
     group->Render(renderer);
   }
 }
 
 void GameState::UpdateTick(double deltaTime) {
-  for (SceneObject* group : this->allGroups) {
+  for (SceneObject* group : this->nonCardGroups) {
+    group->UpdateTick(deltaTime);
+  }
+  for (SceneObject* group : this->cardGroups) {
     group->UpdateTick(deltaTime);
   }
 }
@@ -29,7 +39,15 @@ bool GameState::CheckCollision(Renderer* renderer, double x, double y, double* c
   CollisionInfo tempInfo;
   bool objectCollision = false;
 
-  for (SceneObject* group : allGroups) {
+  for (SceneObject* group : this->nonCardGroups) {
+    objectCollision = group->CheckCollision(renderer, x, y, &tempZ, &tempInfo);
+    if (objectCollision && tempZ < minZ) {
+      minZ = tempZ;
+      collisionInfo = tempInfo;
+      collisionInfo.groupPointer = (void*)group;
+    }
+  }
+  for (SceneObject* group : this->cardGroups) {
     objectCollision = group->CheckCollision(renderer, x, y, &tempZ, &tempInfo);
     if (objectCollision && tempZ < minZ) {
       minZ = tempZ;
@@ -45,5 +63,14 @@ bool GameState::CheckCollision(Renderer* renderer, double x, double y, double* c
   } else {
     return false;
   }
+}
 
+ClickEvent GameState::ProcessPreClick(CollisionInfo info) {
+  SceneObject* src = (SceneObject*) info.groupPointer;
+  return src->ProcessPreClick(info);
+}
+
+void GameState::ReleaseClick() {
+  for (auto& object : this->nonCardGroups) object->ReleaseClick();
+  for (auto& object : this->cardGroups) object->ReleaseClick();
 }

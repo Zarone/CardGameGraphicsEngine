@@ -20,5 +20,6 @@ public:
   void SetUniform1i(const std::string& name, GLint val);
   void SetInstancedTextures(int maxBindableTextures, TextureMap* textureMap);
   void SetTexture(int maxBindableTextures, const std::string& texture, TextureMap* textureMap);
+  friend std::ostream& operator<<(std::ostream& os, const Shader& s);
   ~Shader();
 };

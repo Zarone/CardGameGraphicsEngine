@@ -22,10 +22,9 @@ private:
 public:
   TestGameState(Renderer* renderer, TestCardDatabaseSingleton* database);
   ClickEvent ProcessClick(CollisionInfo info);
-  ClickEvent ProcessPreClick(CollisionInfo info);
-  void ReleaseClick();
   ~TestGameState() {
     std::cout << "delete game state" << std::endl;
   }
+  void LoadProperShader(Renderer* renderer, CardGroup* group);
   void Render(Renderer* renderer);
 };

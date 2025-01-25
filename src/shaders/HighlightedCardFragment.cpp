@@ -12,8 +12,8 @@ flat in int f_cardTexture;
 
 uniform sampler2D textures[16];
 
-float shininess = 10;
-float glow = 0.8;
+float shininess = 20;
+float glow = 1;
 vec4 glowColor = vec4(1.0, 0.5, 0.5, 0);
 
 void main()

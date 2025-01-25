@@ -104,17 +104,15 @@ TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* data
   oppHand.AddCard(2);
   oppHand.AddCard(3);
 
-  hand.AddCard(3);
-  hand.AddCard(3);
-  hand.AddCard(3);
-  hand.AddCard(3);
-  hand.AddCard(3);
-  hand.AddCard(3);
-  hand.AddCard(3);
-  hand.AddCard(3);
-  hand.AddCard(3);
+  hand.AddCard(0);
+  hand.AddCard(2);
   hand.AddCard(3);
   hand.AddCard(0);
+  hand.AddCard(2);
+  hand.AddCard(3);
+  hand.AddCard(0);
+  hand.AddCard(2);
+  hand.AddCard(3);
 
   AddObject(&hand);
   AddObject(&oppHand);
@@ -158,24 +156,32 @@ ClickEvent TestGameState::ProcessClick(CollisionInfo info) {
   };
 }
 
-ClickEvent TestGameState::ProcessPreClick(CollisionInfo info) {
-  return {};
-}
-
-void TestGameState::ReleaseClick() {
-}
-
 void TestGameState::test() {
   std::cout << "test" << std::endl;
 }
 
-void TestGameState::Render(Renderer* renderer) {
-  for (auto& card : this->hand.GetCards()) {
-    if (database->GetInfo(card.card.GetID())->type == TestCardInfo::CardType::BASIC_CHARACTER_CARD) {
-      card.renderData.shader = renderer->GetShader("highlightCardShader");
-    } else {
+void TestGameState::LoadProperShader(Renderer* renderer, CardGroup* group) {
+  int highlight = 0;
+  if (&this->hand == group) {
+    for (CardItem& card : *group->GetCards()) {
+      if (database->GetInfo(card.card.GetID())->type == TestCardInfo::CardType::BASIC_CHARACTER_CARD) {
+        card.renderData.shader = renderer->GetShader("highlightCardShader");
+        highlight++;
+      } else {
+        card.renderData.shader = renderer->GetShader("cardShader");
+      }
+    }
+  } else {
+    for (auto& card : *group->GetCards()) {
       card.renderData.shader = renderer->GetShader("cardShader");
     }
+  }
+  group->highlightedCards=highlight;
+}
+
+void TestGameState::Render(Renderer* renderer) {
+  for (CardGroup* group : this->cardGroups) {
+    this->LoadProperShader(renderer, group);
   }
   GameState::Render(renderer);
 }

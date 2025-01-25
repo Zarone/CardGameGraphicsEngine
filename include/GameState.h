@@ -5,12 +5,14 @@
 
 class GameState : public SceneObject
 {
-private:
-  std::vector<SceneObject*> allGroups;
+protected:
+  std::vector<SceneObject*> nonCardGroups;
+  std::vector<CardGroup*> cardGroups;
 public:
   GameState();
   void AddObject(SceneObject* group);
-  void Render(Renderer* renderer);
+  void AddObject(CardGroup* group);
+  virtual void Render(Renderer* renderer);
   void UpdateTick(double deltaTime);
   bool CheckCollision(
     Renderer* renderer, 
@@ -20,4 +22,6 @@ public:
     CollisionInfo* info
   ) const;
   virtual ClickEvent ProcessClick(CollisionInfo info) = 0;
+  virtual ClickEvent ProcessPreClick(CollisionInfo info);
+  virtual void ReleaseClick();
 };

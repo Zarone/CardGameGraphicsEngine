@@ -5,7 +5,7 @@ std::string myShaders::textureVertex = R"(
 
 layout(location = 0) in vec4 position;
 layout(location = 1) in vec2 texturePosition;
-//out vec4 vertColor;
+out vec4 vertColor;
 out vec2 fragmentTextureCoordinates;
 
 uniform mat4 projMatrix;
@@ -16,7 +16,7 @@ uniform vec4 color;
 void main()
 {
   gl_Position = projMatrix * cameraMatrix * modelMatrix * position;
-  //vertColor = color;
+  vertColor = color;
 
   fragmentTextureCoordinates = texturePosition;
 }

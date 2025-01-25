@@ -101,14 +101,16 @@ private:
 
   void BindAndDrawAllFrontFaces(
     Renderer* renderer,
+    Shader* shader,
     int maxBindableTextures,
-    int size
+    int offset,
+    int groupSize,
+    int totalSize
   );
 
   #ifdef DEBUG
 
   // just where the cards are
-  //Shader strictBackingPlaneShader;
   SimplePlane strictBackingPlane;
   glm::mat4 strictBackingPlaneTransform;
 
@@ -167,7 +169,7 @@ public:
 
   Card GetCard(unsigned int index);
 
-  std::vector<CardItem> GetCards();
+  std::vector<CardItem>* GetCards();
 
   void UpdateTick(double deltaTime);
 
@@ -190,4 +192,5 @@ public:
   ClickEvent ProcessClick(CollisionInfo info) {return {};}
   ClickEvent ProcessPreClick(CollisionInfo info) {return {};};
   void ReleaseClick() {};
+  int highlightedCards = 0;
 };

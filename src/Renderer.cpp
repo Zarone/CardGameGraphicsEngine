@@ -47,7 +47,6 @@ void Renderer::GetCursorPosition(CursorData* cursorData) {
 }
 
 void Renderer::SetupShader(const std::string& shaderName, const std::string& vertex, const std::string& fragment) {
-  std::cout << "setup " << shaderName << std::endl;
   this->shaderMap.emplace(
     std::piecewise_construct,
     std::forward_as_tuple(shaderName),

@@ -150,9 +150,6 @@ void CardGroup::PrepareTextures(TextureMap* textureMap, int start, int end) {
     for (auto iter = startIter+start; iter < startIter+end; ++iter) {
       textureMap->SetupCard((*iter).card.GetID());
     }
-    //for (CardItem& cardItem : this->cards) {
-      //textureMap->SetupCard(cardItem.card.GetID());
-    //}
   }
 }
 

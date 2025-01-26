@@ -18,6 +18,7 @@ private:
   FannedCardGroup oppBatlefield;
   FannedCardGroup oppSpecials;
   StackedCardGroup deck;
+  StackedCardGroup discardPile;
   BoundButton passTurn;
   TestCardDatabaseSingleton* database;
 

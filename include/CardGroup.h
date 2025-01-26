@@ -42,6 +42,17 @@ typedef struct TextureVertex {
 class CardGroup : public SceneObject
 {
 protected:
+  VertexArray groupVao;
+  VertexBuffer staticBuffer;
+  IndexBuffer indexBuffer;
+  MemoryLayout staticBufferLayout;
+  VertexBuffer transformBuffer;
+  MemoryLayout transformBufferLayout;
+  unsigned int transformEndAttribID;
+  VertexBuffer textureIDBuffer;
+  MemoryLayout textureIDBufferLayout;
+  unsigned int textureEndAttribID;
+
   const static unsigned int estimatedMax;
 
   std::vector<CardItem> cards = {};
@@ -64,6 +75,16 @@ protected:
     int size,
     bool reverse = false
   );
+
+  void BindAndDrawAllFrontFaces(
+    Renderer* renderer,
+    Shader* shader,
+    int maxBindableTextures,
+    int offset,
+    int groupSize,
+    int totalSize,
+    bool zFlipped
+  );
 public:
   int highlightedCards = 0;
 
@@ -76,7 +97,9 @@ public:
   * @brief Must be called after cards are added to group
   *
   */
-  void PrepareTextures(TextureMap* textureMap);
+  void PrepareTextures(TextureMap* textureMap, int start, int end);
+
+  void DrawElements(int size);
 
   void SetDirtyPosition(bool dirty);
 

@@ -6,17 +6,6 @@ class FannedCardGroup : public CardGroup
 private:
   glm::mat4 transform;
 
-  VertexArray groupVao;
-  VertexBuffer staticBuffer;
-  IndexBuffer indexBuffer;
-  MemoryLayout staticBufferLayout;
-  VertexBuffer transformBuffer;
-  MemoryLayout transformBufferLayout;
-  unsigned int transformEndAttribID;
-  VertexBuffer textureIDBuffer;
-  MemoryLayout textureIDBufferLayout;
-  unsigned int textureEndAttribID;
-
   // animated on hover if true
   bool isHand;
 
@@ -26,8 +15,6 @@ private:
   int lastCursorY;
   bool wasInsideBoundary;
   int lastClosestIndex;
-
-  void DrawElements(int size);
 
   int GetClosestCardIndex(
     double projectedLeftBoundary,
@@ -46,15 +33,6 @@ private:
     int size,
     double whitespace,
     double zGap
-  );
-
-  void BindAndDrawAllFrontFaces(
-    Renderer* renderer,
-    Shader* shader,
-    int maxBindableTextures,
-    int offset,
-    int groupSize,
-    int totalSize
   );
 
   bool GetInsideHandBoundary(

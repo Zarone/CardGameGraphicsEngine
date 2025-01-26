@@ -100,6 +100,12 @@ TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* data
     -90.0f,
     true
   ),
+  discardPile(
+    renderer,
+    glm::vec3(4.1f, -2.0f, 4.5f),
+    -90.0f,
+    false
+  ),
   database(database)
 {
 
@@ -145,9 +151,10 @@ ClickEvent TestGameState::ProcessClick(CollisionInfo info) {
     TestCardInfo* cardInfo = this->database->GetInfo(card.GetID());
     if (cardInfo->type == TestCardInfo::CardType::BASIC_CHARACTER_CARD) {
       std::cout << "playing basic character" << std::endl;
-       this->hand.MoveToGroup(info.collisionIndex, &this->deck);
+      this->hand.MoveToGroup(info.collisionIndex, &this->discardPile);
     } else if (cardInfo->type == TestCardInfo::CardType::SPECIAL_CHARACTER_CARD) {
       std::cout << "how do you have that in your hand... :(" << std::endl;
+      this->hand.MoveToGroup(info.collisionIndex, &this->deck);
     }
 
   } else if (src == &this->oppHand) {

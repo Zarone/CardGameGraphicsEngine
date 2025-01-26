@@ -5,17 +5,6 @@ class StackedCardGroup : public CardGroup
 {
 private:
   glm::mat4 transform;
-
-  VertexArray groupVao;
-  VertexBuffer staticBuffer;
-  IndexBuffer indexBuffer;
-  MemoryLayout staticBufferLayout;
-  VertexBuffer transformBuffer;
-  MemoryLayout transformBufferLayout;
-  unsigned int transformEndAttribID;
-  VertexBuffer textureIDBuffer;
-  MemoryLayout textureIDBufferLayout;
-  unsigned int textureEndAttribID;
 public:
   StackedCardGroup(
     Renderer* renderer,

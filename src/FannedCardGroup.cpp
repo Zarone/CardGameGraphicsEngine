@@ -170,85 +170,6 @@ void FannedCardGroup::UpdateHandPosition(
   }
 }
 
-void FannedCardGroup::BindAndDrawAllFrontFaces(
-  Renderer* renderer,
-  Shader* shader,
-  int maxBindableTextures,
-  int offset,
-  int groupSize,
-  int totalSize
-) {
-  int buffer[sizeof(TextureVertex)/sizeof(unsigned int)*groupSize];
-
-  int i = 0;
-  while (i < groupSize) {
-    int batchSize = fmin(maxBindableTextures, groupSize-i);
-
-    int cardIndex = i;
-
-    // bind all textures about to be used
-    for (int j = i; j < i+batchSize; ++j) {
-      // find the next card with the type of
-      // shader we're trying to render
-      for (; cardIndex < totalSize && this->cards[cardIndex].renderData.shader != shader; cardIndex++);
-
-      unsigned int cardID = this->cards[cardIndex].card.GetID();
-
-      // update texture buffer using newly bound addresses
-      buffer[j] = renderer->textureMap.RequestBind(maxBindableTextures, cardID);
-      cardIndex++;
-    }
-
-    // write data from buffer to gpu
-    this->textureIDBuffer.OverwriteData(
-      buffer+i*(sizeof(TextureVertex)/sizeof(unsigned int)), 
-      (offset+i)*sizeof(TextureVertex), 
-      batchSize*sizeof(TextureVertex)
-    );
-
-    // this changes the offset within the
-    // instanced buffers so that they are read
-    // from the right offset.
-    this->textureIDBuffer.OverwriteAttrib(
-      this->textureEndAttribID, 
-      1, 
-      GL_UNSIGNED_INT, 
-      sizeof(TextureVertex), 
-      (const void*)((offset+i)*sizeof(TextureVertex))
-    );
-
-    this->transformBuffer.OverwriteAttrib(
-      this->transformEndAttribID-1,
-      3,
-      GL_FLOAT,
-      sizeof(CardTransformVertex), 
-      (const void*)((i+offset)*sizeof(CardTransformVertex))
-    );
-
-    this->transformBuffer.OverwriteAttrib(
-      this->transformEndAttribID,
-      1,
-      GL_FLOAT,
-      sizeof(CardTransformVertex), 
-      (const void*)((offset+i)*sizeof(CardTransformVertex)+offsetof(CardTransformVertex, rotationZ))
-    );
-
-    this->DrawElements(batchSize);
-
-    i += maxBindableTextures;
-  }
-}
-
-void FannedCardGroup::DrawElements(int size) {
-  GLCall(glDrawElementsInstanced(
-    GL_TRIANGLES, 
-    6, 
-    GL_UNSIGNED_INT, 
-    nullptr,
-    size 
-  ));
-}
-
 void FannedCardGroup::GroupPositionToScreen(
   Renderer* renderer, 
   glm::vec4& src, 
@@ -627,66 +548,35 @@ void FannedCardGroup::Render(
   cardShader->SetUniform4fv("u_modelMatrix", false, glm::value_ptr(this->transform));
   cardShader->SetInstancedTextures(maxBindableTextures, &renderer->textureMap);
 
-  this->PrepareTextures(&renderer->textureMap);
+  this->PrepareTextures(&renderer->textureMap, 0, size);
 
   // Pass texture units as an array to the shader.
 
   // bind textures and shift buffer for
   // rendering
   if (size != 0) {
-    if (this->zFlipped) {
-      int boundTo = renderer->textureMap.RequestBind(maxBindableTextures, "back");
-      int boundToArray[size];
-      for (int i = 0; i < size; ++i) {
-        boundToArray[i] = boundTo;
-      }
-      this->textureIDBuffer.OverwriteData(
-        boundToArray, 
-        0, 
-        sizeof(GLint)*size
-      );
-
-      this->transformBuffer.OverwriteAttrib(
-        this->transformEndAttribID-1,
-        3,
-        GL_FLOAT,
-        sizeof(CardTransformVertex), 
-        0
-      );
-
-      this->transformBuffer.OverwriteAttrib(
-        this->transformEndAttribID,
-        1,
-        GL_FLOAT,
-        sizeof(CardTransformVertex), 
-        (const void*) (offsetof(CardTransformVertex, rotationZ))
-      );
-
-      this->DrawElements(size);
-    } else {
+    this->BindAndDrawAllFrontFaces(
+      renderer,
+      cardShader,
+      maxBindableTextures,
+      0,
+      size-this->highlightedCards,
+      size, zFlipped
+    );
+    if (this->highlightedCards != 0) {
+      cardShader = renderer->GetShader("highlightCardShader");
+      cardShader->SetUniform4fv("u_projMatrix", false, glm::value_ptr(projMatrix));
+      cardShader->SetUniform4fv("u_cameraMatrix", false, glm::value_ptr(camMatrix));
+      cardShader->SetUniform4fv("u_modelMatrix", false, glm::value_ptr(this->transform));
+      cardShader->SetInstancedTextures(maxBindableTextures, &renderer->textureMap);
       this->BindAndDrawAllFrontFaces(
         renderer,
         cardShader,
         maxBindableTextures,
-        0,
         size-this->highlightedCards,
-        size
+        this->highlightedCards,
+        size, zFlipped
       );
-      if (this->highlightedCards != 0) {
-        cardShader = renderer->GetShader("highlightCardShader");
-        cardShader->SetUniform4fv("u_projMatrix", false, glm::value_ptr(projMatrix));
-        cardShader->SetUniform4fv("u_cameraMatrix", false, glm::value_ptr(camMatrix));
-        cardShader->SetUniform4fv("u_modelMatrix", false, glm::value_ptr(this->transform));
-        cardShader->SetInstancedTextures(maxBindableTextures, &renderer->textureMap);
-        this->BindAndDrawAllFrontFaces(
-          renderer,
-          cardShader,
-          maxBindableTextures,
-          size-this->highlightedCards,
-          this->highlightedCards,
-          size
-        );
-      }
     }
   }
 

@@ -36,7 +36,7 @@ void CardGroup::LoadPositions(
       buffer[i+2] = thisCard.displayedPosition.z;
       buffer[i+3] = thisCard.displayedRotationZ;
 
-      cardIndex++;
+      cardIndex--;
     }
   } else {
     int i = offset*transformVertexSize;
@@ -55,15 +55,104 @@ void CardGroup::LoadPositions(
   }
 }
 
-void CardGroup::PrepareTextures(TextureMap* textureMap) {
+void CardGroup::BindAndDrawAllFrontFaces(
+  Renderer* renderer,
+  Shader* shader,
+  int maxBindableTextures,
+  int offset,
+  int groupSize,
+  int totalSize,
+  bool zFlipped
+) {
+  int buffer[sizeof(TextureVertex)/sizeof(unsigned int)*groupSize];
+
+  int i = 0;
+  while (i < groupSize) {
+    int batchSize = fmin(maxBindableTextures, groupSize-i);
+
+    int cardIndex = i;
+
+    // bind all textures about to be used
+    for (int j = i; j < i+batchSize; ++j) {
+      // find the next card with the type of
+      // shader we're trying to render
+      for (; cardIndex < totalSize && this->cards[cardIndex].renderData.shader != shader; cardIndex++);
+
+      unsigned int cardID = this->cards[cardIndex].card.GetID();
+
+      // update texture buffer using newly bound addresses
+      if (zFlipped) {
+        buffer[j] = renderer->textureMap.RequestBind(maxBindableTextures, "back");
+      } else {
+        buffer[j] = renderer->textureMap.RequestBind(maxBindableTextures, cardID);
+      }
+      cardIndex++;
+    }
+
+    // write data from buffer to gpu
+    this->textureIDBuffer.OverwriteData(
+      buffer+i*(sizeof(TextureVertex)/sizeof(unsigned int)), 
+      (offset+i)*sizeof(TextureVertex), 
+      batchSize*sizeof(TextureVertex)
+    );
+
+    // this changes the offset within the
+    // instanced buffers so that they are read
+    // from the right offset.
+    this->textureIDBuffer.OverwriteAttrib(
+      this->textureEndAttribID, 
+      1, 
+      GL_UNSIGNED_INT, 
+      sizeof(TextureVertex), 
+      (const void*)((offset+i)*sizeof(TextureVertex))
+    );
+
+    this->transformBuffer.OverwriteAttrib(
+      this->transformEndAttribID-1,
+      3,
+      GL_FLOAT,
+      sizeof(CardTransformVertex), 
+      (const void*)((i+offset)*sizeof(CardTransformVertex))
+    );
+
+    this->transformBuffer.OverwriteAttrib(
+      this->transformEndAttribID,
+      1,
+      GL_FLOAT,
+      sizeof(CardTransformVertex), 
+      (const void*)((offset+i)*sizeof(CardTransformVertex)+offsetof(CardTransformVertex, rotationZ))
+    );
+
+    this->DrawElements(batchSize);
+
+    i += maxBindableTextures;
+  }
+}
+
+void CardGroup::DrawElements(int size) {
+  GLCall(glDrawElementsInstanced(
+    GL_TRIANGLES, 
+    6, 
+    GL_UNSIGNED_INT, 
+    nullptr,
+    size 
+  ));
+}
+
+void CardGroup::PrepareTextures(TextureMap* textureMap, int start, int end) {
   int size = this->cards.size();
 
   if (zFlipped) {
     textureMap->SetupBack();
   } else {
-    for (CardItem& cardItem : this->cards) {
-      textureMap->SetupCard(cardItem.card.GetID());
+
+    auto startIter = this->cards.begin();
+    for (auto iter = startIter+start; iter < startIter+end; ++iter) {
+      textureMap->SetupCard((*iter).card.GetID());
     }
+    //for (CardItem& cardItem : this->cards) {
+      //textureMap->SetupCard(cardItem.card.GetID());
+    //}
   }
 }
 
@@ -72,7 +161,9 @@ void CardGroup::UpdateTick(double deltaTime) {
   for (auto& card : this->cards) {
     anythingUpdated = card.renderData.UpdateDisplayed(deltaTime) || anythingUpdated;
   }
-  this->dirtyDisplay = true;
+  if (anythingUpdated) {
+    this->dirtyDisplay = true;
+  }
 }
 
 void CardGroup::SetDirtyPosition(bool dirty) {

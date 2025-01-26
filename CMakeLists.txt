@@ -52,6 +52,7 @@ add_executable(${PROJECT_NAME}
   src/SimpleButton.cpp
   src/SimplePlane.cpp
   src/SimpleRenderObject.cpp
+  src/StackedCardGroup.cpp
   src/Texture.cpp
   src/TextureLRU.cpp
   src/TextureMap.cpp

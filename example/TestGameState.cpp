@@ -94,6 +94,12 @@ TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* data
     }),
     std::bind(&TestGameState::test, this)
   ),
+  deck(
+    renderer,
+    glm::vec3(4.1f, -2.0f, 2.75f),
+    -90.0f,
+    true
+  ),
   database(database)
 {
 
@@ -125,6 +131,7 @@ TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* data
 
   renderer->textureMap.SetupTexturePath("endturn");
   AddObject(&passTurn);
+  AddObject(&deck);
 }
 
 ClickEvent TestGameState::ProcessClick(CollisionInfo info) {
@@ -138,7 +145,7 @@ ClickEvent TestGameState::ProcessClick(CollisionInfo info) {
     TestCardInfo* cardInfo = this->database->GetInfo(card.GetID());
     if (cardInfo->type == TestCardInfo::CardType::BASIC_CHARACTER_CARD) {
       std::cout << "playing basic character" << std::endl;
-       this->hand.MoveToGroup(info.collisionIndex, &this->reserve);
+       this->hand.MoveToGroup(info.collisionIndex, &this->deck);
     } else if (cardInfo->type == TestCardInfo::CardType::SPECIAL_CHARACTER_CARD) {
       std::cout << "how do you have that in your hand... :(" << std::endl;
     }

@@ -10,38 +10,36 @@ FannedCardGroup::FannedCardGroup(
   bool isHand
 ) : 
   isHand(isHand),
-  dirtyDisplay(true), 
-  dirtyPosition(true), 
   width(width),
   lastCursorX(0),
   lastCursorY(0),
   wasInsideBoundary(false),
   lastClosestIndex(-1),
 #ifdef DEBUG
-    strictBackingPlane(
-      SimplePlane(
-        glm::identity<glm::mat4>(), 
-        Material(
-          {
-            .hasTexture=false,
-            .shader=renderer->GetShader("basicShader"),
-            .color=glm::vec4(0.5f, 0.0f, 0.5f, 0.5f)
-          }
-        )
+  strictBackingPlane(
+    SimplePlane(
+      glm::identity<glm::mat4>(), 
+      Material(
+        {
+          .hasTexture=false,
+          .shader=renderer->GetShader("basicShader"),
+          .color=glm::vec4(0.5f, 0.0f, 0.5f, 0.5f)
+        }
       )
-    ),
-    extendedBackingPlane(
-      SimplePlane(
-        glm::identity<glm::mat4>(), 
-        Material(
-          {
-            .hasTexture=false,
-            .shader=renderer->GetShader("basicShader"),
-            .color=glm::vec4(0.0f, 0.5f, 0.0f, 0.5f)
-          }
-        )
+    )
+  ),
+  extendedBackingPlane(
+    SimplePlane(
+      glm::identity<glm::mat4>(), 
+      Material(
+        {
+          .hasTexture=false,
+          .shader=renderer->GetShader("basicShader"),
+          .color=glm::vec4(0.0f, 0.5f, 0.0f, 0.5f)
+        }
       )
-    ),
+    )
+  ),
 #endif
   fullBackingPlane(
     SimplePlane(
@@ -85,14 +83,6 @@ FannedCardGroup::FannedCardGroup(
   this->textureEndAttribID = this->groupVao.AddBuffer(this->textureIDBuffer, this->textureIDBufferLayout);
 
   this->indexBuffer = IndexBuffer(CardRenderingData::cardIndices, 2);
-}
-
-void FannedCardGroup::UpdateTick(double deltaTime) {
-  bool anythingUpdated = false;
-  for (auto& card : this->cards) {
-    anythingUpdated = card.renderData.UpdateDisplayed(deltaTime) || anythingUpdated;
-  }
-  this->dirtyDisplay = true;
 }
 
 void FannedCardGroup::UpdateHandPosition(
@@ -604,9 +594,6 @@ void FannedCardGroup::Render(
     );
   }
 
-
-
-  // 3 for positions plus 1 for rotation
   const int transformVertexSize = sizeof(CardTransformVertex)/sizeof(float);
 
   // if we need to update the
@@ -618,33 +605,9 @@ void FannedCardGroup::Render(
 
     // load display info from cards into buffer
     Shader* cardShader = renderer->GetShader("cardShader");
-    int cardIndex = 0;
-    int i = 0;
-    for (; i < (size-this->highlightedCards)*transformVertexSize; i+=transformVertexSize) {
-      for (; cardIndex<size && cards[cardIndex].renderData.shader != cardShader; ++cardIndex) {
-      }
-      CardRenderingData& thisCard = cards[cardIndex].renderData;
-
-      buffer[i] = thisCard.displayedPosition.x;
-      buffer[i+1] = thisCard.displayedPosition.y;
-      buffer[i+2] = thisCard.displayedPosition.z;
-      buffer[i+3] = thisCard.displayedRotationZ;
-
-      cardIndex++;
-    }
+    this->LoadPositions(buffer, cardShader, 0, size-this->highlightedCards, size);
     cardShader = renderer->GetShader("highlightCardShader");
-    cardIndex = 0;
-    for (; i < size*transformVertexSize; i+=transformVertexSize) {
-      for (; cardIndex<size && cards[cardIndex].renderData.shader != cardShader; ++cardIndex);
-      CardRenderingData& thisCard = cards[cardIndex].renderData;
-
-      buffer[i] = thisCard.displayedPosition.x;
-      buffer[i+1] = thisCard.displayedPosition.y;
-      buffer[i+2] = thisCard.displayedPosition.z;
-      buffer[i+3] = thisCard.displayedRotationZ;
-
-      cardIndex++;
-    }
+    this->LoadPositions(buffer, cardShader, size-this->highlightedCards, this->highlightedCards, size);
 
     this->transformBuffer.OverwriteData(buffer, 0, size*sizeof(CardTransformVertex));
   }
@@ -760,9 +723,13 @@ void FannedCardGroup::Render(
   }
 }
 
-void FannedCardGroup::MoveToGroup(int index, FannedCardGroup* to) {
+const glm::mat4 FannedCardGroup::WorldSpaceToThisSpace() {
+  return glm::inverse(this->transform);
+}
+
+void FannedCardGroup::MoveToGroup(int index, CardGroup* to) {
   this->dirtyPosition = true;
-  to->dirtyPosition = true;
+  to->SetDirtyPosition(true);
 
   // this just makes it so that
   // in the next render we reset
@@ -779,9 +746,9 @@ void FannedCardGroup::MoveToGroup(int index, FannedCardGroup* to) {
   CardItem cardCopy = {
     .card = this->cards[index].card,
   };
-  cardCopy.renderData.displayedPosition = glm::inverse(to->transform)*this->transform*v;
+  cardCopy.renderData.displayedPosition = (to->WorldSpaceToThisSpace())*this->transform*v;
 
-  to->cards.push_back(cardCopy);
+  to->AddCard(cardCopy);
   this->cards.erase(this->cards.begin() + index);
 }
 

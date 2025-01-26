@@ -4,6 +4,7 @@
 #include "../include/BoundButton.h"
 #include "../include/shaders/allShaders.h"
 #include "../include/FannedCardGroup.h"
+#include "../include/StackedCardGroup.h"
 
 class TestGameState : public GameState
 {
@@ -16,6 +17,7 @@ private:
   FannedCardGroup oppReserve;
   FannedCardGroup oppBatlefield;
   FannedCardGroup oppSpecials;
+  StackedCardGroup deck;
   BoundButton passTurn;
   TestCardDatabaseSingleton* database;
 

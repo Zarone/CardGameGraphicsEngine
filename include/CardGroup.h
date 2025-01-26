@@ -49,6 +49,21 @@ protected:
   // if this is true, only the back 
   // of the cards is shown
   bool zFlipped; 
+  
+  // keeps track of whether or not 
+  // we need to update position info 
+  // before the next render.
+  bool dirtyDisplay; 
+  bool dirtyPosition;
+
+  void LoadPositions(
+    float* buffer,
+    Shader* cardShader,
+    int offset,
+    int numPositions,
+    int size,
+    bool reverse = false
+  );
 public:
   int highlightedCards = 0;
 
@@ -63,13 +78,19 @@ public:
   */
   void PrepareTextures(TextureMap* textureMap);
 
+  void SetDirtyPosition(bool dirty);
+
+  void AddCard(CardItem card);
+
   void AddCard(unsigned int id);
 
   Card GetCard(unsigned int index);
 
+  void UpdateTick(double deltaTime);
+
   std::vector<CardItem>* GetCards();
 
-  virtual void UpdateTick(double deltaTime) = 0;
+  virtual const glm::mat4 WorldSpaceToThisSpace() = 0;
 
   virtual void Render(Renderer* renderer) = 0;
 

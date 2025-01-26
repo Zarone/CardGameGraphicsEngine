@@ -1,3 +1,4 @@
+#pragma once
 #include "../include/CardGroup.h"
 
 class FannedCardGroup : public CardGroup 
@@ -20,12 +21,6 @@ private:
   bool isHand;
 
   float width;
-  
-  // keeps track of whether or not 
-  // we need to update position info 
-  // before the next render.
-  bool dirtyDisplay; 
-  bool dirtyPosition;
 
   int lastCursorX;
   int lastCursorY;
@@ -110,9 +105,9 @@ public:
     bool isHand
   );
 
-  void MoveToGroup(int index, FannedCardGroup* to);
+  const glm::mat4 WorldSpaceToThisSpace();
 
-  void UpdateTick(double deltaTime);
+  void MoveToGroup(int index, CardGroup* to);
 
   void Render(Renderer* renderer); 
 

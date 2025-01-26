@@ -138,6 +138,7 @@ TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* data
   renderer->textureMap.SetupTexturePath("endturn");
   AddObject(&passTurn);
   AddObject(&deck);
+  AddObject(&discardPile);
 }
 
 ClickEvent TestGameState::ProcessClick(CollisionInfo info) {
@@ -184,6 +185,18 @@ void TestGameState::LoadProperShader(Renderer* renderer, CardGroup* group) {
       } else {
         card.renderData.shader = renderer->GetShader("cardShader");
       }
+    }
+  } else if (&this->discardPile == group) {
+    std::vector<CardItem>* cards = group->GetCards();
+    auto startIter = cards->begin();
+    auto endIter = cards->end();
+    int groupSize = cards->size();
+    if (groupSize != 0) {
+      for (auto iter = startIter; iter < endIter-1; ++iter) {
+        (*iter).renderData.shader = renderer->GetShader("cardShader");
+      }
+      cards->at(groupSize-1).renderData.shader = renderer->GetShader("highlightCardShader");
+      highlight++;
     }
   } else {
     for (auto& card : *group->GetCards()) {

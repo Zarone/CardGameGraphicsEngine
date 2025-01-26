@@ -47,7 +47,7 @@ void StackedCardGroup::Render(Renderer* renderer) {
   int renderSize = fmin(renderMax, totalSize);
 
   if (this->dirtyPosition) {
-    const float zGap = 0.05f;
+    const float zGap = (this->zFlipped ? -1 : 1) * 0.01f;
     // set all cards to position 0
     for (int i = 0; i < totalSize; i++) {
       CardRenderingData& thisCard = cards[i].renderData;
@@ -56,7 +56,7 @@ void StackedCardGroup::Render(Renderer* renderer) {
         glm::vec3(
           0.5f,
           0.0f,
-          -zGap*i
+          zGap*i
         ),
         0.0f 
       );

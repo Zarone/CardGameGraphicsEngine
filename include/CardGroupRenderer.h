@@ -27,8 +27,12 @@ typedef struct TextureVertex {
 class CardGroupRenderer
 {
 protected:
+  // Makes sure this class can access the
+  // cards. This variable is set in CardGroup
+  // which contains this object.
   std::vector<CardItem>* cardsPointer = {};
 
+  // Information for rendering to OpenGL
   VertexArray groupVao;
   VertexBuffer staticBuffer;
   IndexBuffer indexBuffer;
@@ -54,6 +58,11 @@ protected:
   // this group
   const static unsigned int estimatedMax; 
 
+  /*
+   * @brief This is a helper function for loading
+   * the position data into the given buffer.
+   *
+   */
   void LoadPositions(
     float* buffer,
     Shader* cardShader,
@@ -63,6 +72,12 @@ protected:
     bool reverse = false
   );
 
+  /*
+   * @brief This loads the data from cards into
+   * the GPU. It makes sure to bind the correct
+   * textures beforehand.
+   *
+   */
   void BindAndDrawAllFrontFaces(
     Renderer* renderer,
     Shader* shader,
@@ -78,17 +93,32 @@ public:
 
   CardGroupRenderer(bool zFlipped);
 
+  /*
+   * @brief This is just a setter for cards.
+   *
+   */
   void SetCardsPointer(std::vector<CardItem> *);
 
   /*
   *
-  * @brief Must be called after cards are added to group
+  * @brief Must be called after cards are added to group.
+  * Makes sure all textures are loaded into the texture map.
   *
   */
   void PrepareTextures(TextureMap* textureMap, int start, int end);
 
+  /*
+   * @brief This just makes the OpenGL call to use instanced
+   * drawing.
+   *
+   *
+   */
   void DrawElements(int size);
 
+  /*
+   * @brief This is just a setter for dirtyPosition
+   *
+   */
   void SetDirtyPosition(bool dirty);
 
   virtual const glm::mat4 WorldSpaceToThisSpace() = 0;

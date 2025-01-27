@@ -86,7 +86,6 @@ public:
   const glm::mat4 WorldSpaceToThisSpace();
 
   void Render(Renderer* renderer); 
-
   bool CheckCollision(
     Renderer* renderer, 
     double x, 

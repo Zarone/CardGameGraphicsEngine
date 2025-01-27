@@ -11,12 +11,9 @@ public:
     bool zFlipped
   );
 
-  //void MoveToGroup(int index, FannedCardGroupRenderer* to);
-
   const glm::mat4 WorldSpaceToThisSpace();
 
   void Render(Renderer* renderer); 
-
   bool CheckCollision(
     Renderer* renderer, 
     double x, 

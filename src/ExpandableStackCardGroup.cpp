@@ -33,7 +33,7 @@ void ExpandableStackCardGroup::UpdateTick(double deltaTime) {
 
 ClickEvent ExpandableStackCardGroup::ProcessClick(CollisionInfo info) {
   if (isExpanded) {
-    std::cout << "You forgot to implement expanded updatetick" << std::endl;
+    std::cout << "You forgot to implement expanded processClick" << std::endl;
     return {};
   } else {
     return this->stackRenderer.ProcessClick(info);
@@ -42,7 +42,7 @@ ClickEvent ExpandableStackCardGroup::ProcessClick(CollisionInfo info) {
 
 ClickEvent ExpandableStackCardGroup::ProcessPreClick(CollisionInfo info) {
   if (isExpanded) {
-    std::cout << "You forgot to implement expanded updatetick" << std::endl;
+    std::cout << "You forgot to implement expanded processpreclick" << std::endl;
     return {};
   } else {
     return this->stackRenderer.ProcessClick(info);
@@ -51,7 +51,7 @@ ClickEvent ExpandableStackCardGroup::ProcessPreClick(CollisionInfo info) {
 
 void ExpandableStackCardGroup::ReleaseClick(){
   if (isExpanded) {
-    std::cout << "You forgot to implement expanded updatetick" << std::endl;
+    std::cout << "You forgot to implement expanded releaseClick" << std::endl;
   } else {
     this->stackRenderer.ReleaseClick();
   }
@@ -65,7 +65,7 @@ bool ExpandableStackCardGroup::CheckCollision(
   CollisionInfo* info
 ) const {
   if (isExpanded) {
-    std::cout << "You forgot to implement expanded updatetick" << std::endl;
+    std::cout << "You forgot to implement expanded checkCollision" << std::endl;
     return false;
   } else {
     return this->stackRenderer.CheckCollision(renderer, x, y, collisionZ, info);
@@ -74,7 +74,7 @@ bool ExpandableStackCardGroup::CheckCollision(
 
 void ExpandableStackCardGroup::SetNumHighlightedCards(int num){
   if (isExpanded) {
-    std::cout << "You forgot to implement expanded updatetick" << std::endl;
+    std::cout << "You forgot to implement expanded setnumhighlightedcards" << std::endl;
     return;
   } else {
     this->stackRenderer.highlightedCards=num;
@@ -83,7 +83,7 @@ void ExpandableStackCardGroup::SetNumHighlightedCards(int num){
 
 void ExpandableStackCardGroup::SetDirtyPosition(bool dirty) {
   if (isExpanded) {
-    std::cout << "You forgot to implement expanded updatetick" << std::endl;
+    std::cout << "You forgot to implement expanded setDirtyPosition" << std::endl;
     return;
   } else {
     this->stackRenderer.SetDirtyPosition(dirty); 
@@ -92,7 +92,7 @@ void ExpandableStackCardGroup::SetDirtyPosition(bool dirty) {
 
 const glm::mat4 ExpandableStackCardGroup::WorldSpaceToThisSpace() {
   if (isExpanded) {
-    std::cout << "You forgot to implement expanded updatetick" << std::endl;
+    std::cout << "You forgot to implement expanded worldSpaceToThisSpace" << std::endl;
     ASSERT(false);
   } else {
     return this->stackRenderer.WorldSpaceToThisSpace();

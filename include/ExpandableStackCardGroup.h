@@ -16,6 +16,11 @@ public:
     bool zFlipped
   );
 
+  void SetNumHighlightedCards(int num);
+  void SetDirtyPosition(bool dirty);
+  const glm::mat4 WorldSpaceToThisSpace();
+  void MoveToGroup(int index, CardGroup* to);
+  
   void Render(Renderer* renderer);
   void UpdateTick(double deltaTime);
   ClickEvent ProcessClick(CollisionInfo info);
@@ -28,9 +33,4 @@ public:
     double* collisionZ, 
     CollisionInfo* info
   ) const;
-
-  void SetNumHighlightedCards(int num);
-  void SetDirtyPosition(bool dirty);
-  const glm::mat4 WorldSpaceToThisSpace();
-  void MoveToGroup(int index, CardGroup* to);
 };

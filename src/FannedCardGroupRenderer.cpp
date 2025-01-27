@@ -258,7 +258,6 @@ bool FannedCardGroupRenderer::GetInsideHandBoundary(
 
     xScale = (rightBoundary - leftBoundary)/(this->width+2*(-horizontalOffset));
     
-    //xScale = (projectedBottomRight.x - projectedTopLeft.x)/(this->width+2*(-horizontalOffset));
     projectedLeftBoundary = halfWayLeftBoundary+(-horizontalOffset)*xScale;
 
     // see if cursor is below top left boundary and 

@@ -92,7 +92,7 @@ TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* data
       .shader=renderer->GetShader("buttonShader"),
       .color=glm::vec4(1.0f, 0, 0, 1.0f),
     }),
-    std::bind(&TestGameState::test, this)
+    std::bind(&TestGameState::EndTurnButtonPress, this)
   ),
   deck(
     renderer,
@@ -153,6 +153,7 @@ ClickEvent TestGameState::ProcessClick(CollisionInfo info) {
     if (cardInfo->type == TestCardInfo::CardType::BASIC_CHARACTER_CARD) {
       std::cout << "playing basic character" << std::endl;
       this->hand.MoveToGroup(info.collisionIndex, &this->discardPile);
+      //this->hand.MoveToGroup(info.collisionIndex, &this->reserve);
     } else if (cardInfo->type == TestCardInfo::CardType::SPECIAL_CHARACTER_CARD) {
       std::cout << "how do you have that in your hand... :(" << std::endl;
       this->hand.MoveToGroup(info.collisionIndex, &this->deck);
@@ -171,7 +172,7 @@ ClickEvent TestGameState::ProcessClick(CollisionInfo info) {
   };
 }
 
-void TestGameState::test() {
+void TestGameState::EndTurnButtonPress() {
   std::cout << "end turn click" << std::endl;
 }
 
@@ -186,24 +187,24 @@ void TestGameState::LoadProperShader(Renderer* renderer, CardGroup* group) {
         card.renderData.shader = renderer->GetShader("cardShader");
       }
     }
-  } else if (&this->discardPile == group) {
-    std::vector<CardItem>* cards = group->GetCards();
-    auto startIter = cards->begin();
-    auto endIter = cards->end();
-    int groupSize = cards->size();
-    if (groupSize != 0) {
-      for (auto iter = startIter; iter < endIter-1; ++iter) {
-        (*iter).renderData.shader = renderer->GetShader("cardShader");
-      }
-      cards->at(groupSize-1).renderData.shader = renderer->GetShader("highlightCardShader");
-      highlight++;
-    }
+  //} else if (&this->discardPile == group) {
+    //std::vector<CardItem>* cards = group->GetCards();
+    //auto startIter = cards->begin();
+    //auto endIter = cards->end();
+    //int groupSize = cards->size();
+    //if (groupSize != 0) {
+      //for (auto iter = startIter; iter < endIter-1; ++iter) {
+        //(*iter).renderData.shader = renderer->GetShader("cardShader");
+      //}
+      //cards->at(groupSize-1).renderData.shader = renderer->GetShader("highlightCardShader");
+      //highlight++;
+    //}
   } else {
     for (auto& card : *group->GetCards()) {
       card.renderData.shader = renderer->GetShader("cardShader");
     }
   }
-  group->highlightedCards=highlight;
+  group->SetNumHighlightedCards(highlight);
 }
 
 void TestGameState::Render(Renderer* renderer) {

@@ -4,7 +4,7 @@
 #include "../include/BoundButton.h"
 #include "../include/shaders/allShaders.h"
 #include "../include/FannedCardGroup.h"
-#include "../include/StackedCardGroup.h"
+#include "../include/ExpandableStackCardGroup.h"
 
 class TestGameState : public GameState
 {
@@ -17,12 +17,12 @@ private:
   FannedCardGroup oppReserve;
   FannedCardGroup oppBatlefield;
   FannedCardGroup oppSpecials;
-  StackedCardGroup deck;
-  StackedCardGroup discardPile;
+  ExpandableStackCardGroup deck;
+  ExpandableStackCardGroup discardPile;
   BoundButton passTurn;
   TestCardDatabaseSingleton* database;
 
-  void test();
+  void EndTurnButtonPress();
 public:
   TestGameState(Renderer* renderer, TestCardDatabaseSingleton* database);
   ClickEvent ProcessClick(CollisionInfo info);

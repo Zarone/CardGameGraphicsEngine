@@ -37,13 +37,15 @@ add_executable(${PROJECT_NAME}
   src/BoundButton.cpp
   src/Card.cpp
   src/CardGroup.cpp
+  src/CardGroupRenderer.cpp
   src/CardInfo.cpp
   src/CardRenderingData.cpp
   src/ErrorHandling.cpp
+  src/ExpandableStackCardGroup.cpp
   src/FannedCardGroup.cpp
+  src/FannedCardGroupRenderer.cpp
   src/GameState.cpp
   src/IndexBuffer.cpp
-  src/main.cpp
   src/MathHelper.cpp
   src/MemoryLayout.cpp
   src/Renderer.cpp
@@ -52,13 +54,14 @@ add_executable(${PROJECT_NAME}
   src/SimpleButton.cpp
   src/SimplePlane.cpp
   src/SimpleRenderObject.cpp
-  src/StackedCardGroup.cpp
+  src/StackedCardGroupRenderer.cpp
   src/Texture.cpp
   src/TextureLRU.cpp
   src/TextureMap.cpp
   src/VertexArray.cpp
   src/VertexBuffer.cpp
   src/WindowManager.cpp
+  src/main.cpp
 )
 
 add_executable(test

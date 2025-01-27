@@ -1,19 +1,17 @@
-#include "CardGroup.h"
-#include "FannedCardGroup.h"
+#include "CardGroupRenderer.h"
 
-class StackedCardGroup : public CardGroup
+class StackedCardGroupRenderer : public CardGroupRenderer
 {
 private:
-  glm::mat4 transform;
 public:
-  StackedCardGroup(
+  StackedCardGroupRenderer(
     Renderer* renderer,
     glm::vec3 position, 
     float rotationX, 
     bool zFlipped
   );
 
-  void MoveToGroup(int index, FannedCardGroup* to);
+  //void MoveToGroup(int index, FannedCardGroupRenderer* to);
 
   const glm::mat4 WorldSpaceToThisSpace();
 
@@ -27,4 +25,5 @@ public:
     CollisionInfo* collisioInfo
   ) const;
 
+  glm::mat4 transform;
 };

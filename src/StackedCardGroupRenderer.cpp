@@ -1,14 +1,14 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "../include/StackedCardGroup.h"
+#include "../include/StackedCardGroupRenderer.h"
 
-StackedCardGroup::StackedCardGroup(
+StackedCardGroupRenderer::StackedCardGroupRenderer(
   Renderer* renderer,
   glm::vec3 position, 
   float rotationX, 
   bool zFlipped
 ): 
-  CardGroup(zFlipped)
+  CardGroupRenderer(zFlipped)
 {
   this->transform = glm::mat4(1.0f); // setup to identity
   this->transform = glm::translate(this->transform, position);
@@ -39,10 +39,10 @@ StackedCardGroup::StackedCardGroup(
   this->indexBuffer = IndexBuffer(CardRenderingData::cardIndices, 2);
 };
 
-void StackedCardGroup::Render(Renderer* renderer) {
+void StackedCardGroupRenderer::Render(Renderer* renderer) {
   const unsigned int renderMax = 2;
 
-  int totalSize = this->cards.size();
+  int totalSize = cardsPointer->size();
   if (totalSize==0) return;
   int renderSize = fmin(renderMax, totalSize);
 
@@ -50,7 +50,7 @@ void StackedCardGroup::Render(Renderer* renderer) {
     const float zGap = (this->zFlipped ? -1 : 1) * 0.01f;
     // set all cards to position 0
     for (int i = 0; i < totalSize; i++) {
-      CardRenderingData& thisCard = cards[i].renderData;
+      CardRenderingData& thisCard = (*cardsPointer)[i].renderData;
 
       thisCard.SetActualTransform(
         glm::vec3(
@@ -126,11 +126,11 @@ void StackedCardGroup::Render(Renderer* renderer) {
   this->dirtyPosition = false;
 }
 
-const glm::mat4 StackedCardGroup::WorldSpaceToThisSpace() {
+const glm::mat4 StackedCardGroupRenderer::WorldSpaceToThisSpace() {
   return glm::inverse(this->transform);
 }
 
-bool StackedCardGroup::CheckCollision(
+bool StackedCardGroupRenderer::CheckCollision(
   Renderer* renderer, 
   double x, 
   double y, 

@@ -1,19 +1,19 @@
 #pragma once
 #include "CardGroup.h"
-#include "FannedCardGroupRenderer.h"
+#include "StackedCardGroupRenderer.h"
 
-class FannedCardGroup : public CardGroup
+class ExpandableStackCardGroup : public CardGroup
 {
 private:
-  FannedCardGroupRenderer thisRenderer;
+  StackedCardGroupRenderer stackRenderer;
+  //ExpandedCardGroupRenderer expandedRenderer;
+  bool isExpanded = false;
 public:
-  FannedCardGroup(
+  ExpandableStackCardGroup(
     Renderer* renderer,
     glm::vec3 position, 
     float rotationX, 
-    float width, 
-    bool zFlipped,
-    bool isHand
+    bool zFlipped
   );
 
   void Render(Renderer* renderer);

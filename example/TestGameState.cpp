@@ -143,6 +143,7 @@ TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* data
 
 ClickEvent TestGameState::ProcessClick(CollisionInfo info) {
   SceneObject* src = (SceneObject*) info.groupPointer;
+  //std::cout << "ProcessClick in TestGameState with groupPointer: " << info.groupPointer << std::endl;
 
   if (src == &this->hand) {
     std::cout << "hand collision recognized" << std::endl;

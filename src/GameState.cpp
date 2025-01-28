@@ -44,7 +44,7 @@ bool GameState::CheckCollision(Renderer* renderer, double x, double y, double* c
     if (objectCollision && tempZ < minZ) {
       minZ = tempZ;
       collisionInfo = tempInfo;
-      collisionInfo.groupPointer = (void*)group;
+      collisionInfo.groupPointer = group;
     }
   }
   for (SceneObject* group : this->cardGroups) {
@@ -52,7 +52,7 @@ bool GameState::CheckCollision(Renderer* renderer, double x, double y, double* c
     if (objectCollision && tempZ < minZ) {
       minZ = tempZ;
       collisionInfo = tempInfo;
-      collisionInfo.groupPointer = (void*)group;
+      //collisionInfo.groupPointer = (void*)group;
     }
   }
 

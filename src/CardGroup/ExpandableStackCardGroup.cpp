@@ -13,9 +13,14 @@ ExpandableStackCardGroup::ExpandableStackCardGroup(
     zFlipped
   ),
   expandedRenderer(
-    renderer
+    renderer,
+    std::bind(&ExpandableStackCardGroup::OnClose, this)
   )
 {}
+
+void ExpandableStackCardGroup::OnClose() {
+  this->isExpanded = false;
+}
 
 void ExpandableStackCardGroup::Render(Renderer* renderer) {
   if (isExpanded) {
@@ -37,8 +42,7 @@ void ExpandableStackCardGroup::UpdateTick(double deltaTime) {
 
 ClickEvent ExpandableStackCardGroup::ProcessClick(CollisionInfo info) {
   if (isExpanded) {
-    std::cout << "You forgot to implement expanded processClick" << std::endl;
-    return {};
+    return this->expandedRenderer.ProcessClick(info);
   } else {
     this->isExpanded = true;
     return this->stackRenderer.ProcessClick(info);
@@ -69,9 +73,9 @@ bool ExpandableStackCardGroup::CheckCollision(
   double* collisionZ, 
   CollisionInfo* info
 ) const {
+  info->groupPointer = (ExpandableStackCardGroup*)this;
   if (isExpanded) {
-    std::cout << "You forgot to implement expanded checkCollision" << std::endl;
-    return false;
+    return this->expandedRenderer.CheckCollision(renderer, x, y, collisionZ, info);
   } else {
     return this->stackRenderer.CheckCollision(renderer, x, y, collisionZ, info);
   }

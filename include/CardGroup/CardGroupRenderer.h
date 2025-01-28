@@ -25,7 +25,7 @@ typedef struct TextureVertex {
   unsigned int index;
 } TextureVertex;
 
-class CardGroupRenderer
+class CardGroupRenderer : public SceneObject
 {
 protected:
   // Makes sure this class can access the
@@ -169,10 +169,11 @@ public:
     CollisionInfo* collisioInfo
   ) const = 0;
 
+  virtual ClickEvent ProcessClick(CollisionInfo info) {return {};}
+
   // Game state should perform operations on the card group,
   // so that it can correctly manipulate data. So these can just
   // be blank unless I need them for something else.
-  ClickEvent ProcessClick(CollisionInfo info) {return {};}
   ClickEvent ProcessPreClick(CollisionInfo info) {return {};};
   void ReleaseClick() {};
 };

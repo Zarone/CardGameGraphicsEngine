@@ -46,7 +46,11 @@ bool FannedCardGroup::CheckCollision(
   double* collisionZ, 
   CollisionInfo* info
 ) const {
-  return this->thisRenderer.CheckCollision(renderer, x, y, collisionZ, info);
+  if (this->thisRenderer.CheckCollision(renderer, x, y, collisionZ, info)) {
+    info->groupPointer = (FannedCardGroup*) this;
+    return true;
+  }
+  return false;
 }
 
 void FannedCardGroup::SetNumHighlightedCards(int num){

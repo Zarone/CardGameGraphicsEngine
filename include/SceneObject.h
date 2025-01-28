@@ -2,6 +2,8 @@
 
 #include "../include/Renderer.h"
 
+class SceneObject;
+
 typedef struct CollisionInfo {
   // if the scene object has multiple items
   // inside it, this identifies which one
@@ -12,7 +14,7 @@ typedef struct CollisionInfo {
   // inside it, this identifies which one was 
   // hit. Individual collision indices are inside
   // this group.
-  void* groupPointer;
+  SceneObject* groupPointer;
 
 } CollisionInfo;
 

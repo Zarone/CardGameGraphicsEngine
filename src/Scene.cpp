@@ -28,6 +28,10 @@ void Scene::ProcessCollision(double x, double y, double* collisionZ, bool preCli
   // since you can have multiple collisions
   // you need to find the one closest to the
   // camera (lowest z)
+  
+  std::cout << std::endl;
+  std::cout << std::endl;
+  std::cout << "ProcessCollision call in Scene" << std::endl;
 
   std::unique_ptr<SceneObject>* selectedObject = nullptr;
   double minZ = MAXFLOAT;
@@ -36,7 +40,9 @@ void Scene::ProcessCollision(double x, double y, double* collisionZ, bool preCli
     double z = MAXFLOAT;
     CollisionInfo info;
     bool objectCollision = object->CheckCollision(&this->renderer, x, y, &z, &info);
-    //if (objectCollision) std::cout << "Collision at z = " << z << std::endl;
+    if (objectCollision) {
+      //std::cout << "Collision at z = " << z << std::endl;
+    }
 
     if (objectCollision && z < minZ) {
       minZ = z;

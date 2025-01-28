@@ -137,7 +137,7 @@ bool StackedCardGroupRenderer::CheckCollision(
   double x, 
   double y, 
   double* collisionZ,
-  CollisionInfo* collisioInfo
+  CollisionInfo* collisionInfo
 ) const {
   double leftBoundary;
   double zAtCursor;
@@ -175,5 +175,7 @@ bool StackedCardGroupRenderer::CheckCollision(
     &zAtCursor,
     &xScale
   )) return false;
-  else return true;
+  else {
+    return true;
+  }
 }

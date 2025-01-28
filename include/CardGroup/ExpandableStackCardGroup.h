@@ -21,6 +21,7 @@ public:
   void SetDirtyPosition(bool dirty);
   const glm::mat4 WorldSpaceToThisSpace();
   void MoveToGroup(int index, CardGroup* to);
+  void OnClose();
   
   void Render(Renderer* renderer);
   void UpdateTick(double deltaTime);

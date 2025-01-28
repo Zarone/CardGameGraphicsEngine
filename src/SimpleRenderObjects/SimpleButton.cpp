@@ -68,6 +68,11 @@ bool SimpleButton::CheckCollision(
     return false;
   }
 
+  std::cout << "Setting group pointer to " << this << std::endl;
+  std::cout << "Setting group pointer to (void*)" << (void*)this << std::endl;
+  SceneObject* test = (SceneObject*)this;
+  std::cout << "Setting group pointer to (SceneObject*)" << test << std::endl;
+  info->groupPointer = (SimpleButton*)this;
   return true;
 }
 

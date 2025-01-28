@@ -2,7 +2,8 @@
 #include "../../include/CardGroup/ExpandedStackCardGroupRenderer.h"
 
 ExpandedStackCardGroupRenderer::ExpandedStackCardGroupRenderer(
-  Renderer* renderer
+  Renderer* renderer,
+  std::function<void()> onClose
 ) : 
   //lastCursorX(0),
   //lastCursorY(0),
@@ -31,6 +32,18 @@ ExpandedStackCardGroupRenderer::ExpandedStackCardGroupRenderer(
       )
     )
   ),
+  closeExpandedView(
+    renderer,
+    glm::identity<glm::mat4>(), 
+    Material(
+      {
+        .hasTexture=false,
+        .shader=renderer->GetShader("basicShader"),
+        .color=glm::vec4(1.f,0.f,0.f,1.f)
+      }
+    ),
+    onClose
+  ),
   CardGroupRenderer(false) 
 {
   // render straight to screen without projection
@@ -39,6 +52,9 @@ ExpandedStackCardGroupRenderer::ExpandedStackCardGroupRenderer(
   this->backingPlaneTransform = glm::scale(this->backingPlaneTransform, glm::vec3(2.0f, 2.0f, 1.0f));
   this->cardContainerTransform = glm::translate(this->transform, glm::vec3(0.0f, (2.0f-this->height)/2.0f-this->yTopPadding, 0.0f));
   this->cardContainerTransform = glm::scale(this->cardContainerTransform, glm::vec3(this->width, this->height, 1.0f));
+  float buttonHeight = 0.25f;
+  this->closeExpandedTransform = glm::translate(this->transform, glm::vec3(0.0f, 1-this->height-this->yTopPadding-buttonHeight/2, 0.0f));
+  this->closeExpandedTransform = glm::scale(this->closeExpandedTransform, glm::vec3(0.5f, 0.25f, 1.0f));
   this->transform = glm::translate(this->transform, glm::vec3(-this->width/2, (2.0f-this->height)/2.0f-this->yTopPadding, 0.0f));
   this->transform = glm::scale(this->transform, glm::vec3(1.0f, renderer->GetAspectRatio(), 1.0f));
 
@@ -83,8 +99,8 @@ bool ExpandedStackCardGroupRenderer::CheckCollision(
   double* collisionZ, 
   CollisionInfo* collisionInfo
 ) const {
-  std::cout << "Unimplemented collision function for ExpandedStackCardGroup" << std::endl;
-  return false;
+  std::cout << "Unimplemented collision function for cards of ExpandedStackCardGroup" << std::endl;
+  return closeExpandedView.CheckCollision(renderer, x, y, collisionZ, collisionInfo);
 }
 
 void ExpandedStackCardGroupRenderer::UpdateCardPositions(Renderer* renderer) {
@@ -186,6 +202,8 @@ void ExpandedStackCardGroupRenderer::Render(
   this->backingPlane.Render(renderer);
   this->cardContainerPlane.SetTransform(&this->cardContainerTransform);
   this->cardContainerPlane.Render(renderer);
+  this->closeExpandedView.SetTransform(&this->closeExpandedTransform);
+  this->closeExpandedView.Render(renderer);
 
   this->dirtyPosition = false;
   this->dirtyDisplay = false;
@@ -193,4 +211,11 @@ void ExpandedStackCardGroupRenderer::Render(
 
 const glm::mat4 ExpandedStackCardGroupRenderer::WorldSpaceToThisSpace() {
   return glm::inverse(this->transform);
+}
+
+ClickEvent ExpandedStackCardGroupRenderer::ProcessClick(CollisionInfo info) {
+  std::cout << "(CardGroup*) info.groupPointer == this->closeExpandedView" << std::endl;
+  std::cout << (info.groupPointer == (void*)&this->closeExpandedView) << std::endl;
+  std::cout << "groupPointer: " << (info.groupPointer) << std::endl;
+  std::cout << "thisPointer: " << ((void*)&this->closeExpandedView) << std::endl;
 }

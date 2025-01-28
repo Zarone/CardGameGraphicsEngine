@@ -3,6 +3,7 @@
 #include "../../include/CardGroup/CardGroupRenderer.h"
 #include "../../include/SimpleRenderObjects/SimplePlane.h"
 #include "../../include/CardGroup/CardGroup.h"
+#include "../../include/SimpleRenderObjects/BoundButton.h"
 
 class ExpandedStackCardGroupRenderer : public CardGroupRenderer
 {
@@ -38,17 +39,21 @@ private:
     //double& projectedLeftBoundary
   //);
 
+  const float height = 1.5f;
+  const float width = 1.7f;
+  const float yTopPadding = 0.15f;
+
   SimplePlane backingPlane;
   glm::mat4 backingPlaneTransform;
   SimplePlane cardContainerPlane;
   glm::mat4 cardContainerTransform;
+  BoundButton closeExpandedView;
+  glm::mat4 closeExpandedTransform;
 
-  const float height = 1.5f;
-  const float width = 1.7f;
-  const float yTopPadding = 0.15f;
 public:
   ExpandedStackCardGroupRenderer(
-    Renderer* renderer
+    Renderer* renderer,
+    std::function<void()> onClose
   );
 
   void UpdateCardPositions(Renderer* renderer);
@@ -62,4 +67,5 @@ public:
     double* collisionZ,
     CollisionInfo* collisioInfo
   ) const;
+  ClickEvent ProcessClick(CollisionInfo info);
 };

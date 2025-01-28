@@ -43,13 +43,15 @@ private:
   SimplePlane cardContainerPlane;
   glm::mat4 cardContainerTransform;
 
-  float width = 1.5f;
+  const float height = 1.5f;
+  const float width = 1.7f;
+  const float yTopPadding = 0.15f;
 public:
   ExpandedStackCardGroupRenderer(
     Renderer* renderer
   );
 
-  void UpdateCardPositions();
+  void UpdateCardPositions(Renderer* renderer);
 
   const glm::mat4 WorldSpaceToThisSpace();
   void Render(Renderer* renderer); 

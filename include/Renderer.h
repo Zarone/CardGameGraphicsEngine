@@ -47,4 +47,6 @@ public:
   void ResetShaders();
 
   Shader* GetShader(const std::string& name);
+
+  float GetAspectRatio();
 };

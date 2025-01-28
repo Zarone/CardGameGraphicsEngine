@@ -19,10 +19,6 @@ uniform mat4 u_projMatrix;
 uniform mat4 u_cameraMatrix;
 uniform mat4 u_modelMatrix;
 
-float rand(vec2 co){
-    return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
-}
-
 mat4 getZRotation(float rotation) 
 {
   float sinR = sin(rotation);
@@ -38,7 +34,7 @@ mat4 getZRotation(float rotation)
 void main()
 {
   mat4 dynamicRotationMatrix = getZRotation(rotation);
-  vec3 vertexPosition = (dynamicRotationMatrix * position).xyz + positionRelativeGroup;
+  vec3 vertexPosition = (dynamicRotationMatrix * scale * position).xyz + positionRelativeGroup;
 
   mat4 cameraModelMatrix = u_cameraMatrix * u_modelMatrix;
   vec4 cameraPosition4 = (cameraModelMatrix * vec4(vertexPosition, 1));

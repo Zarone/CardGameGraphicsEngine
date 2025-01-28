@@ -67,3 +67,7 @@ Shader* Renderer::GetShader(const std::string& name) {
     return &(shader->second);
   }
 }
+
+float Renderer::GetAspectRatio() {
+  return this->window->AspectRatio();
+}

@@ -79,7 +79,7 @@ bool ExpandableStackCardGroup::CheckCollision(
 
 void ExpandableStackCardGroup::SetNumHighlightedCards(int num){
   if (isExpanded) {
-    std::cout << "You forgot to implement expanded setnumhighlightedcards" << std::endl;
+    this->expandedRenderer.highlightedCards=num;
     return;
   } else {
     this->stackRenderer.highlightedCards=num;

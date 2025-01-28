@@ -32,7 +32,7 @@ mat4 getZRotation(float rotation)
 void main()
 {
   mat4 dynamicRotationMatrix = getZRotation(rotation);
-  vec3 vertexPosition = (dynamicRotationMatrix * position).xyz + positionRelativeGroup;
+  vec3 vertexPosition = scale*((dynamicRotationMatrix * position).xyz) + positionRelativeGroup;
 
   gl_Position = 
     u_projMatrix * u_cameraMatrix * u_modelMatrix 

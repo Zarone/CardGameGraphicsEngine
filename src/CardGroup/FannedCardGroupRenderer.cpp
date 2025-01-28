@@ -139,7 +139,7 @@ void FannedCardGroupRenderer::UpdateHandPosition(
     closestCard.SetActualTransform(
       glm::vec3(centerX, 0.1f, (this->lastClosestIndex+zOffset)*zGap+0.1f),
       0.0f,
-      1.0f
+      1.05f
     );
 
     for (int i = (this->lastClosestIndex+1); i < size; i++) {

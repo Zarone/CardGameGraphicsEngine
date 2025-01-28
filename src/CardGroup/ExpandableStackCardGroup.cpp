@@ -11,12 +11,16 @@ ExpandableStackCardGroup::ExpandableStackCardGroup(
     position,
     rotationX,
     zFlipped
+  ),
+  expandedRenderer(
+    renderer
   )
 {}
 
 void ExpandableStackCardGroup::Render(Renderer* renderer) {
   if (isExpanded) {
-    std::cout << "You forgot to implement expanded render" << std::endl;
+    this->expandedRenderer.SetCardsPointer(&this->cards);
+    this->expandedRenderer.Render(renderer);
   } else {
     this->stackRenderer.SetCardsPointer(&this->cards);
     this->stackRenderer.Render(renderer);
@@ -25,7 +29,7 @@ void ExpandableStackCardGroup::Render(Renderer* renderer) {
 
 void ExpandableStackCardGroup::UpdateTick(double deltaTime) {
   if (isExpanded) {
-    std::cout << "You forgot to implement expanded updatetick" << std::endl;
+    this->expandedRenderer.UpdateTick(deltaTime);
   } else {
     this->stackRenderer.UpdateTick(deltaTime);
   }
@@ -36,6 +40,7 @@ ClickEvent ExpandableStackCardGroup::ProcessClick(CollisionInfo info) {
     std::cout << "You forgot to implement expanded processClick" << std::endl;
     return {};
   } else {
+    this->isExpanded = true;
     return this->stackRenderer.ProcessClick(info);
   }
 }
@@ -45,7 +50,7 @@ ClickEvent ExpandableStackCardGroup::ProcessPreClick(CollisionInfo info) {
     std::cout << "You forgot to implement expanded processpreclick" << std::endl;
     return {};
   } else {
-    return this->stackRenderer.ProcessClick(info);
+    return this->stackRenderer.ProcessPreClick(info);
   }
 }
 

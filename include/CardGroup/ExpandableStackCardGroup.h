@@ -1,12 +1,13 @@
 #pragma once
 #include "CardGroup.h"
 #include "StackedCardGroupRenderer.h"
+#include "ExpandedStackCardGroupRenderer.h"
 
 class ExpandableStackCardGroup : public CardGroup
 {
 private:
   StackedCardGroupRenderer stackRenderer;
-  //ExpandedCardGroupRenderer expandedRenderer;
+  ExpandedStackCardGroupRenderer expandedRenderer;
   bool isExpanded = false;
 public:
   ExpandableStackCardGroup(

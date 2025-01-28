@@ -165,8 +165,10 @@ ClickEvent TestGameState::ProcessClick(CollisionInfo info) {
     std::cout << "reserve click recognized" << std::endl;
   } else if (src == &this->discardPile) {
     std::cout << "discard pile click recognized" << std::endl;
+    src->ProcessClick(info);
   } else if (src == &this->deck) {
     std::cout << "deck click recognized" << std::endl;
+    src->ProcessClick(info);
   } else {
     src->ProcessClick(info);
   }

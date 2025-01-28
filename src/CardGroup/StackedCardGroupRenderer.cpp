@@ -29,6 +29,7 @@ StackedCardGroupRenderer::StackedCardGroupRenderer(
   this->transformBufferLayout = MemoryLayout();
   this->transformBufferLayout.AddMemoryElement(GL_FLOAT, 3, true); // position relative group
   this->transformBufferLayout.AddMemoryElement(GL_FLOAT, 1, true); // rotation
+  this->transformBufferLayout.AddMemoryElement(GL_FLOAT, 1, true); // scaleXY
   this->transformEndAttribID = this->groupVao.AddBuffer(this->transformBuffer, this->transformBufferLayout);
 
   this->textureIDBuffer = VertexBuffer(NULL, 2*sizeof(TextureVertex), true);
@@ -58,7 +59,8 @@ void StackedCardGroupRenderer::Render(Renderer* renderer) {
           0.0f,
           zGap*i
         ),
-        0.0f 
+        0.0f,
+        1.0f
       );
     }
   }

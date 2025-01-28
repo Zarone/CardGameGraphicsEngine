@@ -40,11 +40,16 @@ private:
 
   SimplePlane backingPlane;
   glm::mat4 backingPlaneTransform;
+  SimplePlane cardContainerPlane;
+  glm::mat4 cardContainerTransform;
 
+  float width = 1.5f;
 public:
   ExpandedStackCardGroupRenderer(
     Renderer* renderer
   );
+
+  void UpdateCardPositions();
 
   const glm::mat4 WorldSpaceToThisSpace();
   void Render(Renderer* renderer); 

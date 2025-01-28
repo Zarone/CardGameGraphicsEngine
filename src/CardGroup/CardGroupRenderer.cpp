@@ -32,6 +32,7 @@ void CardGroupRenderer::LoadPositions(
       buffer[i+1] = thisCard.displayedPosition.y;
       buffer[i+2] = thisCard.displayedPosition.z;
       buffer[i+3] = thisCard.displayedRotationZ;
+      buffer[i+4] = thisCard.displayedScaleXY;
 
       cardIndex--;
     }
@@ -46,6 +47,7 @@ void CardGroupRenderer::LoadPositions(
       buffer[i+1] = thisCard.displayedPosition.y;
       buffer[i+2] = thisCard.displayedPosition.z;
       buffer[i+3] = thisCard.displayedRotationZ;
+      buffer[i+4] = thisCard.displayedScaleXY;
 
       cardIndex++;
     }
@@ -131,7 +133,7 @@ void CardGroupRenderer::BindAndDrawAllFrontFaces(
     );
 
     this->transformBuffer.OverwriteAttrib(
-      this->transformEndAttribID-1,
+      this->transformEndAttribID-2,
       3,
       GL_FLOAT,
       sizeof(CardTransformVertex), 
@@ -139,11 +141,19 @@ void CardGroupRenderer::BindAndDrawAllFrontFaces(
     );
 
     this->transformBuffer.OverwriteAttrib(
-      this->transformEndAttribID,
+      this->transformEndAttribID-1,
       1,
       GL_FLOAT,
       sizeof(CardTransformVertex), 
       (const void*)((offset+i)*sizeof(CardTransformVertex)+offsetof(CardTransformVertex, rotationZ))
+    );
+
+    this->transformBuffer.OverwriteAttrib(
+      this->transformEndAttribID,
+      1,
+      GL_FLOAT,
+      sizeof(CardTransformVertex), 
+      (const void*)((offset+i)*sizeof(CardTransformVertex)+offsetof(CardTransformVertex, scaleXY))
     );
 
     this->DrawElements(batchSize);

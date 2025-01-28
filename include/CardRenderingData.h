@@ -12,8 +12,10 @@ private:
   // is so that the card can be animated
   glm::vec3 actualPosition;
   double actualRotationZ;
+  double actualScaleXY;
   glm::vec3 previousActualPosition;
   double previousActualRotationZ;
+  double previousActualScaleXY;
 
   static const double animationDuration;
   
@@ -30,8 +32,13 @@ public:
 
   glm::vec3 displayedPosition;
   double displayedRotationZ;
+  double displayedScaleXY;
 
   CardRenderingData();
-  void SetActualTransform(glm::vec3 position, double rotationZ);
+  void SetActualTransform(
+    glm::vec3 position, 
+    double rotationZ,
+    double scaleXY
+  );
   bool UpdateDisplayed(double deltaTime);
 };

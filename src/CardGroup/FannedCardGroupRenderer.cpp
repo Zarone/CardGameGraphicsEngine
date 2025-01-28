@@ -75,6 +75,7 @@ FannedCardGroupRenderer::FannedCardGroupRenderer(
   this->transformBufferLayout = MemoryLayout();
   this->transformBufferLayout.AddMemoryElement(GL_FLOAT, 3, true); // position relative group
   this->transformBufferLayout.AddMemoryElement(GL_FLOAT, 1, true); // rotation
+  this->transformBufferLayout.AddMemoryElement(GL_FLOAT, 1, true); // scale
   this->transformEndAttribID = this->groupVao.AddBuffer(this->transformBuffer, this->transformBufferLayout);
 
   this->textureIDBuffer = VertexBuffer(NULL, estimatedMax*sizeof(TextureVertex), true);
@@ -129,14 +130,16 @@ void FannedCardGroupRenderer::UpdateHandPosition(
           0.0f,
           (float)(cardIndex+zOffset)*zGap
         ),
-        (float)(cardIndex-(float)this->lastClosestIndex)/size*rotationPerCard
+        (float)(cardIndex-(float)this->lastClosestIndex)/size*rotationPerCard,
+        1.0f
       );
     }
 
     CardRenderingData& closestCard = (*cardsPointer)[this->lastClosestIndex].renderData;
     closestCard.SetActualTransform(
       glm::vec3(centerX, 0.1f, (this->lastClosestIndex+zOffset)*zGap+0.1f),
-      0.0f
+      0.0f,
+      1.0f
     );
 
     for (int i = (this->lastClosestIndex+1); i < size; i++) {
@@ -149,7 +152,8 @@ void FannedCardGroupRenderer::UpdateHandPosition(
           0.0f,
           (float)(this->lastClosestIndex - (cardIndex-this->lastClosestIndex) + zOffset) *zGap
         ),
-        (float)(cardIndex-(float)(this->lastClosestIndex))/size*rotationPerCard
+        (float)(cardIndex-(float)(this->lastClosestIndex))/size*rotationPerCard,
+        1.0f
       );
     }
   } else {
@@ -164,7 +168,8 @@ void FannedCardGroupRenderer::UpdateHandPosition(
           0.0f,
           (float)cardIndex*zGap+0.01f
         ),
-        (float)(cardIndex-(float)(size-1)/2.0f)/size*rotationPerCard
+        (float)(cardIndex-(float)(size-1)/2.0f)/size*rotationPerCard,
+        1.0f
       );
     }
   }
@@ -300,6 +305,7 @@ bool FannedCardGroupRenderer::CheckCollision(
   double* collisionZ, 
   CollisionInfo* collisionInfo
 ) const {
+  if (cardsPointer == nullptr) return false;
   int size = cardsPointer->size();
   if (size == 0) return false;
 

@@ -10,6 +10,7 @@ typedef struct CardTransformVertex {
   float y;
   float z;
   float rotationZ;
+  float scaleXY;
 } CardTransformVertex;
 
 typedef struct CardVertex {
@@ -30,7 +31,7 @@ protected:
   // Makes sure this class can access the
   // cards. This variable is set in CardGroup
   // which contains this object.
-  std::vector<CardItem>* cardsPointer = {};
+  std::vector<CardItem>* cardsPointer = nullptr;
 
   // Information for rendering to OpenGL
   VertexArray groupVao;

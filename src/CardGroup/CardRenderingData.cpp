@@ -24,11 +24,17 @@ CardRenderingData::CardRenderingData() {
   this->completedAnimation = true;
 }
 
-void CardRenderingData::SetActualTransform(glm::vec3 position, double rotationZ) {
+void CardRenderingData::SetActualTransform(
+  glm::vec3 position, 
+  double rotationZ,
+  double scaleXY
+) {
   this->previousActualPosition = this->displayedPosition;
   this->previousActualRotationZ = this->displayedRotationZ;
+  this->previousActualScaleXY = this->displayedScaleXY;
   this->actualPosition = position;
   this->actualRotationZ = rotationZ;
+  this->actualScaleXY = scaleXY;
   this->completedDuration = 0;
   this->completedAnimation = false;
 }
@@ -40,11 +46,13 @@ bool CardRenderingData::UpdateDisplayed(double deltaTime) {
   if (this->completedDuration >= this->animationDuration) {
     this->displayedPosition = this->actualPosition;
     this->displayedRotationZ = this->actualRotationZ;
+    this->displayedScaleXY = this->actualScaleXY;
     this->completedAnimation = true;
   } else {
     float t = (this->completedDuration / this->animationDuration);
     this->displayedPosition = t * this->actualPosition + (1-t) * this->previousActualPosition;
     this->displayedRotationZ = t * this->actualRotationZ + (1-t) * this->previousActualRotationZ;
+    this->displayedScaleXY = t * this->actualScaleXY + (1-t) * this->previousActualScaleXY;
   }
 
   return true;

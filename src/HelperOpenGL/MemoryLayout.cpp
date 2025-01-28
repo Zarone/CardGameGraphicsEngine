@@ -1,7 +1,7 @@
 #include <GL/glew.h>
 #include <cstdlib>
 #include <iostream>
-#include "../include/MemoryLayout.h"
+#include "../../include/HelperOpenGL/MemoryLayout.h"
 
 MemoryLayout::MemoryLayout() {
   stride = 0;

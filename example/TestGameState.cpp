@@ -163,6 +163,10 @@ ClickEvent TestGameState::ProcessClick(CollisionInfo info) {
     std::cout << "opp hand collision recognized" << std::endl;
   } else if (src == &this->reserve) {
     std::cout << "reserve click recognized" << std::endl;
+  } else if (src == &this->discardPile) {
+    std::cout << "discard pile click recognized" << std::endl;
+  } else if (src == &this->deck) {
+    std::cout << "deck click recognized" << std::endl;
   } else {
     src->ProcessClick(info);
   }
@@ -187,18 +191,18 @@ void TestGameState::LoadProperShader(Renderer* renderer, CardGroup* group) {
         card.renderData.shader = renderer->GetShader("cardShader");
       }
     }
-  //} else if (&this->discardPile == group) {
-    //std::vector<CardItem>* cards = group->GetCards();
-    //auto startIter = cards->begin();
-    //auto endIter = cards->end();
-    //int groupSize = cards->size();
-    //if (groupSize != 0) {
-      //for (auto iter = startIter; iter < endIter-1; ++iter) {
-        //(*iter).renderData.shader = renderer->GetShader("cardShader");
-      //}
-      //cards->at(groupSize-1).renderData.shader = renderer->GetShader("highlightCardShader");
-      //highlight++;
-    //}
+  } else if (&this->discardPile == group) {
+    std::vector<CardItem>* cards = group->GetCards();
+    auto startIter = cards->begin();
+    auto endIter = cards->end();
+    int groupSize = cards->size();
+    if (groupSize != 0) {
+      for (auto iter = startIter; iter < endIter-1; ++iter) {
+        (*iter).renderData.shader = renderer->GetShader("cardShader");
+      }
+      cards->at(groupSize-1).renderData.shader = renderer->GetShader("highlightCardShader");
+      highlight++;
+    }
   } else {
     for (auto& card : *group->GetCards()) {
       card.renderData.shader = renderer->GetShader("cardShader");

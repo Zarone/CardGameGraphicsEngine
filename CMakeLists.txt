@@ -34,32 +34,32 @@ add_executable(${PROJECT_NAME}
   src/shaders/HighlightedCardFragment.cpp
   src/shaders/TextureVertex.cpp
   src/shaders/TextureFragment.cpp
-  src/BoundButton.cpp
+  src/CardGroup/CardGroup.cpp
+  src/CardGroup/CardGroupRenderer.cpp
+  src/CardGroup/CardRenderingData.cpp
+  src/CardGroup/ExpandableStackCardGroup.cpp
+  src/CardGroup/FannedCardGroup.cpp
+  src/CardGroup/FannedCardGroupRenderer.cpp
+  src/CardGroup/StackedCardGroupRenderer.cpp
+  src/HelperOpenGL/IndexBuffer.cpp
+  src/HelperOpenGL/MemoryLayout.cpp
+  src/HelperOpenGL/VertexArray.cpp
+  src/HelperOpenGL/VertexBuffer.cpp
+  src/SimpleRenderObjects/BoundButton.cpp
+  src/SimpleRenderObjects/SimpleButton.cpp
+  src/SimpleRenderObjects/SimplePlane.cpp
+  src/SimpleRenderObjects/SimpleRenderObject.cpp
   src/Card.cpp
-  src/CardGroup.cpp
-  src/CardGroupRenderer.cpp
   src/CardInfo.cpp
-  src/CardRenderingData.cpp
   src/ErrorHandling.cpp
-  src/ExpandableStackCardGroup.cpp
-  src/FannedCardGroup.cpp
-  src/FannedCardGroupRenderer.cpp
   src/GameState.cpp
-  src/IndexBuffer.cpp
   src/MathHelper.cpp
-  src/MemoryLayout.cpp
   src/Renderer.cpp
   src/Scene.cpp
   src/Shader.cpp
-  src/SimpleButton.cpp
-  src/SimplePlane.cpp
-  src/SimpleRenderObject.cpp
-  src/StackedCardGroupRenderer.cpp
   src/Texture.cpp
   src/TextureLRU.cpp
   src/TextureMap.cpp
-  src/VertexArray.cpp
-  src/VertexBuffer.cpp
   src/WindowManager.cpp
   src/main.cpp
 )

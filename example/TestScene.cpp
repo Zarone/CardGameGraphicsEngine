@@ -1,7 +1,7 @@
 #include "./TestScene.h"
 #include "./TestGameState.h"
 #include "./TestSceneData.h"
-#include "../include/BoundButton.h"
+#include "../include/SimpleRenderObjects/BoundButton.h"
 
 TestScene::TestScene(WindowManager* windowManager, TestCardDatabaseSingleton* database):
   Scene(windowManager, database), database(database)

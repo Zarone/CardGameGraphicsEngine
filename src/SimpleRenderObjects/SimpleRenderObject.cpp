@@ -1,6 +1,6 @@
 #include <glm/gtc/type_ptr.hpp>
-#include "../include/SimpleRenderObject.h"
-#include "../include/ErrorHandling.h"
+#include "../../include/SimpleRenderObjects/SimpleRenderObject.h"
+#include "../../include/ErrorHandling.h"
 
 SimpleRenderObject::SimpleRenderObject(
   glm::mat4 transform,

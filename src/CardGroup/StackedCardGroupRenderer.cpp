@@ -1,6 +1,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "../include/StackedCardGroupRenderer.h"
+#include "../../include/CardGroup/StackedCardGroupRenderer.h"
 
 StackedCardGroupRenderer::StackedCardGroupRenderer(
   Renderer* renderer,
@@ -137,5 +137,41 @@ bool StackedCardGroupRenderer::CheckCollision(
   double* collisionZ,
   CollisionInfo* collisioInfo
 ) const {
-  return false;
+  double leftBoundary;
+  double zAtCursor;
+  double xScale;
+
+  if (!this->IsInsideScreenRectangle(
+    renderer,
+    x, y,
+    glm::vec4( // top left
+      0, 
+      0.5f*CardRenderingData::cardHeightRatio, 
+      0.0f, 
+      1.0f
+    ),
+    glm::vec4( // top right
+      1.0f, 
+      0.5f*CardRenderingData::cardHeightRatio, 
+      0.0f, 
+      1.0f
+    ),
+    glm::vec4( // bottom left 
+      0, 
+      -0.5f*CardRenderingData::cardHeightRatio, 
+      0.0f, 
+      1.0f
+    ),
+    glm::vec4( // bottom right
+      1.0f, 
+      -0.5f*CardRenderingData::cardHeightRatio, 
+      0.0f, 
+      1.0f
+    ),
+    1.0f,
+    &leftBoundary,
+    &zAtCursor,
+    &xScale
+  )) return false;
+  else return true;
 }

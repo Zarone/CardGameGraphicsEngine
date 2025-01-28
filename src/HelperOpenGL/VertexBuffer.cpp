@@ -1,7 +1,7 @@
 #include <GL/glew.h>
 #include <iostream>
-#include "../include/VertexBuffer.h"
-#include "../include/ErrorHandling.h"
+#include "../../include/HelperOpenGL/VertexBuffer.h"
+#include "../../include/ErrorHandling.h"
 
 VertexBuffer::VertexBuffer() {
   #ifdef DEBUG

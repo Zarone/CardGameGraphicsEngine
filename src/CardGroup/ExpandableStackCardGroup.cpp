@@ -1,4 +1,4 @@
-#include "../include/ExpandableStackCardGroup.h"
+#include "../../include/CardGroup/ExpandableStackCardGroup.h"
 
 ExpandableStackCardGroup::ExpandableStackCardGroup(
     Renderer* renderer,

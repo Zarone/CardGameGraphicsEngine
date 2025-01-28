@@ -21,6 +21,4 @@ public:
     double* collisionZ,
     CollisionInfo* collisioInfo
   ) const;
-
-  glm::mat4 transform;
 };

@@ -2,11 +2,11 @@
 
 #include <glm/glm.hpp>
 
-#include "../include/VertexArray.h"
-#include "../include/IndexBuffer.h"
-#include "../include/Renderer.h"
-#include "../include/SceneObject.h"
-#include "../include/Material.h"
+#include "../../include/HelperOpenGL/VertexArray.h"
+#include "../../include/HelperOpenGL/IndexBuffer.h"
+#include "../../include/Renderer.h"
+#include "../../include/SceneObject.h"
+#include "../../include/Material.h"
 
 class SimpleRenderObject : public SceneObject
 {

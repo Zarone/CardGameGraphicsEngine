@@ -1,4 +1,4 @@
-#include "../include/CardGroupRenderer.h"
+#include "../../include/CardGroup/CardGroupRenderer.h"
 
 const unsigned int CardGroupRenderer::estimatedMax = 60;
 
@@ -50,6 +50,28 @@ void CardGroupRenderer::LoadPositions(
       cardIndex++;
     }
   }
+}
+
+void CardGroupRenderer::GroupPositionToScreen(
+  Renderer* renderer, 
+  glm::vec4& src, 
+  glm::vec2& dest
+) const {
+  glm::mat4& projMatrix = renderer->projMatrix;
+  glm::mat4& camMatrix = renderer->cameraMatrix;
+  glm::vec4 screenSpace = projMatrix * camMatrix * this->transform * src;
+  dest = renderer->GetScreenPositionFromCamera(screenSpace);
+}
+
+void CardGroupRenderer::GroupPositionTo3DScreen(
+  Renderer* renderer, 
+  glm::vec4& src, 
+  glm::vec3& dest
+) const {
+  glm::mat4& projMatrix = renderer->projMatrix;
+  glm::mat4& camMatrix = renderer->cameraMatrix;
+  glm::vec4 screenSpace = projMatrix * camMatrix * this->transform * src;
+  dest = renderer->Get3DScreenPositionFromCamera(screenSpace);
 }
 
 void CardGroupRenderer::SetCardsPointer(std::vector<CardItem>* ptr) {
@@ -166,4 +188,49 @@ void CardGroupRenderer::UpdateTick(double deltaTime) {
   if (anythingUpdated) {
     this->dirtyDisplay = true;
   }
+}
+
+bool CardGroupRenderer::IsInsideScreenRectangle(
+  Renderer* renderer,
+  double x, 
+  double y, 
+  glm::vec4 topLeft,
+  glm::vec4 topRight,
+  glm::vec4 bottomLeft,
+  glm::vec4 bottomRight,
+  double width,
+  double* leftBoundary,
+  double* zAtCursor,
+  double* xScale
+) const {
+  glm::vec3 projectedBottomRight;
+  this->GroupPositionTo3DScreen(renderer, bottomRight, projectedBottomRight);
+
+  glm::vec3 projectedTopRight;
+  this->GroupPositionTo3DScreen(renderer, topRight, projectedTopRight);
+
+  // if y inside inside the box, then you can short circuit
+  // because the cursor definitely isn't in the group
+  if (y > projectedBottomRight.y || y < projectedTopRight.y) return false;
+
+  glm::vec2 projectedBottomLeft;
+  this->GroupPositionToScreen(renderer, bottomLeft, projectedBottomLeft);
+
+  glm::vec2 projectedTopLeft;
+  this->GroupPositionToScreen(renderer, topLeft, projectedTopLeft);
+
+  double t = (y-projectedTopLeft.y)/(projectedBottomLeft.y-projectedTopLeft.y);
+
+  // linear interpolate to find boundaries
+  *leftBoundary = t*projectedBottomLeft.x + (1-t)*(projectedTopLeft.x);
+  double rightBoundary = t*projectedBottomRight.x + (1-t)*(projectedTopRight.x);
+  *zAtCursor = t*projectedBottomRight.z + (1-t)*projectedTopRight.z;
+
+  bool inBounds = (x >= *leftBoundary && x <= rightBoundary);
+
+  if (!inBounds) return false;
+
+  *xScale = (rightBoundary - *leftBoundary)/width;
+
+  return true;
 }

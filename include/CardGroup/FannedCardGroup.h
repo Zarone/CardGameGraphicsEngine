@@ -1,6 +1,6 @@
 #pragma once
-#include "CardGroup.h"
-#include "FannedCardGroupRenderer.h"
+#include "../../include/CardGroup/CardGroup.h"
+#include "../../include/CardGroup/FannedCardGroupRenderer.h"
 
 class FannedCardGroup : public CardGroup
 {

@@ -1,5 +1,5 @@
 #include <glm/gtc/type_ptr.hpp>
-#include "../include/FannedCardGroupRenderer.h"
+#include "../../include/CardGroup/FannedCardGroupRenderer.h"
 
 FannedCardGroupRenderer::FannedCardGroupRenderer(
   Renderer* renderer,
@@ -170,28 +170,6 @@ void FannedCardGroupRenderer::UpdateHandPosition(
   }
 }
 
-void FannedCardGroupRenderer::GroupPositionToScreen(
-  Renderer* renderer, 
-  glm::vec4& src, 
-  glm::vec2& dest
-) const {
-  glm::mat4& projMatrix = renderer->projMatrix;
-  glm::mat4& camMatrix = renderer->cameraMatrix;
-  glm::vec4 screenSpace = projMatrix * camMatrix * this->transform * src;
-  dest = renderer->GetScreenPositionFromCamera(screenSpace);
-}
-
-void FannedCardGroupRenderer::GroupPositionTo3DScreen(
-  Renderer* renderer, 
-  glm::vec4& src, 
-  glm::vec3& dest
-) const {
-  glm::mat4& projMatrix = renderer->projMatrix;
-  glm::mat4& camMatrix = renderer->cameraMatrix;
-  glm::vec4 screenSpace = projMatrix * camMatrix * this->transform * src;
-  dest = renderer->Get3DScreenPositionFromCamera(screenSpace);
-}
-
 bool FannedCardGroupRenderer::GetInsideHandBoundary(
   Renderer* renderer,
   const CursorData& renderData,
@@ -336,66 +314,50 @@ bool FannedCardGroupRenderer::CheckCollision(
   // and bottomHeight, as a result of the fact that rotationZ
   // is 0 when you hover over the card
 
-  glm::vec4 bottomRight = glm::vec4(
-    width, 
-    -0.5f*CardRenderingData::cardHeightRatio, 
-    0.0f, 
-    1.0f
-  );
-  glm::vec3 projectedBottomRight;
-  this->GroupPositionTo3DScreen(renderer, bottomRight, projectedBottomRight);
+  double leftBoundary;
+  double zAtCursor;
+  double xScale;
 
-  glm::vec4 topRight = glm::vec4(
-    width, 
-    0.5f*CardRenderingData::cardHeightRatio, 
-    0.0f, 
-    1.0f
-  );
-  glm::vec3 projectedTopRight;
-  this->GroupPositionTo3DScreen(renderer, topRight, projectedTopRight);
-
-  // if y inside inside the box, then you can short circuit
-  // because the cursor definitely isn't in the group
-  if (y > projectedBottomRight.y || y < projectedTopRight.y) return false;
-
-  glm::vec4 bottomLeft = glm::vec4(
-    0, 
-    -0.5f*CardRenderingData::cardHeightRatio, 
-    0.0f, 
-    1.0f
-  );
-  glm::vec2 projectedBottomLeft;
-  this->GroupPositionToScreen(renderer, bottomLeft, projectedBottomLeft);
-
-  glm::vec4 topLeft = glm::vec4(
-    0, 
-    0.5f*CardRenderingData::cardHeightRatio, 
-    0.0f, 
-    1.0f
-  );
-  glm::vec2 projectedTopLeft;
-  this->GroupPositionToScreen(renderer, topLeft, projectedTopLeft);
-
-  double t = (y-projectedTopLeft.y)/(projectedBottomLeft.y-projectedTopLeft.y);
-
-  // linear interpolate to find boundaries
-  double leftBoundary = t*projectedBottomLeft.x + (1-t)*(projectedTopLeft.x);
-  double rightBoundary = t*projectedBottomRight.x + (1-t)*(projectedTopRight.x);
-  double zAtCursor = t*projectedBottomRight.z + (1-t)*projectedTopRight.z;
-
-  bool inBounds = (x >= leftBoundary && x <= rightBoundary);
-
-  if (!inBounds) return false;
-
-  double xGap = (rightBoundary - leftBoundary)/this->width;
+  if (!this->IsInsideScreenRectangle(
+    renderer,
+    x, y,
+    glm::vec4( // top left
+      0, 
+      0.5f*CardRenderingData::cardHeightRatio, 
+      0.0f, 
+      1.0f
+    ),
+    glm::vec4( // top right
+      width, 
+      0.5f*CardRenderingData::cardHeightRatio, 
+      0.0f, 
+      1.0f
+    ),
+    glm::vec4( // bottom left 
+      0, 
+      -0.5f*CardRenderingData::cardHeightRatio, 
+      0.0f, 
+      1.0f
+    ),
+    glm::vec4( // bottom right
+      width, 
+      -0.5f*CardRenderingData::cardHeightRatio, 
+      0.0f, 
+      1.0f
+    ),
+    this->width,
+    &leftBoundary,
+    &zAtCursor,
+    &xScale
+  )) return false;
   
   // iterate through all the cards
   for (int i = 0; i < size; ++i) {
-    double currentCardLeftBound = leftBoundary + xGap*((*cardsPointer)[i].renderData.displayedPosition.x - 0.5f);
-    double currentCardRightBound = currentCardLeftBound + xGap;
+    double currentCardLeftBound = leftBoundary + xScale*((*cardsPointer)[i].renderData.displayedPosition.x - 0.5f);
+    double currentCardRightBound = currentCardLeftBound + xScale;
     double rightBoundary = (i+1 < size) ? 
        fmin(
-         leftBoundary + xGap*((*cardsPointer)[i+1].renderData.displayedPosition.x - 0.5f), 
+         leftBoundary + xScale*((*cardsPointer)[i+1].renderData.displayedPosition.x - 0.5f), 
          currentCardRightBound
        ) :
        currentCardRightBound;

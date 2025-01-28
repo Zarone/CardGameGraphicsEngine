@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../include/CardGroupRenderer.h"
-#include "../include/SimplePlane.h"
-#include "../include/CardGroup.h"
+#include "../../include/CardGroup/CardGroupRenderer.h"
+#include "../../include/SimpleRenderObjects/SimplePlane.h"
+#include "../../include/CardGroup/CardGroup.h"
 
 class FannedCardGroupRenderer : public CardGroupRenderer
 {
@@ -45,18 +45,6 @@ private:
     double& projectedLeftBoundary
   );
 
-  void GroupPositionToScreen(
-    Renderer* renderer, 
-    glm::vec4& src, 
-    glm::vec2& dest
-  ) const;
-
-  void GroupPositionTo3DScreen(
-    Renderer* renderer, 
-    glm::vec4& src, 
-    glm::vec3& dest
-  ) const;
-
   #ifdef DEBUG
 
   // just where the cards are
@@ -73,6 +61,7 @@ private:
   // horizontal/vectical margin
   SimplePlane fullBackingPlane;
   glm::mat4 fullBackingPlaneTransform;
+
 public:
   FannedCardGroupRenderer(
     Renderer* renderer,
@@ -84,7 +73,6 @@ public:
   );
 
   const glm::mat4 WorldSpaceToThisSpace();
-
   void Render(Renderer* renderer); 
   bool CheckCollision(
     Renderer* renderer, 
@@ -94,6 +82,5 @@ public:
     CollisionInfo* collisioInfo
   ) const;
 
-  glm::mat4 transform;
   bool wasInsideBoundary;
 };

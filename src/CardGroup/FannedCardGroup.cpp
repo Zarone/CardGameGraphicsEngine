@@ -1,4 +1,4 @@
-#include "../include/FannedCardGroup.h"
+#include "../../include/CardGroup/FannedCardGroup.h"
 
 FannedCardGroup::FannedCardGroup(
     Renderer* renderer,

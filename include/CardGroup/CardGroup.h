@@ -3,9 +3,9 @@
 #include <vector>
 #include <glm/glm.hpp>
 
-#include "Card.h"
-#include "SceneObject.h"
-#include "../include/CardItem.h"
+#include "../../include/Card.h"
+#include "../../include/SceneObject.h"
+#include "../../include/CardGroup/CardItem.h"
 
 class CardGroup : public SceneObject
 {

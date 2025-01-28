@@ -1,10 +1,10 @@
 #pragma once
 #include "../include/GameState.h"
 #include "../example/TestCardDatabaseSingleton.h"
-#include "../include/BoundButton.h"
+#include "../include/SimpleRenderObjects/BoundButton.h"
 #include "../include/shaders/allShaders.h"
-#include "../include/FannedCardGroup.h"
-#include "../include/ExpandableStackCardGroup.h"
+#include "../include/CardGroup/FannedCardGroup.h"
+#include "../include/CardGroup/ExpandableStackCardGroup.h"
 
 class TestGameState : public GameState
 {

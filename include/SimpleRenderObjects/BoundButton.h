@@ -1,5 +1,5 @@
 #pragma once
-#include "SimpleButton.h"
+#include "../../include/SimpleRenderObjects/SimpleButton.h"
 
 class BoundButton : public SimpleButton 
 {

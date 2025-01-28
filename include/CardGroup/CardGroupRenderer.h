@@ -1,9 +1,9 @@
 #pragma once
 
-#include "SceneObject.h"
-#include "../include/CardItem.h"
-#include "VertexArray.h"
-#include "IndexBuffer.h"
+#include "../../include/SceneObject.h"
+#include "../../include/CardGroup/CardItem.h"
+#include "../../include/HelperOpenGL/VertexArray.h"
+#include "../../include/HelperOpenGL/IndexBuffer.h"
 
 typedef struct CardTransformVertex {
   float x;
@@ -88,8 +88,35 @@ protected:
     bool zFlipped
   );
 
+  void GroupPositionToScreen(
+    Renderer* renderer, 
+    glm::vec4& src, 
+    glm::vec2& dest
+  ) const;
+
+  void GroupPositionTo3DScreen(
+    Renderer* renderer, 
+    glm::vec4& src, 
+    glm::vec3& dest
+  ) const;
+
+  bool IsInsideScreenRectangle(
+    Renderer* renderer,
+    double x, 
+    double y, 
+    glm::vec4 topLeft,
+    glm::vec4 topRight,
+    glm::vec4 bottomLeft,
+    glm::vec4 bottomRight,
+    double width,
+    double* leftBoundary,
+    double* zAtCursor,
+    double* xScale
+  ) const;
 public:
   int highlightedCards = 0;
+
+  glm::mat4 transform;
 
   CardGroupRenderer(bool zFlipped);
 
@@ -121,11 +148,11 @@ public:
    */
   void SetDirtyPosition(bool dirty);
 
+  void UpdateTick(double deltaTime);
+
   virtual const glm::mat4 WorldSpaceToThisSpace() = 0;
 
   virtual void Render(Renderer* renderer) = 0;
-
-  void UpdateTick(double deltaTime);
 
   /*
   *

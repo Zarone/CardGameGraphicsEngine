@@ -13,8 +13,9 @@ protected:
   // central source of data for the
   // actual card data
   std::vector<CardItem> cards = {};
+  Renderer* renderer;
 public:
-  CardGroup();
+  CardGroup(Renderer* renderer);
 
   // add cards to card vector
   void AddCard(CardItem card);

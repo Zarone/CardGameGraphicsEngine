@@ -8,7 +8,7 @@ StackedCardGroupRenderer::StackedCardGroupRenderer(
   float rotationX, 
   bool zFlipped
 ): 
-  CardGroupRenderer(zFlipped)
+  CardGroupRenderer(renderer, zFlipped)
 {
   this->transform = glm::mat4(1.0f); // setup to identity
   this->transform = glm::translate(this->transform, position);

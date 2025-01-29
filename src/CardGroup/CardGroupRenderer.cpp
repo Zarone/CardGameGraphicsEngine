@@ -3,12 +3,14 @@
 const unsigned int CardGroupRenderer::estimatedMax = 60;
 
 CardGroupRenderer::CardGroupRenderer(
+  Renderer* renderer,
   bool zFlipped
 ) 
 : 
 dirtyDisplay(true), 
 dirtyPosition(true), 
-zFlipped(zFlipped)
+zFlipped(zFlipped),
+renderer(renderer)
 {
 }
 

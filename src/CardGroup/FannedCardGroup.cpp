@@ -15,7 +15,8 @@ FannedCardGroup::FannedCardGroup(
     width,
     zFlipped,
     isHand
-  )
+  ),
+  CardGroup(renderer)
 {}
 
 void FannedCardGroup::Render(Renderer* renderer) {

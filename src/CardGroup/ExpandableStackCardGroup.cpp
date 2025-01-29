@@ -15,13 +15,31 @@ ExpandableStackCardGroup::ExpandableStackCardGroup(
   expandedRenderer(
     renderer,
     std::bind(&ExpandableStackCardGroup::OnClose, this)
-  )
+  ),
+  CardGroup(renderer)
 {}
 
 void ExpandableStackCardGroup::OnClose() {
   this->isExpanded = false;
   this->stackRenderer.SetDirtyPosition(true);
   this->expandedRenderer.SetDirtyPosition(true);
+
+  // make each card in the world space reference frame, and then
+  // the reference frame of the stack renderer.
+  glm::mat4 transformation = this->stackRenderer.WorldSpaceToThisSpace() 
+    * glm::inverse(renderer->projMatrix*renderer->cameraMatrix)
+    * this->expandedRenderer.transform;
+
+  for (auto& card : this->cards) {
+    glm::vec4 v = glm::vec4(
+      card.renderData.displayedPosition.x,
+      card.renderData.displayedPosition.y,
+      card.renderData.displayedPosition.z,
+      1
+    );
+    card.renderData.displayedPosition = transformation * v;
+  }
+
 }
 
 void ExpandableStackCardGroup::Render(Renderer* renderer) {
@@ -105,8 +123,7 @@ void ExpandableStackCardGroup::SetDirtyPosition(bool dirty) {
 
 const glm::mat4 ExpandableStackCardGroup::WorldSpaceToThisSpace() {
   if (isExpanded) {
-    std::cout << "You forgot to implement expanded worldSpaceToThisSpace" << std::endl;
-    ASSERT(false);
+    return this->expandedRenderer.WorldSpaceToThisSpace();
   } else {
     return this->stackRenderer.WorldSpaceToThisSpace();
   }

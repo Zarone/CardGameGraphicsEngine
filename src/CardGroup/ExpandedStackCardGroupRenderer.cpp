@@ -44,7 +44,7 @@ ExpandedStackCardGroupRenderer::ExpandedStackCardGroupRenderer(
     ),
     onClose
   ),
-  CardGroupRenderer(false) 
+  CardGroupRenderer(renderer, false) 
 {
   this->transform = glm::identity<glm::mat4>();
 
@@ -108,7 +108,7 @@ bool ExpandedStackCardGroupRenderer::CheckCollision(
   return closeExpandedView.CheckCollision(renderer, x, y, collisionZ, collisionInfo);
 }
 
-void ExpandedStackCardGroupRenderer::UpdateCardPositions(Renderer* renderer) {
+void ExpandedStackCardGroupRenderer::UpdateCardPositions() {
   const float rotationPerCard = glm::radians(10.0f);
   float yOffset = 0.0f;
   const double scaleXY = 0.28f;
@@ -142,7 +142,7 @@ void ExpandedStackCardGroupRenderer::Render(
   int size = this->cardsPointer->size();
 
   if (this->dirtyPosition) {
-    this->UpdateCardPositions(renderer);
+    this->UpdateCardPositions();
   }
 
   const int transformVertexSize = sizeof(CardTransformVertex)/sizeof(float);
@@ -220,7 +220,7 @@ void ExpandedStackCardGroupRenderer::Render(
 }
 
 const glm::mat4 ExpandedStackCardGroupRenderer::WorldSpaceToThisSpace() {
-  return glm::inverse(this->transform);
+  return glm::inverse(this->transform*this->renderer->projMatrix*this->renderer->cameraMatrix);
 }
 
 ClickEvent ExpandedStackCardGroupRenderer::ProcessClick(CollisionInfo info) {

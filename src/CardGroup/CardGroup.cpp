@@ -3,7 +3,7 @@
 
 #include "../../include/CardGroup/CardGroup.h"
 
-CardGroup::CardGroup() {
+CardGroup::CardGroup(Renderer* renderer): renderer(renderer) {
 }
 
 void CardGroup::AddCard(unsigned int id) {

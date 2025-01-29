@@ -48,6 +48,8 @@ protected:
   // if this is true, only the back 
   // of the cards is shown
   bool zFlipped; 
+
+  Renderer* renderer;
   
   // keeps track of whether or not 
   // we need to update position info 
@@ -119,7 +121,7 @@ public:
 
   glm::mat4 transform;
 
-  CardGroupRenderer(bool zFlipped);
+  CardGroupRenderer(Renderer* renderer, bool zFlipped);
 
   /*
    * @brief This is just a setter for cards.

@@ -53,7 +53,7 @@ FannedCardGroupRenderer::FannedCardGroupRenderer(
       )
     )
   ),
-  CardGroupRenderer(zFlipped) 
+  CardGroupRenderer(renderer, zFlipped) 
 {
   ASSERT(width>3.0f);
   this->transform = glm::mat4(1.0f); // setup to identity

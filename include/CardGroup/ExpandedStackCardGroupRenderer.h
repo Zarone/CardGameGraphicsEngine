@@ -56,7 +56,7 @@ public:
     std::function<void()> onClose
   );
 
-  void UpdateCardPositions(Renderer* renderer);
+  void UpdateCardPositions();
 
   const glm::mat4 WorldSpaceToThisSpace();
   void Render(Renderer* renderer); 

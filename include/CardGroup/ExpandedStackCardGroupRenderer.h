@@ -68,4 +68,5 @@ public:
     CollisionInfo* collisioInfo
   ) const;
   ClickEvent ProcessClick(CollisionInfo info);
+  void ReleaseClick();
 };

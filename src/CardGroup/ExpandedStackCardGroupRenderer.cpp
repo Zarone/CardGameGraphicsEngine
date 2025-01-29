@@ -46,8 +46,13 @@ ExpandedStackCardGroupRenderer::ExpandedStackCardGroupRenderer(
   ),
   CardGroupRenderer(false) 
 {
+  this->transform = glm::identity<glm::mat4>();
+
   // render straight to screen without projection
-  this->transform = glm::inverse(renderer->projMatrix*renderer->cameraMatrix);
+  this->backingPlane.TogglePerspective(false);
+  this->cardContainerPlane.TogglePerspective(false);
+  this->closeExpandedView.TogglePerspective(false);
+
   this->backingPlaneTransform = glm::translate(this->transform, glm::vec3(0.0f, 0.0f, 0.01f));
   this->backingPlaneTransform = glm::scale(this->backingPlaneTransform, glm::vec3(2.0f, 2.0f, 1.0f));
   this->cardContainerTransform = glm::translate(this->transform, glm::vec3(0.0f, (2.0f-this->height)/2.0f-this->yTopPadding, 0.0f));
@@ -164,8 +169,11 @@ void ExpandedStackCardGroupRenderer::Render(
 
   Shader* cardShader = renderer->GetShader("cardShader");
   cardShader->Bind();
-  cardShader->SetUniform4fv("u_projMatrix", false, glm::value_ptr(projMatrix));
-  cardShader->SetUniform4fv("u_cameraMatrix", false, glm::value_ptr(camMatrix));
+  glm::mat4 identity = glm::identity<glm::mat4>();
+  cardShader->SetUniform4fv("u_projMatrix", false, glm::value_ptr(identity));
+  cardShader->SetUniform4fv("u_cameraMatrix", false, glm::value_ptr(identity));
+  //cardShader->SetUniform4fv("u_projMatrix", false, glm::value_ptr(projMatrix));
+  //cardShader->SetUniform4fv("u_cameraMatrix", false, glm::value_ptr(camMatrix));
   cardShader->SetUniform4fv("u_modelMatrix", false, glm::value_ptr(this->transform));
   cardShader->SetInstancedTextures(maxBindableTextures, &renderer->textureMap);
 
@@ -183,8 +191,10 @@ void ExpandedStackCardGroupRenderer::Render(
     );
     if (this->highlightedCards != 0) {
       cardShader = renderer->GetShader("highlightCardShader");
-      cardShader->SetUniform4fv("u_projMatrix", false, glm::value_ptr(projMatrix));
-      cardShader->SetUniform4fv("u_cameraMatrix", false, glm::value_ptr(camMatrix));
+      cardShader->SetUniform4fv("u_projMatrix", false, glm::value_ptr(identity));
+      cardShader->SetUniform4fv("u_cameraMatrix", false, glm::value_ptr(identity));
+      //cardShader->SetUniform4fv("u_projMatrix", false, glm::value_ptr(projMatrix));
+      //cardShader->SetUniform4fv("u_cameraMatrix", false, glm::value_ptr(camMatrix));
       cardShader->SetUniform4fv("u_modelMatrix", false, glm::value_ptr(this->transform));
       cardShader->SetInstancedTextures(maxBindableTextures, &renderer->textureMap);
       this->BindAndDrawAllFrontFaces(
@@ -214,8 +224,9 @@ const glm::mat4 ExpandedStackCardGroupRenderer::WorldSpaceToThisSpace() {
 }
 
 ClickEvent ExpandedStackCardGroupRenderer::ProcessClick(CollisionInfo info) {
-  std::cout << "(CardGroup*) info.groupPointer == this->closeExpandedView" << std::endl;
   std::cout << (info.groupPointer == (void*)&this->closeExpandedView) << std::endl;
-  std::cout << "groupPointer: " << (info.groupPointer) << std::endl;
-  std::cout << "thisPointer: " << ((void*)&this->closeExpandedView) << std::endl;
+}
+
+void ExpandedStackCardGroupRenderer::ReleaseClick() {
+  this->closeExpandedView.ReleaseClick();
 }

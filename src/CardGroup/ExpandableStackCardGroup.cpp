@@ -20,6 +20,8 @@ ExpandableStackCardGroup::ExpandableStackCardGroup(
 
 void ExpandableStackCardGroup::OnClose() {
   this->isExpanded = false;
+  this->stackRenderer.SetDirtyPosition(true);
+  this->expandedRenderer.SetDirtyPosition(true);
 }
 
 void ExpandableStackCardGroup::Render(Renderer* renderer) {
@@ -45,6 +47,8 @@ ClickEvent ExpandableStackCardGroup::ProcessClick(CollisionInfo info) {
     return this->expandedRenderer.ProcessClick(info);
   } else {
     this->isExpanded = true;
+    this->stackRenderer.SetDirtyPosition(true);
+    this->expandedRenderer.SetDirtyPosition(true);
     return this->stackRenderer.ProcessClick(info);
   }
 }
@@ -60,7 +64,7 @@ ClickEvent ExpandableStackCardGroup::ProcessPreClick(CollisionInfo info) {
 
 void ExpandableStackCardGroup::ReleaseClick(){
   if (isExpanded) {
-    std::cout << "You forgot to implement expanded releaseClick" << std::endl;
+    this->expandedRenderer.ReleaseClick();
   } else {
     this->stackRenderer.ReleaseClick();
   }

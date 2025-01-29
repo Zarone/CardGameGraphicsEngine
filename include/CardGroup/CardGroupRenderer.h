@@ -171,9 +171,10 @@ public:
 
   virtual ClickEvent ProcessClick(CollisionInfo info) {return {};}
 
+  virtual void ReleaseClick() {};
+
   // Game state should perform operations on the card group,
   // so that it can correctly manipulate data. So these can just
   // be blank unless I need them for something else.
   ClickEvent ProcessPreClick(CollisionInfo info) {return {};};
-  void ReleaseClick() {};
 };

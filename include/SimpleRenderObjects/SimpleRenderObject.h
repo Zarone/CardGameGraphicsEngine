@@ -21,6 +21,7 @@ protected:
   virtual int GetVertexCount() = 0;
   virtual void FillData(float* vertexData, unsigned int* indexData) = 0;
   Material material;
+  bool perspective;
 public:
   SimpleRenderObject(
     glm::mat4 transform,
@@ -28,6 +29,8 @@ public:
   );
 
   virtual void SetTransform(glm::mat4* transform);
+  void TogglePerspective(bool perspective);
+
   void Render(Renderer* renderer);
   void UpdateTick(double deltaTime);
   virtual bool CheckCollision(

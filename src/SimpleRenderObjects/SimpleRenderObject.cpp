@@ -6,7 +6,8 @@ SimpleRenderObject::SimpleRenderObject(
   glm::mat4 transform,
   Material material
 ):
-  material(material)
+  material(material),
+  perspective(true)
 {
   this->SetTransform(&transform);
 }
@@ -38,13 +39,24 @@ void SimpleRenderObject::SetTransform(glm::mat4* transform) {
   this->material.shader->SetUniform4fv("modelMatrix", false, glm::value_ptr(*transform));
 }
 
+void SimpleRenderObject::TogglePerspective(bool perspective) {
+  this->perspective = perspective;
+}
+
 void SimpleRenderObject::Render(Renderer* renderer) {
   this->vArray.Bind();
   this->vBuffer.Bind();
   this->iBuffer.Bind();
   this->material.shader->Bind();
-  this->material.shader->SetUniform4fv("projMatrix", false, glm::value_ptr(renderer->projMatrix));
-  this->material.shader->SetUniform4fv("cameraMatrix", false, glm::value_ptr(renderer->cameraMatrix));
+
+  if (perspective) {
+    this->material.shader->SetUniform4fv("projMatrix", false, glm::value_ptr(renderer->projMatrix));
+    this->material.shader->SetUniform4fv("cameraMatrix", false, glm::value_ptr(renderer->cameraMatrix));
+  } else {
+    glm::mat4 identity = glm::identity<glm::mat4>();
+    this->material.shader->SetUniform4fv("projMatrix", false, glm::value_ptr(identity));
+    this->material.shader->SetUniform4fv("cameraMatrix", false, glm::value_ptr(identity));
+  }
   this->material.shader->SetUniform4f("color", this->material.color);
   if (this->material.hasTexture) {
     this->material.shader->SetTexture(renderer->maxBindableTextures, this->material.textureAddr, &renderer->textureMap);

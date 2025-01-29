@@ -68,10 +68,7 @@ bool SimpleButton::CheckCollision(
     return false;
   }
 
-  std::cout << "Setting group pointer to " << this << std::endl;
-  std::cout << "Setting group pointer to (void*)" << (void*)this << std::endl;
   SceneObject* test = (SceneObject*)this;
-  std::cout << "Setting group pointer to (SceneObject*)" << test << std::endl;
   info->groupPointer = (SimpleButton*)this;
   return true;
 }
@@ -83,28 +80,26 @@ ClickEvent SimpleButton::ProcessClick(CollisionInfo info) {
 
 // must be counter-clockwise
 void SimpleButton::SetupProjectedVertices(glm::mat4* transform) {
-  this->projectedVertices[0] = this->renderer->Get3DScreenPositionFromCamera(
+  glm::mat4 transformation = this->perspective ?
     this->renderer->projMatrix * 
     this->renderer->cameraMatrix * 
-    *transform * 
+    *transform
+    : *transform;
+
+  this->projectedVertices[0] = this->renderer->Get3DScreenPositionFromCamera(
+    transformation *
     glm::vec4(-0.5f, -0.5f, 0.0f, 1.0f)
   );
   this->projectedVertices[1] = this->renderer->Get3DScreenPositionFromCamera(
-    this->renderer->projMatrix * 
-    this->renderer->cameraMatrix * 
-    *transform * 
+    transformation *
     glm::vec4(0.5f, -0.5f, 0.0f, 1.0f)
   );
   this->projectedVertices[2] = this->renderer->Get3DScreenPositionFromCamera(
-    this->renderer->projMatrix * 
-    this->renderer->cameraMatrix * 
-    *transform * 
+    transformation *
     glm::vec4(0.5f, 0.5f, 0.0f, 1.0f)
   );
   this->projectedVertices[3] = this->renderer->Get3DScreenPositionFromCamera(
-    this->renderer->projMatrix * 
-    this->renderer->cameraMatrix * 
-    *transform * 
+    transformation *
     glm::vec4(-0.5f, 0.5f, 0.0f, 1.0f)
   );
 }

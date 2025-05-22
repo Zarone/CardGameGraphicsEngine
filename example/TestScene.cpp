@@ -14,7 +14,6 @@ void TestScene::Swap(unsigned int sceneIndex) {
   this->renderer.ResetShaders();
   switch ((TestSceneID)sceneIndex) {
     case TestSceneID::GAME_SCREEN: {
-
       this->SetupCamera(
         glm::vec3(0.0f, 4.5f, 9.8f),
         glm::vec3(0.0f, -0.9f, -1.0f)
@@ -36,7 +35,8 @@ void TestScene::Swap(unsigned int sceneIndex) {
         glm::vec3(0.0f, 0.0f, -1.0f)
       );
 
-      this->renderer.SetupShader("buttonShader", myShaders::basicVertex, myShaders::basicFragment);
+      this->renderer.SetupShader("buttonShader", myShaders::textureVertex, myShaders::textureFragment);
+      this->renderer.textureMap.SetupTexturePath("startgame");
       this->AddObject<BoundButton>(
         &this->renderer,
         glm::rotate(
@@ -47,10 +47,11 @@ void TestScene::Swap(unsigned int sceneIndex) {
           glm::vec3(0, 0, 1.0f)
         ), 
         Material {
-          .hasTexture = false,
-          .textureMap = &this->renderer.textureMap,
-          .shader = this->renderer.GetShader("buttonShader"),
-          .color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f),
+          .hasTexture=true,
+          .textureMap=&renderer.textureMap,
+          .textureAddr="startgame",
+          .shader=renderer.GetShader("buttonShader"),
+          .color=glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
         },
         std::bind(&TestScene::Swap, this, TestSceneID::GAME_SCREEN)
       );

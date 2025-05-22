@@ -15,9 +15,5 @@ void main()
     fragmentTextureCoordinates.x,
     fragmentTextureCoordinates.y
   )).xyz, vertColor.w);
-  //color = texture(textureSampler, vec2(
-    //fragmentTextureCoordinates.x,
-    //fragmentTextureCoordinates.y
-  //));
 }
 )";

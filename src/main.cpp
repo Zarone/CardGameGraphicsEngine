@@ -3,7 +3,6 @@
 #include "../include/WindowManager.h"
 
 #include "../example/TestCardDatabaseSingleton.h"
-#include "../example/TestGameState.h"
 #include "../example/TestScene.h"
 #include "../example/TestSceneData.h"
 

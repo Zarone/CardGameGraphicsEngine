@@ -5,9 +5,6 @@ ExpandedStackCardGroupRenderer::ExpandedStackCardGroupRenderer(
   Renderer* renderer,
   std::function<void()> onClose
 ) : 
-  //lastCursorX(0),
-  //lastCursorY(0),
-  //lastClosestIndex(-1),
   backingPlane(
     SimplePlane(
       glm::identity<glm::mat4>(), 
@@ -109,7 +106,7 @@ bool ExpandedStackCardGroupRenderer::CheckCollision(
 }
 
 void ExpandedStackCardGroupRenderer::UpdateCardPositions() {
-  const float rotationPerCard = glm::radians(10.0f);
+  const float rotationPerCard = glm::radians(2.0f);
   float yOffset = 0.0f;
   const double scaleXY = 0.28f;
   int size = this->cardsPointer->size();

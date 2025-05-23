@@ -14,7 +14,6 @@ StackedCardGroupRenderer::StackedCardGroupRenderer(
   this->transform = glm::translate(this->transform, position);
   this->transform = glm::translate(this->transform, glm::vec3(-0.5f, 0.0f, 0.0f));
   this->transform = glm::rotate(this->transform, glm::radians(rotationX), glm::vec3(1.0f, 0.0f, 0.0f));
-  this->transform = glm::scale(this->transform, glm::vec3(1.0f, 1.0f, zFlipped ? -1.0f : 1.0f));
 
   this->groupVao = VertexArray();
   this->groupVao.Bind();

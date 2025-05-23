@@ -14,10 +14,17 @@ void TestScene::Swap(unsigned int sceneIndex) {
   this->renderer.ResetShaders();
   switch ((TestSceneID)sceneIndex) {
     case TestSceneID::GAME_SCREEN: {
+      // Side View Camera
       this->SetupCamera(
         glm::vec3(0.0f, 4.5f, 9.8f),
         glm::vec3(0.0f, -0.9f, -1.0f)
       );
+      
+      // Top Down Camera
+      //this->SetupCamera(
+        //glm::vec3(0.0f, 15.0f, 0.0f),
+        //glm::vec3(0.0f, -1.0f, -0.01f)
+      //);
       
       // setup shader for card and button
       this->renderer.SetupShader("buttonShader", myShaders::textureVertex, myShaders::textureFragment);

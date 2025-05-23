@@ -24,20 +24,37 @@ void ExpandableStackCardGroup::OnClose() {
   this->stackRenderer.SetDirtyPosition(true);
   this->expandedRenderer.SetDirtyPosition(true);
 
+  /* This has the effect of sending the cards from the camera frame
+   * into the 3D space but it looks janky so I'm just sending it to 
+   * 0,0,0 now
+   
   // make each card in the world space reference frame, and then
   // the reference frame of the stack renderer.
   glm::mat4 transformation = this->stackRenderer.WorldSpaceToThisSpace() 
     * glm::inverse(renderer->projMatrix*renderer->cameraMatrix)
     * this->expandedRenderer.transform;
+  */
 
   for (auto& card : this->cards) {
+    /* 
+     * 
+     * This uses the old transformation from camera space
+     *
+
     glm::vec4 v = glm::vec4(
       card.renderData.displayedPosition.x,
       card.renderData.displayedPosition.y,
       card.renderData.displayedPosition.z,
       1
     );
+
     card.renderData.displayedPosition = transformation * v;
+    */
+    
+    /* This just uses 0,0,0, which looks better anyway */
+    card.renderData.displayedScaleXY = 1;
+    card.renderData.displayedRotationZ = 0;
+    card.renderData.displayedPosition = glm::vec4(0.5,0,1,1);
   }
 
 }

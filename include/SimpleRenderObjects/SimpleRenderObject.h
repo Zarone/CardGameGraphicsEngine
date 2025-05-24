@@ -22,6 +22,7 @@ protected:
   virtual void FillData(float* vertexData, unsigned int* indexData) = 0;
   Material material;
   bool perspective;
+  glm::mat4 transform; // Store the transform matrix
 public:
   SimpleRenderObject(
     glm::mat4 transform,

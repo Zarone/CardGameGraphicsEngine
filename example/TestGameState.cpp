@@ -179,6 +179,12 @@ ClickEvent TestGameState::ProcessClick(CollisionInfo info) {
   };
 }
 
+void TestGameState::ProcessScroll(CollisionInfo info) {
+  SceneObject* src = (SceneObject*) info.groupPointer;
+
+  src->ProcessScroll(info);
+}
+
 void TestGameState::EndTurnButtonPress() {
   std::cout << "end turn click" << std::endl;
 }

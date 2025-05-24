@@ -10,6 +10,8 @@ Right now, the application is very barebones. The application opens to a main me
 ### TODO:
 - Scrolling for expanded card view
 - OnHover effect for expanded card view
+- Move ProcessClick and ProcessScroll from the testGameState
+  - Everything in the example directory should be specific to the card game being implemented, not a part of the engine. So the ProcessClick and ProcessScroll should be abstracted, perhaps with some event handler creator for all inner sceneObjects
 - Proper startup screen in example directory
 - Right click to expand view of single card
 - Object file loading

@@ -67,6 +67,7 @@ public:
     double* collisionZ,
     CollisionInfo* collisioInfo
   ) const;
+  void ProcessScroll(CollisionInfo info);
   ClickEvent ProcessClick(CollisionInfo info);
   void ReleaseClick();
 };

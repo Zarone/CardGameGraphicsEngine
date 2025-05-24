@@ -34,6 +34,7 @@ public:
   void OnClick(GLFWwindow* window, int button, int action, int mods, bool preClick);
   void SendReleaseClick();
   void SetupMouseClickCallback(WindowManager* window);
+  void SetupScrollCallback(WindowManager* window);
   void Render();
   void UpdateTick(double deltaTime);
   virtual void Swap(unsigned int sceneIndex) = 0;

@@ -36,9 +36,9 @@ void Scene::ProcessCollision(double x, double y, double* collisionZ, bool preCli
     double z = MAXFLOAT;
     CollisionInfo info;
     bool objectCollision = object->CheckCollision(&this->renderer, x, y, &z, &info);
-    if (objectCollision) {
+    //if (objectCollision) {
       //std::cout << "Collision at z = " << z << std::endl;
-    }
+    //}
 
     if (objectCollision && z < minZ) {
       minZ = z;
@@ -78,7 +78,7 @@ void Scene::OnClick(GLFWwindow* window, int button, int action, int mods, bool p
 }
 
 void Scene::SetupMouseClickCallback(WindowManager* window) {
-  glfwSetWindowUserPointer(window->GetRawPointer(), this);
+  glfwSetWindowUserPointer(window->GetRawPointer(), this); // so we can use this scene inside the callback
 
   glfwSetMouseButtonCallback(window->GetRawPointer(), [](GLFWwindow* window, int button, int action, int mods) {
     if (action == GLFW_PRESS) {
@@ -98,7 +98,43 @@ void Scene::SetupMouseClickCallback(WindowManager* window) {
         //std::cout << "Right button release" << std::endl;
       }
     }
-      
+  });
+}
+
+void Scene::SetupScrollCallback(WindowManager* window) {
+  glfwSetWindowUserPointer(window->GetRawPointer(), this); // so we can use this scene inside the callback
+  
+  glfwSetScrollCallback(window->GetRawPointer(), [](GLFWwindow* window, double xOffset, double yOffset){
+    double x;
+    double y;
+    glfwGetCursorPos(window, &x, &y);
+    std::cout << x << std::endl;
+    std::cout << y << std::endl;
+
+    Scene* scene = static_cast<Scene*>(glfwGetWindowUserPointer(window));
+    ASSERT(scene);
+
+    std::unique_ptr<SceneObject>* selectedObject = nullptr;
+
+    double minZ = MAXFLOAT;
+    CollisionInfo collisionInfo;
+    for (auto& object : scene->objects) {
+      double z = MAXFLOAT;
+      CollisionInfo info;
+      bool objectCollision = object->CheckCollision(&scene->renderer, x, y, &z, &info);
+
+      if (objectCollision && z < minZ) {
+        minZ = z;
+        selectedObject = &object;
+        collisionInfo = info;
+      }
+    }
+
+    if (selectedObject != nullptr) {
+      (*selectedObject)->ProcessScroll(collisionInfo);
+    }
+
+    return;
   });
 }
 

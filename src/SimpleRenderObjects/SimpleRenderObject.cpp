@@ -7,7 +7,8 @@ SimpleRenderObject::SimpleRenderObject(
   Material material
 ):
   material(material),
-  perspective(true)
+  perspective(true),
+  transform(transform)
 {
   this->SetTransform(&transform);
 }
@@ -35,8 +36,7 @@ void SimpleRenderObject::LoadIntoGPU() {
 }
 
 void SimpleRenderObject::SetTransform(glm::mat4* transform) {
-  this->material.shader->Bind();
-  this->material.shader->SetUniform4fv("modelMatrix", false, glm::value_ptr(*transform));
+  this->transform = *transform;
 }
 
 void SimpleRenderObject::TogglePerspective(bool perspective) {
@@ -44,6 +44,9 @@ void SimpleRenderObject::TogglePerspective(bool perspective) {
 }
 
 void SimpleRenderObject::Render(Renderer* renderer) {
+  this->material.shader->Bind();
+  this->material.shader->SetUniform4fv("modelMatrix", false, glm::value_ptr(this->transform));
+
   this->vArray.Bind();
   this->vBuffer.Bind();
   this->iBuffer.Bind();

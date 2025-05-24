@@ -12,6 +12,13 @@ protected:
   int GetVertexCount();
   void FillData(float* vertexData, unsigned int* indexData);
 public:
+  bool CheckCollision(
+    Renderer* renderer, 
+    double x, 
+    double y, 
+    double* collisionZ, 
+    CollisionInfo* info
+  ) const;
   SimplePlane(
     glm::mat4 transform, 
     Material mat

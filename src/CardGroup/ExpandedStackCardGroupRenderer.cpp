@@ -101,8 +101,36 @@ bool ExpandedStackCardGroupRenderer::CheckCollision(
   double* collisionZ, 
   CollisionInfo* collisionInfo
 ) const {
-  std::cout << "Unimplemented collision function for cards of ExpandedStackCardGroup" << std::endl;
-  return closeExpandedView.CheckCollision(renderer, x, y, collisionZ, collisionInfo);
+
+  CollisionInfo closeButtonCollisionInfo;
+  double closeButtonCollisionZ;
+  CollisionInfo cardContainerCollisionInfo;
+  double cardContainerCollisionZ;
+  bool closeButtonCollision = closeExpandedView.CheckCollision(renderer, x, y, &closeButtonCollisionZ, &closeButtonCollisionInfo);
+  bool cardContainerCollision = cardContainerPlane.CheckCollision(renderer, x, y, &cardContainerCollisionZ, &cardContainerCollisionInfo);
+
+  if(!cardContainerCollision && !closeButtonCollision) {
+    return false;
+  } else if (!cardContainerCollision || (closeButtonCollision && closeButtonCollisionZ <= cardContainerCollisionZ)) {
+    *collisionZ = closeButtonCollisionZ;
+    *collisionInfo = closeButtonCollisionInfo;
+    return true;
+  } else if (!closeButtonCollision || (cardContainerCollision && cardContainerCollisionZ <= closeButtonCollision)) {
+    std::cout << "Unimplemented collision function for cards of ExpandedStackCardGroup" << std::endl;
+    *collisionZ = cardContainerCollisionZ;
+
+    // So it's sort of unintuitive, but it makes more sense for this object
+    // to just handle the collision event in the expandedstackrenderer itself.
+    // For example, this scroll method should be called instead of the cardContainer plane,
+    // since that's just a plane with no event handlers.
+    collisionInfo->groupPointer = (SceneObject*) this;
+
+    return true;
+  } else {
+    ASSERT(false);
+    return false;
+  }
+
 }
 
 void ExpandedStackCardGroupRenderer::UpdateCardPositions() {
@@ -221,7 +249,12 @@ const glm::mat4 ExpandedStackCardGroupRenderer::WorldSpaceToThisSpace() {
 }
 
 ClickEvent ExpandedStackCardGroupRenderer::ProcessClick(CollisionInfo info) {
+  std::cout << "Inside ExpandedStackCardGroupRenderer" << std::endl;
   std::cout << (info.groupPointer == (void*)&this->closeExpandedView) << std::endl;
+}
+
+void ExpandedStackCardGroupRenderer::ProcessScroll(CollisionInfo info) {
+  std::cout << "Inside ProcessScroll of ExpandedStackCardGroupRenderer" << std::endl;
 }
 
 void ExpandedStackCardGroupRenderer::ReleaseClick() {

@@ -18,6 +18,7 @@ int main(void)
   scene.Swap(TestSceneID::MAIN_MENU);
 
   scene.SetupMouseClickCallback(&myWindow);
+  scene.SetupScrollCallback(&myWindow);
 
   /* Loop until the user closes the window */
   while (!myWindow.ShouldClose())

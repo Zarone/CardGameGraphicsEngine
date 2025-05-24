@@ -135,36 +135,46 @@ bool ExpandedStackCardGroupRenderer::CheckCollision(
   double* collisionZ, 
   CollisionInfo* collisionInfo
 ) const {
+  CollisionInfo bestCollisionInfo;
+  double bestCollisionZ = MAXFLOAT;
+  //bool closeButtonCollision = closeExpandedView.CheckCollision(renderer, x, y, &closeButtonCollisionZ, &closeButtonCollisionInfo);
+  //bool cardContainerCollision = cardContainerPlane.CheckCollision(renderer, x, y, &cardContainerCollisionZ, &cardContainerCollisionInfo);
 
-  CollisionInfo closeButtonCollisionInfo;
-  double closeButtonCollisionZ;
-  CollisionInfo cardContainerCollisionInfo;
-  double cardContainerCollisionZ;
-  bool closeButtonCollision = closeExpandedView.CheckCollision(renderer, x, y, &closeButtonCollisionZ, &closeButtonCollisionInfo);
-  bool cardContainerCollision = cardContainerPlane.CheckCollision(renderer, x, y, &cardContainerCollisionZ, &cardContainerCollisionInfo);
+  const int numElements = 3;
+  const SceneObject* elements[numElements];
+  const SceneObject* selectedObject = nullptr;
+  elements[0] = &closeExpandedView;
+  elements[1] = &cardContainerPlane;
+  elements[2] = &backingPlane;
 
-  if(!cardContainerCollision && !closeButtonCollision) {
-    return false;
-  } else if (!cardContainerCollision || (closeButtonCollision && closeButtonCollisionZ <= cardContainerCollisionZ)) {
-    *collisionZ = closeButtonCollisionZ;
-    *collisionInfo = closeButtonCollisionInfo;
-    return true;
-  } else if (!closeButtonCollision || (cardContainerCollision && cardContainerCollisionZ <= closeButtonCollision)) {
+  for (int i = 0; i < numElements; ++i) {
+    CollisionInfo localCollisionInfo;
+    double localCollisionZ = MAXFLOAT;
+    bool objectCollision = elements[i]->CheckCollision(renderer, x, y, &localCollisionZ, &localCollisionInfo);
+
+    if (objectCollision && localCollisionZ < bestCollisionZ) {
+      bestCollisionZ = localCollisionZ;
+      selectedObject = elements[i];
+      bestCollisionInfo = localCollisionInfo;
+    }
+  }
+
+  if (selectedObject == nullptr) return false;
+
+  *collisionZ = bestCollisionZ;
+  *collisionInfo = bestCollisionInfo;
+
+  if (selectedObject == &cardContainerPlane) {
     std::cout << "Unimplemented collision function for cards of ExpandedStackCardGroup" << std::endl;
-    *collisionZ = cardContainerCollisionZ;
 
     // So it's sort of unintuitive, but it makes more sense for this object
     // to just handle the collision event in the expandedstackrenderer itself.
     // For example, this scroll method should be called instead of the cardContainer plane,
     // since that's just a plane with no event handlers.
     collisionInfo->groupPointer = (SceneObject*) this;
-
-    return true;
-  } else {
-    ASSERT(false);
-    return false;
   }
 
+  return true;
 }
 
 void ExpandedStackCardGroupRenderer::UpdateCardPositions() {
@@ -287,7 +297,6 @@ const glm::mat4 ExpandedStackCardGroupRenderer::WorldSpaceToThisSpace() {
 
 ClickEvent ExpandedStackCardGroupRenderer::ProcessClick(CollisionInfo info) {
   std::cout << "Inside ExpandedStackCardGroupRenderer" << std::endl;
-  std::cout << (info.groupPointer == (void*)&this->closeExpandedView) << std::endl;
   return {};
 }
 

@@ -26,7 +26,7 @@ private:
 public:
   TestGameState(Renderer* renderer, TestCardDatabaseSingleton* database);
   ClickEvent ProcessClick(CollisionInfo info);
-  void ProcessScroll(CollisionInfo info);
+  void ProcessScroll(CollisionInfo info, double yOffset);
   ~TestGameState() {
     std::cout << "delete game state" << std::endl;
   }

@@ -125,6 +125,24 @@ TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* data
   hand.AddCard(0);
   hand.AddCard(2);
   hand.AddCard(3);
+  hand.AddCard(0);
+  hand.AddCard(2);
+  hand.AddCard(3);
+  hand.AddCard(0);
+  hand.AddCard(2);
+  hand.AddCard(3);
+  hand.AddCard(0);
+  hand.AddCard(2);
+  hand.AddCard(3);
+  hand.AddCard(0);
+  hand.AddCard(2);
+  hand.AddCard(3);
+  hand.AddCard(0);
+  hand.AddCard(2);
+  hand.AddCard(3);
+  hand.AddCard(0);
+  hand.AddCard(2);
+  hand.AddCard(3);
 
   AddObject(&hand);
   AddObject(&oppHand);
@@ -179,10 +197,10 @@ ClickEvent TestGameState::ProcessClick(CollisionInfo info) {
   };
 }
 
-void TestGameState::ProcessScroll(CollisionInfo info) {
+void TestGameState::ProcessScroll(CollisionInfo info, double yOffset) {
   SceneObject* src = (SceneObject*) info.groupPointer;
 
-  src->ProcessScroll(info);
+  src->ProcessScroll(info, yOffset);
 }
 
 void TestGameState::EndTurnButtonPress() {

@@ -29,6 +29,13 @@ void SimplePlane::FillData(float* vertexData, unsigned int* indexData) {
   memcpy(indexData, this->indexData, 6*sizeof(unsigned int));
 }
 
+void SimplePlane::MakeClickable() {
+  this->isClickable = true;
+}
+void SimplePlane::MakeUnclickable() {
+  this->isClickable = true;
+}
+
 bool SimplePlane::CheckCollision(
   Renderer* renderer, 
   double x, 
@@ -36,11 +43,13 @@ bool SimplePlane::CheckCollision(
   double* collisionZ, 
   CollisionInfo* info
 ) const {
+  if (!isClickable) return false;
+
   if (this->perspective) {
     std::cout << "No implemented way to check collision with perspective-enabled simple plane object" << std::endl;
   } else {
-    glm::vec3 projectedTopLeft = renderer->Get3DScreenPositionFromCamera(this->transform * glm::vec4(0.0f, 0.5f, 0.0f, 1.0f));
-    glm::vec3 projectedBottomRight = renderer->Get3DScreenPositionFromCamera(this->transform * glm::vec4(1.0f, -0.5f, 0.0f, 1.0f));
+    glm::vec3 projectedTopLeft = renderer->Get3DScreenPositionFromCamera(this->transform * glm::vec4(-0.5f, 0.5f, 0.0f, 1.0f));
+    glm::vec3 projectedBottomRight = renderer->Get3DScreenPositionFromCamera(this->transform * glm::vec4(0.5f, -0.5f, 0.0f, 1.0f));
 
     if (x < projectedTopLeft.x || x > projectedBottomRight.x || y < projectedTopLeft.y || y > projectedBottomRight.y) {
       return false;

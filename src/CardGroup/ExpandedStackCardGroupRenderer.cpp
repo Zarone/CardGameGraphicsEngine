@@ -17,6 +17,30 @@ ExpandedStackCardGroupRenderer::ExpandedStackCardGroupRenderer(
       )
     )
   ),
+  coverOverflowTop(
+    SimplePlane(
+      glm::identity<glm::mat4>(), 
+      Material(
+        {
+          .hasTexture=false,
+          .shader=renderer->GetShader("basicShader"),
+          .color=glm::vec4(0.1f,0.1f,0.1f,0.9f)
+        }
+      )
+    )
+  ),
+  coverOverflowBottom(
+    SimplePlane(
+      glm::identity<glm::mat4>(), 
+      Material(
+        {
+          .hasTexture=false,
+          .shader=renderer->GetShader("basicShader"),
+          .color=glm::vec4(0.1f,0.1f,0.1f,0.9f)
+        }
+      )
+    )
+  ),
   cardContainerPlane(
     SimplePlane(
       glm::identity<glm::mat4>(), 
@@ -49,14 +73,24 @@ ExpandedStackCardGroupRenderer::ExpandedStackCardGroupRenderer(
   this->backingPlane.TogglePerspective(false);
   this->cardContainerPlane.TogglePerspective(false);
   this->closeExpandedView.TogglePerspective(false);
+  this->coverOverflowBottom.TogglePerspective(false);
+  this->coverOverflowTop.TogglePerspective(false);
+
+  this->backingPlane.MakeClickable();
+  this->cardContainerPlane.MakeClickable();
 
   this->backingPlaneTransform = glm::translate(this->transform, glm::vec3(0.0f, 0.0f, 0.01f));
   this->backingPlaneTransform = glm::scale(this->backingPlaneTransform, glm::vec3(2.0f, 2.0f, 1.0f));
   this->cardContainerTransform = glm::translate(this->transform, glm::vec3(0.0f, (2.0f-this->height)/2.0f-this->yTopPadding, 0.0f));
   this->cardContainerTransform = glm::scale(this->cardContainerTransform, glm::vec3(this->width, this->height, 1.0f));
   float buttonHeight = 0.25f;
-  this->closeExpandedTransform = glm::translate(this->transform, glm::vec3(0.0f, 1-this->height-this->yTopPadding-buttonHeight/2, 0.0f));
+  this->closeExpandedTransform = glm::translate(this->transform, glm::vec3(0.0f, 1-this->height-this->yTopPadding-buttonHeight/2, -0.003f));
   this->closeExpandedTransform = glm::scale(this->closeExpandedTransform, glm::vec3(0.5f, 0.25f, 1.0f));
+  float remainingHeight = 2-this->height-this->yTopPadding;
+  this->coverOverflowBottomTransform = glm::translate(this->transform, glm::vec3(0.0f, 1-this->height-this->yTopPadding-remainingHeight/2.0f, -0.002f));
+  this->coverOverflowBottomTransform = glm::scale(this->coverOverflowBottomTransform, glm::vec3(2.0f, remainingHeight, 1.0f));
+  this->coverOverflowTopTransform = glm::translate(this->transform, glm::vec3(0.0f, 1-this->yTopPadding/2.0f, -0.002f));
+  this->coverOverflowTopTransform = glm::scale(this->coverOverflowTopTransform, glm::vec3(2.0f, this->yTopPadding, 1.0f));
   this->transform = glm::translate(this->transform, glm::vec3(-this->width/2, (2.0f-this->height)/2.0f-this->yTopPadding, 0.0f));
   this->transform = glm::scale(this->transform, glm::vec3(1.0f, renderer->GetAspectRatio(), 1.0f));
 
@@ -136,27 +170,26 @@ bool ExpandedStackCardGroupRenderer::CheckCollision(
 void ExpandedStackCardGroupRenderer::UpdateCardPositions() {
   const float rotationPerCard = glm::radians(2.0f);
   float yOffset = 0.0f;
-  const double scaleXY = 0.28f;
   int size = this->cardsPointer->size();
-  const float whitespace = 0.05f;
-  int perRow = 5;
-  const float xGap = (this->width-1.0f*scaleXY)/(perRow-1.0f);
+  const float xGap = (this->width-1.0f*cardScaleXY)/(cardsPerRow-1.0f);
 
   for (int i = 0; i < size; i++) {
     CardRenderingData& thisCard = (*cardsPointer)[i].renderData;
 
+    float cardHeight = cardScaleXY*CardRenderingData::cardHeightRatio;
+    float halfContainerHeight = this->height/2.0f/renderer->GetAspectRatio();
+
     thisCard.SetActualTransform(
       glm::vec3(
-        (float)scaleXY*0.5f+(i%perRow)*xGap,
-        (float)(-i/perRow)/2.0f
-          +(
-            this->height/2.0f
-          )/renderer->GetAspectRatio()
-          -scaleXY*0.5f*CardRenderingData::cardHeightRatio,
+        (float)cardScaleXY*0.5f+(i%cardsPerRow)*xGap,
+        (float)(-i/cardsPerRow)*(cardHeight+verticalWhitespaceInContainer)
+          + halfContainerHeight
+          - cardHeight/2.0f
+          + this->scrollPosition,
         (float)-0.001f
       ),
-      (float)((i%perRow)-(float)(perRow-1)/2.0f)/perRow*rotationPerCard,
-      scaleXY
+      (float)((i%cardsPerRow)-(float)(cardsPerRow-1)/2.0f)/cardsPerRow*rotationPerCard,
+      cardScaleXY
     );
   }
 }
@@ -237,6 +270,10 @@ void ExpandedStackCardGroupRenderer::Render(
   this->backingPlane.Render(renderer);
   this->cardContainerPlane.SetTransform(&this->cardContainerTransform);
   this->cardContainerPlane.Render(renderer);
+  this->coverOverflowBottom.SetTransform(&this->coverOverflowBottomTransform);
+  this->coverOverflowBottom.Render(renderer);
+  this->coverOverflowTop.SetTransform(&this->coverOverflowTopTransform);
+  this->coverOverflowTop.Render(renderer);
   this->closeExpandedView.SetTransform(&this->closeExpandedTransform);
   this->closeExpandedView.Render(renderer);
 
@@ -251,10 +288,18 @@ const glm::mat4 ExpandedStackCardGroupRenderer::WorldSpaceToThisSpace() {
 ClickEvent ExpandedStackCardGroupRenderer::ProcessClick(CollisionInfo info) {
   std::cout << "Inside ExpandedStackCardGroupRenderer" << std::endl;
   std::cout << (info.groupPointer == (void*)&this->closeExpandedView) << std::endl;
+  return {};
 }
 
-void ExpandedStackCardGroupRenderer::ProcessScroll(CollisionInfo info) {
-  std::cout << "Inside ProcessScroll of ExpandedStackCardGroupRenderer" << std::endl;
+void ExpandedStackCardGroupRenderer::ProcessScroll(CollisionInfo info, double yOffset) {
+  int rows = (this->cardsPointer->size()+cardsPerRow-1)/cardsPerRow; // equivalent to rounding up size/perRow
+  this->scrollPosition = fmax(
+    0,
+    fmin(rows*CardRenderingData::cardHeightRatio*cardScaleXY + (rows-1) * verticalWhitespaceInContainer - this->height/renderer->GetAspectRatio(), this->scrollPosition - yOffset)
+  );
+  std::cout << "Scroll Position: " << this->scrollPosition << std::endl;
+  this->dirtyPosition = true;
+  this->dirtyDisplay = true;
 }
 
 void ExpandedStackCardGroupRenderer::ReleaseClick() {

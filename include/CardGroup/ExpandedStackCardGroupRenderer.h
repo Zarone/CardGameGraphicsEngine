@@ -39,14 +39,24 @@ private:
     //double& projectedLeftBoundary
   //);
 
+  float scrollPosition = 0;
+
   const float height = 1.5f;
   const float width = 1.7f;
   const float yTopPadding = 0.15f;
+
+  const int cardsPerRow = 5;
+  const double cardScaleXY = 0.28f;
+  const float verticalWhitespaceInContainer = 0.05f;
 
   SimplePlane backingPlane;
   glm::mat4 backingPlaneTransform;
   SimplePlane cardContainerPlane;
   glm::mat4 cardContainerTransform;
+  SimplePlane coverOverflowBottom;
+  glm::mat4 coverOverflowBottomTransform;
+  SimplePlane coverOverflowTop;
+  glm::mat4 coverOverflowTopTransform;
   BoundButton closeExpandedView;
   glm::mat4 closeExpandedTransform;
 
@@ -67,7 +77,7 @@ public:
     double* collisionZ,
     CollisionInfo* collisioInfo
   ) const;
-  void ProcessScroll(CollisionInfo info);
+  void ProcessScroll(CollisionInfo info, double yOffset);
   ClickEvent ProcessClick(CollisionInfo info);
   void ReleaseClick();
 };

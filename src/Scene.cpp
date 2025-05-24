@@ -108,8 +108,6 @@ void Scene::SetupScrollCallback(WindowManager* window) {
     double x;
     double y;
     glfwGetCursorPos(window, &x, &y);
-    std::cout << x << std::endl;
-    std::cout << y << std::endl;
 
     Scene* scene = static_cast<Scene*>(glfwGetWindowUserPointer(window));
     ASSERT(scene);
@@ -131,7 +129,7 @@ void Scene::SetupScrollCallback(WindowManager* window) {
     }
 
     if (selectedObject != nullptr) {
-      (*selectedObject)->ProcessScroll(collisionInfo);
+      (*selectedObject)->ProcessScroll(collisionInfo, yOffset);
     }
 
     return;

@@ -54,7 +54,7 @@ public:
   ) const = 0;
   virtual ClickEvent ProcessClick(CollisionInfo info) = 0;
   virtual ClickEvent ProcessPreClick(CollisionInfo info) = 0;
-  virtual void ProcessScroll(CollisionInfo info) {}
+  virtual void ProcessScroll(CollisionInfo info, double yOffset) {}
   virtual void ReleaseClick() = 0;
   virtual ~SceneObject() = default;
 };

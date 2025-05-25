@@ -1,4 +1,4 @@
-#include "../../include/SimpleRenderObjects/SimplePlane.h"
+#include "SimplePlane.h"
 
 const float SimplePlane::vertexData[] = {
   -0.5f,  0.5f, 0.0f, 0.0f, 0.0f,

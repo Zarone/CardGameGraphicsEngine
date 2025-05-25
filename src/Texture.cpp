@@ -2,9 +2,9 @@
 #include <iostream>
 #include <unordered_map>
 
-#include "../include/Texture.h"
-#include "../include/ErrorHandling.h"
-#include "../include/external/stb_image.h"
+#include "Texture.h"
+#include "ErrorHandling.h"
+#include "external/stb_image.h"
 
 Texture::Texture(const std::string& path) {
   //stbi_set_flip_vertically_on_load(1);

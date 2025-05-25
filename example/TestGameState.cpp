@@ -1,4 +1,4 @@
-#include "../include/ErrorHandling.h"
+#include "../src/ErrorHandling.h"
 #include "./TestGameState.h"
 #include "./TestSceneData.h"
 #include "./TestCardInfo.h"

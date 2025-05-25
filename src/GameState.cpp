@@ -1,4 +1,4 @@
-#include "../include/GameState.h"
+#include "GameState.h"
 
 GameState::GameState() {
 }

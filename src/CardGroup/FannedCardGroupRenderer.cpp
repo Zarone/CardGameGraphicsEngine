@@ -1,5 +1,5 @@
 #include <glm/gtc/type_ptr.hpp>
-#include "../../include/CardGroup/FannedCardGroupRenderer.h"
+#include "FannedCardGroupRenderer.h"
 
 FannedCardGroupRenderer::FannedCardGroupRenderer(
   Renderer* renderer,

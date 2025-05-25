@@ -1,6 +1,6 @@
 #include <iostream>
-#include "../include/ErrorHandling.h"
-#include "../include/TextureLRU.h"
+#include "ErrorHandling.h"
+#include "TextureLRU.h"
 
 TextureLRU::TextureLRU() {
   this->data = std::list<Texture*>();

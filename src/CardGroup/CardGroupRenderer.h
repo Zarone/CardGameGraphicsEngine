@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../../include/SceneObject.h"
-#include "../../include/CardGroup/CardItem.h"
-#include "../../include/HelperOpenGL/VertexArray.h"
-#include "../../include/HelperOpenGL/IndexBuffer.h"
+#include "../SceneObject.h"
+#include "../CardGroup/CardItem.h"
+#include "../HelperOpenGL/VertexArray.h"
+#include "../HelperOpenGL/IndexBuffer.h"
 
 typedef struct CardTransformVertex {
   float x;

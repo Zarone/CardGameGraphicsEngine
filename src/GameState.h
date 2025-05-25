@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../include/Renderer.h"
-#include "../include/CardGroup/CardGroup.h"
+#include "Renderer.h"
+#include "CardGroup/CardGroup.h"
 
 class GameState : public SceneObject
 {

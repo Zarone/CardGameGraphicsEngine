@@ -1,7 +1,7 @@
 #include <GL/glew.h>
 #include <iostream>
-#include "../include/Shader.h"
-#include "../include/ErrorHandling.h"
+#include "Shader.h"
+#include "ErrorHandling.h"
 
 unsigned int Shader::CompileShader(unsigned int type, const std::string& source ) {
   GLCall(unsigned int id = glCreateShader(type));

@@ -1,5 +1,5 @@
 #include <glm/gtc/type_ptr.hpp>
-#include "../../include/CardGroup/ExpandedStackCardGroupRenderer.h"
+#include "ExpandedStackCardGroupRenderer.h"
 
 ExpandedStackCardGroupRenderer::ExpandedStackCardGroupRenderer(
   Renderer* renderer,

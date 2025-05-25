@@ -1,4 +1,4 @@
-#include "../../include/CardGroup/CardGroupRenderer.h"
+#include "CardGroupRenderer.h"
 
 const unsigned int CardGroupRenderer::estimatedMax = 60;
 

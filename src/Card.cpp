@@ -1,4 +1,4 @@
-#include "../include/Card.h"
+#include "Card.h"
 
 Card::Card(unsigned int id) 
 : id(id)

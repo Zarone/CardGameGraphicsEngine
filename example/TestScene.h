@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../include/Scene.h"
-#include "../include/WindowManager.h"
+#include "../src/Scene.h"
+#include "../src/WindowManager.h"
 #include "../example/TestCardDatabaseSingleton.h"
 
 class TestScene : public Scene

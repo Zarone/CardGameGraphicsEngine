@@ -2,9 +2,9 @@
 
 #include <vector>
 
-#include "../include/SceneObject.h"
-#include "../include/CardDatabaseSingleton.h"
-#include "../include/SceneData.h"
+#include "SceneObject.h"
+#include "CardDatabaseSingleton.h"
+#include "SceneData.h"
 
 class Scene
 {

@@ -1,8 +1,8 @@
 #include <iostream>
 
-#include "../../include/SimpleRenderObjects/SimpleButton.h"
-#include "../../include/shaders/allShaders.h"
-#include "../../include/MathHelper.h"
+#include "SimpleButton.h"
+#include "../shaders/allShaders.h"
+#include "../MathHelper.h"
 
 SimpleButton::SimpleButton(
   Renderer* renderer,

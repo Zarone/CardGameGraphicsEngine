@@ -1,4 +1,4 @@
-#include "../../include/shaders/allShaders.h"
+#include "allShaders.h"
 
 std::string myShaders::cardVertex = R"(
 #version 330 core

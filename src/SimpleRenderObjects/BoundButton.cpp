@@ -1,4 +1,4 @@
-#include "../../include/SimpleRenderObjects/BoundButton.h"
+#include "BoundButton.h"
 
 BoundButton::BoundButton(
   Renderer* renderer,

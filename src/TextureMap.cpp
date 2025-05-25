@@ -1,6 +1,6 @@
 #include <iostream>
-#include "../include/TextureMap.h"
-#include "../include/ErrorHandling.h"
+#include "TextureMap.h"
+#include "ErrorHandling.h"
 
 TextureMap::TextureMap()
 :currentlyBound(0), lru(), ID_Database(nullptr)

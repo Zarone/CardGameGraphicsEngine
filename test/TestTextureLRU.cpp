@@ -1,7 +1,7 @@
-#include "../include/ErrorHandling.h"
 #include "TestTextureLRU.h"
-#include "../include/TextureLRU.h"
-#include "../include/Texture.h"
+#include "../src/ErrorHandling.h"
+#include "../src/TextureLRU.h"
+#include "../src/Texture.h"
 
 void TestTextureLRU() {
   TextureLRU lru;

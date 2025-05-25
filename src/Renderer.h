@@ -4,11 +4,11 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 
-#include "../include/WindowManager.h"
-#include "../include/TextureMap.h"
-#include "../include/CardDatabaseSingleton.h"
-#include "../include/CursorData.h"
-#include "../include/Shader.h"
+#include "WindowManager.h"
+#include "TextureMap.h"
+#include "CardDatabaseSingleton.h"
+#include "CursorData.h"
+#include "Shader.h"
 
 class Renderer
 {

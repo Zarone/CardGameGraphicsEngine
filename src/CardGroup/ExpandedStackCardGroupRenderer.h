@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../../include/CardGroup/CardGroupRenderer.h"
-#include "../../include/SimpleRenderObjects/SimplePlane.h"
-#include "../../include/CardGroup/CardGroup.h"
-#include "../../include/SimpleRenderObjects/BoundButton.h"
+#include "CardGroupRenderer.h"
+#include "../SimpleRenderObjects/SimplePlane.h"
+#include "CardGroup.h"
+#include "../SimpleRenderObjects/BoundButton.h"
 
 class ExpandedStackCardGroupRenderer : public CardGroupRenderer
 {

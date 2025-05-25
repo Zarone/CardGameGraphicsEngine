@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../include/Shader.h"
-#include "../include/TextureMap.h"
+#include "Shader.h"
+#include "TextureMap.h"
 
 struct Material
 {

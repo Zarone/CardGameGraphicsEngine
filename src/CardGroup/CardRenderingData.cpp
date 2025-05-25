@@ -1,4 +1,4 @@
-#include "../../include/CardRenderingData.h"
+#include "../CardRenderingData.h"
 
 const double CardRenderingData::animationDuration = 0.1f;
 

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../../include/CardGroup/CardGroupRenderer.h"
-#include "../../include/SimpleRenderObjects/SimplePlane.h"
-#include "../../include/CardGroup/CardGroup.h"
+#include "CardGroupRenderer.h"
+#include "../SimpleRenderObjects/SimplePlane.h"
+#include "CardGroup.h"
 
 class FannedCardGroupRenderer : public CardGroupRenderer
 {

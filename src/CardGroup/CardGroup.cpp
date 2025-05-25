@@ -1,7 +1,7 @@
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "../../include/CardGroup/CardGroup.h"
+#include "CardGroup.h"
 
 CardGroup::CardGroup(Renderer* renderer): renderer(renderer) {
 }

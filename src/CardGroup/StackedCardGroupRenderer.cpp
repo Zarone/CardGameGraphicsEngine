@@ -1,6 +1,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "../../include/CardGroup/StackedCardGroupRenderer.h"
+#include "StackedCardGroupRenderer.h"
 
 StackedCardGroupRenderer::StackedCardGroupRenderer(
   Renderer* renderer,

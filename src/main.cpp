@@ -1,6 +1,6 @@
 #include <GL/glew.h>
 
-#include "../include/WindowManager.h"
+#include "../src/WindowManager.h"
 
 #include "../example/TestCardDatabaseSingleton.h"
 #include "../example/TestScene.h"

@@ -118,15 +118,32 @@ ExpandedStackCardGroupRenderer::ExpandedStackCardGroupRenderer(
   this->indexBuffer = IndexBuffer(CardRenderingData::cardIndices, 2);
 }
 
-//int FannedCardGroupRenderer::GetClosestCardIndex(
-  //double projectedLeftBoundary,
-  //double margin,
-  //double xGap,
-  //double xScale,
-  //const CursorData& renderData,
-  //int size
-//) {
-//}
+bool ExpandedStackCardGroupRenderer::IsCursorHoveringOnCard(
+  const CursorData& renderData,
+  int size,
+  int* cardIndex
+) {
+  float cardHeight = cardScaleXY*CardRenderingData::cardHeightRatio;
+  for (int i = 0; i < size; ++i) {
+    glm::vec4 pos = glm::vec4(this->GetCardPosition(i), 1.0f);
+    glm::vec4 topLeftPos = glm::vec4(pos.x-0.5f*cardScaleXY, pos.y+cardHeight*0.5f, pos.z, pos.w);
+    glm::vec4 bottomRightPos = glm::vec4(pos.x+0.5f*cardScaleXY, pos.y-cardHeight*0.5f, pos.z, pos.w);
+    glm::vec2 screenPosTopLeft = renderer->GetScreenPositionFromCamera(this->transform * topLeftPos);
+    glm::vec2 screenPosBottomRight = renderer->GetScreenPositionFromCamera(this->transform*bottomRightPos);
+
+    bool onCard = ((renderData.cursorX <= screenPosBottomRight.x)&&
+    (renderData.cursorX >= screenPosTopLeft.x)&&
+    (renderData.cursorY <= screenPosBottomRight.y)&&
+    (renderData.cursorY >= screenPosTopLeft.y));
+
+    if (onCard) {
+      *cardIndex = i;
+      return true;
+    }
+
+  }
+  return false;
+}
 
 bool ExpandedStackCardGroupRenderer::CheckCollision(
   Renderer* renderer, 
@@ -137,8 +154,6 @@ bool ExpandedStackCardGroupRenderer::CheckCollision(
 ) const {
   CollisionInfo bestCollisionInfo;
   double bestCollisionZ = MAXFLOAT;
-  //bool closeButtonCollision = closeExpandedView.CheckCollision(renderer, x, y, &closeButtonCollisionZ, &closeButtonCollisionInfo);
-  //bool cardContainerCollision = cardContainerPlane.CheckCollision(renderer, x, y, &cardContainerCollisionZ, &cardContainerCollisionInfo);
 
   const int numElements = 3;
   const SceneObject* elements[numElements];
@@ -177,28 +192,36 @@ bool ExpandedStackCardGroupRenderer::CheckCollision(
   return true;
 }
 
+glm::vec3 ExpandedStackCardGroupRenderer::GetCardPosition(int i) {
+  const float xGap = (this->width-1.0f*cardScaleXY)/(cardsPerRow-1.0f);
+  float cardHeight = cardScaleXY*CardRenderingData::cardHeightRatio;
+  float halfContainerHeight = this->height/2.0f/renderer->GetAspectRatio();
+
+  return glm::vec3(
+    (float)cardScaleXY*0.5f+(i%cardsPerRow)*xGap,
+    (float)(-i/cardsPerRow)*(cardHeight+verticalWhitespaceInContainer)
+      + halfContainerHeight
+      - cardHeight/2.0f
+      + this->scrollPosition,
+    (float)-0.001f
+  );
+}
+
 void ExpandedStackCardGroupRenderer::UpdateCardPositions() {
-  const float rotationPerCard = glm::radians(2.0f);
+  const float rotationPerCard = glm::radians(4.0f);
   float yOffset = 0.0f;
   int size = this->cardsPointer->size();
-  const float xGap = (this->width-1.0f*cardScaleXY)/(cardsPerRow-1.0f);
 
   for (int i = 0; i < size; i++) {
     CardRenderingData& thisCard = (*cardsPointer)[i].renderData;
-
-    float cardHeight = cardScaleXY*CardRenderingData::cardHeightRatio;
-    float halfContainerHeight = this->height/2.0f/renderer->GetAspectRatio();
+    //float thisRotation = (isHovering && this->lastClosestIndex == i) ? rotationPerCard : 0;
+    glm::vec3 thisOffset = (isHovering && this->lastClosestIndex == i) ? glm::vec3(0.0f, 0.03f, -0.01f) : glm::vec3(0.0f);
 
     thisCard.SetActualTransform(
-      glm::vec3(
-        (float)cardScaleXY*0.5f+(i%cardsPerRow)*xGap,
-        (float)(-i/cardsPerRow)*(cardHeight+verticalWhitespaceInContainer)
-          + halfContainerHeight
-          - cardHeight/2.0f
-          + this->scrollPosition,
-        (float)-0.001f
-      ),
-      (float)((i%cardsPerRow)-(float)(cardsPerRow-1)/2.0f)/cardsPerRow*rotationPerCard,
+      this->GetCardPosition(i) + thisOffset,
+      (float) (isHovering && this->lastClosestIndex == i)
+        ? 0
+        : ((i%cardsPerRow)-(float)(cardsPerRow-1)/2.0f)/cardsPerRow*rotationPerCard,
       cardScaleXY
     );
   }
@@ -207,7 +230,53 @@ void ExpandedStackCardGroupRenderer::UpdateCardPositions() {
 void ExpandedStackCardGroupRenderer::Render(
   Renderer* renderer
 ) {
+  CursorData cursor;
+  renderer->GetCursorPosition(&cursor);
+
+  bool insideHandBoundary = false;
+  bool mouseMovedInBoundary = ((int)cursor.cursorX) != this->lastCursorX 
+    || ((int)cursor.cursorY) != this->lastCursorY;
+
+  CollisionInfo cInfo;
+  double collisionZ;
+  insideHandBoundary = cardContainerPlane.CheckCollision(
+    renderer, 
+    cursor.cursorX,
+    cursor.cursorY,
+    &collisionZ,
+    &cInfo 
+  );
+  if (!insideHandBoundary) this->isHovering = false;
+
+  if (this->wasInsideBoundary != insideHandBoundary) this->dirtyPosition = true;
+
   int size = this->cardsPointer->size();
+  
+  // check if the closest card changed.
+  // if it didn't, we don't need to rerender
+  if (mouseMovedInBoundary && size != 0) {
+    // find closest card
+    
+    int closestIndex;
+    bool newIsHovering = this->IsCursorHoveringOnCard(
+      cursor,
+      size,
+      &closestIndex
+    );
+
+    if (
+      this->wasInsideBoundary && 
+      (
+        (isHovering != newIsHovering) || 
+        (isHovering && closestIndex != this->lastClosestIndex)
+      )
+    ) {
+      this->dirtyPosition = true;
+    }
+
+    this->isHovering = newIsHovering;
+    this->lastClosestIndex = closestIndex;
+  }
 
   if (this->dirtyPosition) {
     this->UpdateCardPositions();
@@ -240,8 +309,6 @@ void ExpandedStackCardGroupRenderer::Render(
   glm::mat4 identity = glm::identity<glm::mat4>();
   cardShader->SetUniform4fv("u_projMatrix", false, glm::value_ptr(identity));
   cardShader->SetUniform4fv("u_cameraMatrix", false, glm::value_ptr(identity));
-  //cardShader->SetUniform4fv("u_projMatrix", false, glm::value_ptr(projMatrix));
-  //cardShader->SetUniform4fv("u_cameraMatrix", false, glm::value_ptr(camMatrix));
   cardShader->SetUniform4fv("u_modelMatrix", false, glm::value_ptr(this->transform));
   cardShader->SetInstancedTextures(maxBindableTextures, &renderer->textureMap);
 
@@ -261,8 +328,6 @@ void ExpandedStackCardGroupRenderer::Render(
       cardShader = renderer->GetShader("highlightCardShader");
       cardShader->SetUniform4fv("u_projMatrix", false, glm::value_ptr(identity));
       cardShader->SetUniform4fv("u_cameraMatrix", false, glm::value_ptr(identity));
-      //cardShader->SetUniform4fv("u_projMatrix", false, glm::value_ptr(projMatrix));
-      //cardShader->SetUniform4fv("u_cameraMatrix", false, glm::value_ptr(camMatrix));
       cardShader->SetUniform4fv("u_modelMatrix", false, glm::value_ptr(this->transform));
       cardShader->SetInstancedTextures(maxBindableTextures, &renderer->textureMap);
       this->BindAndDrawAllFrontFaces(
@@ -289,6 +354,10 @@ void ExpandedStackCardGroupRenderer::Render(
 
   this->dirtyPosition = false;
   this->dirtyDisplay = false;
+
+  this->lastCursorX = (int)cursor.cursorX;
+  this->lastCursorY = (int)cursor.cursorY;
+  this->wasInsideBoundary = insideHandBoundary;
 }
 
 const glm::mat4 ExpandedStackCardGroupRenderer::WorldSpaceToThisSpace() {

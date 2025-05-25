@@ -8,12 +8,12 @@ Right now, the application is very barebones. The application opens to a main me
 ![Screenshot 2](./README/2.png "Screenshot 2")
 
 ### TODO:
-- OnHover effect for expanded card view
 - Change how card shading is done:
   - Have a wrapped around the actual image
   - Should clip the card boundaries so they actually look like playing cards and not sharp at the edges
   - Should apply the highlight effect to the wrapped instead of the card itself, making the card seem to glow
 - Right click to expand view of single card
+- Click event for cards in expanded view
 - Move ProcessClick and ProcessScroll from the testGameState
   - Everything in the example directory should be specific to the card game being implemented, not a part of the engine. So the ProcessClick and ProcessScroll should be abstracted, perhaps with some event handler creator for all inner sceneObjects
 - Proper startup screen in example directory

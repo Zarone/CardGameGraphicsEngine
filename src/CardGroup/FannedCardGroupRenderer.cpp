@@ -438,7 +438,15 @@ void FannedCardGroupRenderer::Render(
   if (this->isHand) {
 
     // check if cursor is near the card group
-    insideHandBoundary = this->GetInsideHandBoundary(renderer, cursor, margin-horizontalMargin, -verticalMargin, mouseMovedInBoundary, xScale, projectedLeftBoundary);
+    insideHandBoundary = this->GetInsideHandBoundary(
+      renderer, 
+      cursor, 
+      margin-horizontalMargin, 
+      -verticalMargin, 
+      mouseMovedInBoundary, 
+      xScale, 
+      projectedLeftBoundary
+    );
   }
 
   if (this->wasInsideBoundary != insideHandBoundary) this->dirtyPosition = true;
@@ -447,7 +455,7 @@ void FannedCardGroupRenderer::Render(
   float xGap = size == 1 ? 0 : (this->width-1-2*margin)/(size-1);
   float zGap = 1.0f/200.0f;
 
-  // check is the closest card changed.
+  // check if the closest card changed.
   // if it didn't, we don't need to rerender
   if (mouseMovedInBoundary && size != 0) {
     // find closest card

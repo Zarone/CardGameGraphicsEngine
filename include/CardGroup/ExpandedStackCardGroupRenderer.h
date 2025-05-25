@@ -8,36 +8,27 @@
 class ExpandedStackCardGroupRenderer : public CardGroupRenderer
 {
 private:
-  // TODO: Implement onhover system with these
-  //int lastCursorX;
-  //int lastCursorY;
-  //int lastClosestIndex;
-  //int GetClosestCardIndex(
-    //double projectedLeftBoundary,
-    //double margin,
-    //double xGap,
-    //double xScale,
-    //const CursorData& renderData,
-    //int size
-  //);
-  //void UpdateHandPosition(
-    //const CursorData& renderData,
-    //bool insideHandBoundary,
-    //double xGap,
-    //double margin,
-    //int size,
-    //double whitespace,
-    //double zGap
-  //);
-  //bool GetInsideHandBoundary(
-    //Renderer* renderer,
-    //const CursorData& renderData,
-    //double horizontalOffset,
-    //double verticalOffset,
-    //bool& mouseMovedInBoundary,
-    //double& xScale,
-    //double& projectedLeftBoundary
-  //);
+  int lastCursorX;
+  int lastCursorY;
+  int lastClosestIndex;
+  bool wasInsideBoundary;
+  bool isHovering;
+  
+  bool IsCursorHoveringOnCard(
+    const CursorData& renderData,
+    int size,
+    int* cardIndex
+  );
+
+  bool GetInsideHandBoundary(
+    Renderer* renderer,
+    const CursorData& renderData,
+    double horizontalOffset,
+    double verticalOffset,
+    bool& mouseMovedInBoundary,
+    double& xScale,
+    double& projectedLeftBoundary
+  );
 
   float scrollPosition = 0;
 
@@ -59,6 +50,8 @@ private:
   glm::mat4 coverOverflowTopTransform;
   BoundButton closeExpandedView;
   glm::mat4 closeExpandedTransform;
+
+  glm::vec3 GetCardPosition(int i);
 
 public:
   ExpandedStackCardGroupRenderer(

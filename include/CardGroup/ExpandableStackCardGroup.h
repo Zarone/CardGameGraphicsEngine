@@ -35,4 +35,5 @@ public:
     double* collisionZ, 
     CollisionInfo* info
   ) const;
+  bool const GetIsExpanded();
 };

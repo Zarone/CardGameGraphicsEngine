@@ -171,3 +171,6 @@ void ExpandableStackCardGroup::MoveToGroup(int index, CardGroup* to) {
   cards.erase(cards.begin() + index);
 }
 
+bool const ExpandableStackCardGroup::GetIsExpanded() {
+  return this->isExpanded;
+}

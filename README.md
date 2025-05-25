@@ -8,8 +8,8 @@ Right now, the application is very barebones. The application opens to a main me
 ![Screenshot 2](./README/2.png "Screenshot 2")
 
 ### TODO:
-- Don't highlight top card in discard pile
 - Don't have an include directory, just organize files better. Related logic should be in the same directory.
+- Add visible scroll bar for expanded view
 - Right click to expand view of single card
 - Click event for cards in expanded view
 - Move ProcessClick and ProcessScroll from the testGameState

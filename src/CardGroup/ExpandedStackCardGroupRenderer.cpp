@@ -214,8 +214,7 @@ void ExpandedStackCardGroupRenderer::UpdateCardPositions() {
 
   for (int i = 0; i < size; i++) {
     CardRenderingData& thisCard = (*cardsPointer)[i].renderData;
-    //float thisRotation = (isHovering && this->lastClosestIndex == i) ? rotationPerCard : 0;
-    glm::vec3 thisOffset = (isHovering && this->lastClosestIndex == i) ? glm::vec3(0.0f, 0.03f, -0.01f) : glm::vec3(0.0f);
+    glm::vec3 thisOffset = (isHovering && this->lastClosestIndex == i) ? glm::vec3(0.0f, 0.03f, 0.0f) : glm::vec3(0.0f);
 
     thisCard.SetActualTransform(
       this->GetCardPosition(i) + thisOffset,

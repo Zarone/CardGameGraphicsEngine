@@ -227,7 +227,9 @@ void TestGameState::LoadProperShader(Renderer* renderer, CardGroup* group) {
       for (auto iter = startIter; iter < endIter-1; ++iter) {
         (*iter).renderData.shader = renderer->GetShader("cardShader");
       }
-      cards->at(groupSize-1).renderData.shader = renderer->GetShader("highlightCardShader");
+      cards->at(groupSize-1).renderData.shader = this->discardPile.GetIsExpanded()
+        ? renderer->GetShader("cardShader")
+        : renderer->GetShader("highlightCardShader");
       highlight++;
     }
   } else {

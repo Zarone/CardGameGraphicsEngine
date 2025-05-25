@@ -2,16 +2,14 @@
 
 This is a basic game engine specifically for card games. In essence, I wanted to learn OpenGL and half of the ideas in my "Software Ideas" notes are card games, so I decided to start on my own game engine for it. This isn't meant to work as a game out of the box, this is only meant as a rendering engine for card games. The stuff in the `example` directory serves as an example for what a user would write and customize, and that same directory is used for my own development. The assets used in the example directory are composed of artwork which I do not own in any way, and the card text/outline which was made by myself and my sister for our own entertainment several years ago. None of the assets are intended as a part of this application but as merely in this project repository for the sake of easily testing the application.
 
-Right now, the application is very barebones. The application opens to a main menu which is just an unlabeled red button which brings you to the game screen.
+Right now, the application is very barebones. The application opens to a main menu which is just an single button that brings you to the game screen.
 
 ![Screenshot 1](./README/1.png "Screenshot 1")
 ![Screenshot 2](./README/2.png "Screenshot 2")
 
 ### TODO:
-- Change how card shading is done:
-  - Have a wrapped around the actual image
-  - Should clip the card boundaries so they actually look like playing cards and not sharp at the edges
-  - Should apply the highlight effect to the wrapped instead of the card itself, making the card seem to glow
+- Don't highlight top card in discard pile
+- Don't have an include directory, just organize files better. Related logic should be in the same directory.
 - Right click to expand view of single card
 - Click event for cards in expanded view
 - Move ProcessClick and ProcessScroll from the testGameState

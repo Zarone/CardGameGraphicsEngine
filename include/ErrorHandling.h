@@ -4,7 +4,7 @@
 #include <list>
 #include <iostream>
 
-//#define DEBUG
+#define DEBUG
 #ifdef DEBUG
 #define ASSERT(x) if (!(x)) {\
   std::cout << "FAILED ASSERT: " << #x << ", file: " << __FILE__ << ", line: " << __LINE__ << std::endl;raise(SIGTRAP);\

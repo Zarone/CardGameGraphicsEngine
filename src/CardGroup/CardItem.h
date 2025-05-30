@@ -1,8 +1,10 @@
 #pragma once
 #include "../Card.h"
-#include "../CardRenderingData.h"
+#include "CardRenderingData.h"
 
 typedef struct CardItem {
   Card card;
   CardRenderingData renderData;
+  friend std::ostream& operator<<(std::ostream& os, const CardItem& c);
 } CardItem;
+

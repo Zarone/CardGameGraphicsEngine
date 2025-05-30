@@ -1,4 +1,5 @@
-#include "../CardRenderingData.h"
+#include "CardRenderingData.h"
+#include <iostream>
 
 const double CardRenderingData::animationDuration = 0.1f;
 
@@ -56,4 +57,9 @@ bool CardRenderingData::UpdateDisplayed(double deltaTime) {
   }
 
   return true;
+}
+
+std::ostream& operator<<(std::ostream& os, const CardRenderingData& d) {
+  os << "[" << *d.shader << "]";
+  return os;
 }

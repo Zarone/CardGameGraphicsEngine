@@ -3,6 +3,8 @@
 class StackedCardGroupRenderer : public CardGroupRenderer
 {
 private:
+  // Max number of cards rendered in the stack
+  const static unsigned int RenderMax = 10;
 public:
   StackedCardGroupRenderer(
     Renderer* renderer,

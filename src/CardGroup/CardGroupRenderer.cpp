@@ -89,7 +89,8 @@ void CardGroupRenderer::BindAndDrawAllFrontFaces(
   int offset,
   int groupSize,
   int totalSize,
-  bool zFlipped
+  bool zFlipped,
+  bool reverse
 ) {
   int buffer[sizeof(TextureVertex)/sizeof(unsigned int)*groupSize];
 
@@ -103,9 +104,11 @@ void CardGroupRenderer::BindAndDrawAllFrontFaces(
     for (int j = i; j < i+batchSize; ++j) {
       // find the next card with the type of
       // shader we're trying to render
-      for (; cardIndex < totalSize && (*cardsPointer)[cardIndex].renderData.shader != shader; cardIndex++);
+      for (; cardIndex < totalSize && (*cardsPointer)[reverse ? totalSize - 1 - cardIndex : cardIndex].renderData.shader != shader; cardIndex++);
 
-      unsigned int cardID = (*cardsPointer)[cardIndex].card.GetID();
+      int effectiveCardIndex = reverse ? totalSize - 1 - cardIndex : cardIndex;
+
+      unsigned int cardID = (*cardsPointer)[effectiveCardIndex].card.GetID();
 
       // update texture buffer using newly bound addresses
       if (zFlipped) {

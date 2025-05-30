@@ -24,14 +24,14 @@ StackedCardGroupRenderer::StackedCardGroupRenderer(
   this->staticBufferLayout.AddMemoryElement(GL_FLOAT, 2); // texture uv coordinates
   this->groupVao.AddBuffer(this->staticBuffer, this->staticBufferLayout);
 
-  this->transformBuffer = VertexBuffer(NULL, 2*sizeof(CardTransformVertex), true);
+  this->transformBuffer = VertexBuffer(NULL, RenderMax*sizeof(CardTransformVertex), true);
   this->transformBufferLayout = MemoryLayout();
   this->transformBufferLayout.AddMemoryElement(GL_FLOAT, 3, true); // position relative group
   this->transformBufferLayout.AddMemoryElement(GL_FLOAT, 1, true); // rotation
   this->transformBufferLayout.AddMemoryElement(GL_FLOAT, 1, true); // scaleXY
   this->transformEndAttribID = this->groupVao.AddBuffer(this->transformBuffer, this->transformBufferLayout);
 
-  this->textureIDBuffer = VertexBuffer(NULL, 2*sizeof(TextureVertex), true);
+  this->textureIDBuffer = VertexBuffer(NULL, RenderMax*sizeof(TextureVertex), true);
   this->textureIDBufferLayout = MemoryLayout();
   this->textureIDBufferLayout.AddMemoryElement(GL_INT, 1, true); // texture slot
   this->textureEndAttribID = this->groupVao.AddBuffer(this->textureIDBuffer, this->textureIDBufferLayout);
@@ -40,11 +40,10 @@ StackedCardGroupRenderer::StackedCardGroupRenderer(
 };
 
 void StackedCardGroupRenderer::Render(Renderer* renderer) {
-  const unsigned int renderMax = 2;
 
   int totalSize = cardsPointer->size();
   if (totalSize==0) return;
-  int renderSize = fmin(renderMax, totalSize);
+  int renderSize = fmin(RenderMax, totalSize);
 
   if (this->dirtyPosition) {
     const float zGap = 0.01f;
@@ -105,7 +104,9 @@ void StackedCardGroupRenderer::Render(Renderer* renderer) {
       renderer->maxBindableTextures,
       0,
       renderSize-this->highlightedCards,
-      renderSize, zFlipped
+      totalSize, 
+      zFlipped,
+      true
     );
     if (this->highlightedCards != 0) {
       cardShader = renderer->GetShader("highlightCardShader");
@@ -119,7 +120,9 @@ void StackedCardGroupRenderer::Render(Renderer* renderer) {
         renderer->maxBindableTextures,
         renderSize-this->highlightedCards,
         this->highlightedCards,
-        renderSize, zFlipped
+        totalSize, 
+        zFlipped,
+        true
       );
     }
   }

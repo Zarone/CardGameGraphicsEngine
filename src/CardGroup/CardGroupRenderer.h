@@ -88,7 +88,8 @@ protected:
     int offset,
     int groupSize,
     int totalSize,
-    bool zFlipped
+    bool zFlipped,
+    bool reverse = false
   );
 
   void GroupPositionToScreen(

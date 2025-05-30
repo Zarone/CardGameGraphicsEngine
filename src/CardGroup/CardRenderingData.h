@@ -3,7 +3,7 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 
-#include "Material.h"
+#include "../Material.h"
 
 class CardRenderingData
 {
@@ -41,4 +41,5 @@ public:
     double scaleXY
   );
   bool UpdateDisplayed(double deltaTime);
+  friend std::ostream& operator<<(std::ostream& os, const CardRenderingData& d);
 };

@@ -8,7 +8,9 @@ Right now, the application is very barebones. The application opens to a main me
 ![Screenshot 2](./README/2.png "Screenshot 2")
 
 ### TODO:
-- Don't have an include directory, just organize files better. Related logic should be in the same directory.
+- Fix issues:
+  - Top card of discard pile remains static sometimes
+  - should close discard when card is clicked from it. Or should at least handle it correctly visually.
 - Add visible scroll bar for expanded view
 - Right click to expand view of single card
 - Click event for cards in expanded view

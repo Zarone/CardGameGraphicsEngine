@@ -369,7 +369,10 @@ bool FannedCardGroupRenderer::CheckCollision(
        currentCardRightBound;
     if (x >= currentCardLeftBound && x <= rightBoundary) {
       *collisionZ = zAtCursor;
-      collisionInfo->collisionIndex = i;
+      collisionInfo->groupPointer = (CardGroup*) this;
+      collisionInfo->innerCollision = nullptr;
+      collisionInfo->isCard = true;
+      collisionInfo->cardIndex = i;
       return true;
     }
   }

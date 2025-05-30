@@ -7,8 +7,9 @@ void GameState::AddObject(SceneObject* group) {
   nonCardGroups.push_back(group);
 }
 
-void GameState::AddObject(CardGroup* group) { 
+void GameState::AddCardGroup(CardGroup* group, unsigned int pile) { 
   cardGroups.push_back(group);
+  cardGroupMap.insert({pile, group});
 }
 
 void GameState::Render(Renderer* renderer) {
@@ -43,7 +44,7 @@ bool GameState::CheckCollision(Renderer* renderer, double x, double y, double* c
     objectCollision = group->CheckCollision(renderer, x, y, &tempZ, &tempInfo);
     if (objectCollision && tempZ < minZ) {
       minZ = tempZ;
-      collisionInfo = tempInfo;
+      collisionInfo = std::move(tempInfo);
       collisionInfo.groupPointer = group;
     }
   }
@@ -51,14 +52,14 @@ bool GameState::CheckCollision(Renderer* renderer, double x, double y, double* c
     objectCollision = group->CheckCollision(renderer, x, y, &tempZ, &tempInfo);
     if (objectCollision && tempZ < minZ) {
       minZ = tempZ;
-      collisionInfo = tempInfo;
+      collisionInfo = std::move(tempInfo);
       //collisionInfo.groupPointer = (void*)group;
     }
   }
 
   if (collisionInfo.groupPointer != nullptr) {
     *collisionZ = minZ;
-    *info = collisionInfo;
+    *info = std::move(collisionInfo);
     return true;
   } else {
     return false;
@@ -67,7 +68,7 @@ bool GameState::CheckCollision(Renderer* renderer, double x, double y, double* c
 
 ClickEvent GameState::ProcessPreClick(CollisionInfo info) {
   SceneObject* src = (SceneObject*) info.groupPointer;
-  return src->ProcessPreClick(info);
+  return src->ProcessPreClick(std::move(info));
 }
 
 void GameState::ReleaseClick() {

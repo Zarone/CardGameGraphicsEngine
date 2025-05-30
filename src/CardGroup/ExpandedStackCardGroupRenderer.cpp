@@ -122,7 +122,7 @@ bool ExpandedStackCardGroupRenderer::IsCursorHoveringOnCard(
   const CursorData& renderData,
   int size,
   int* cardIndex
-) {
+) const {
   float cardHeight = cardScaleXY*CardRenderingData::cardHeightRatio;
   for (int i = 0; i < size; ++i) {
     glm::vec4 pos = glm::vec4(this->GetCardPosition(i), 1.0f);
@@ -170,29 +170,54 @@ bool ExpandedStackCardGroupRenderer::CheckCollision(
     if (objectCollision && localCollisionZ < bestCollisionZ) {
       bestCollisionZ = localCollisionZ;
       selectedObject = elements[i];
-      bestCollisionInfo = localCollisionInfo;
+      bestCollisionInfo = std::move(localCollisionInfo);
     }
   }
 
   if (selectedObject == nullptr) return false;
 
   *collisionZ = bestCollisionZ;
-  *collisionInfo = bestCollisionInfo;
+  //*collisionInfo = bestCollisionInfo;
 
   if (selectedObject == &cardContainerPlane) {
     std::cout << "Unimplemented collision function for cards of ExpandedStackCardGroup" << std::endl;
+    collisionInfo->innerCollision = nullptr;
+
+    int cardIndexOfHovering;
+    bool isHovering = this->IsCursorHoveringOnCard(
+      {.cursorX = x, .cursorY = y}, 
+      this->cardsPointer->size(), 
+      &cardIndexOfHovering
+    );
+
+    if (isHovering) {
+      collisionInfo->cardIndex = cardIndexOfHovering;
+      collisionInfo->isCard = true;
+    } else {
+      collisionInfo->isCard = false;
+    }
+
 
     // So it's sort of unintuitive, but it makes more sense for this object
     // to just handle the collision event in the expandedstackrenderer itself.
     // For example, this scroll method should be called instead of the cardContainer plane,
     // since that's just a plane with no event handlers.
     collisionInfo->groupPointer = (SceneObject*) this;
+  } else {
+    collisionInfo->innerCollision = std::make_unique<CollisionInfo>();
+    collisionInfo->innerCollision->groupPointer = bestCollisionInfo.groupPointer;
+    collisionInfo->innerCollision->cardIndex = bestCollisionInfo.cardIndex;
+    collisionInfo->innerCollision->isCard = bestCollisionInfo.isCard;
+    collisionInfo->innerCollision->innerCollision = std::move(bestCollisionInfo.innerCollision);
+
+    collisionInfo->isCard = false;
+    collisionInfo->groupPointer = (SceneObject*) this;
   }
 
   return true;
 }
 
-glm::vec3 ExpandedStackCardGroupRenderer::GetCardPosition(int i) {
+glm::vec3 ExpandedStackCardGroupRenderer::GetCardPosition(int i) const {
   const float xGap = (this->width-1.0f*cardScaleXY)/(cardsPerRow-1.0f);
   float cardHeight = cardScaleXY*CardRenderingData::cardHeightRatio;
   float halfContainerHeight = this->height/2.0f/renderer->GetAspectRatio();
@@ -364,8 +389,12 @@ const glm::mat4 ExpandedStackCardGroupRenderer::WorldSpaceToThisSpace() {
 }
 
 ClickEvent ExpandedStackCardGroupRenderer::ProcessClick(CollisionInfo info) {
-  std::cout << "Inside ExpandedStackCardGroupRenderer" << std::endl;
-  return {};
+  if (info.innerCollision != nullptr && info.innerCollision->groupPointer == &this->closeExpandedView) {
+    return this->closeExpandedView.ProcessClick(std::move(info));
+  } else {
+    std::cout << "Unsure what was clicked" << std::endl;
+    return {};
+  }
 }
 
 void ExpandedStackCardGroupRenderer::ProcessScroll(CollisionInfo info, double yOffset) {

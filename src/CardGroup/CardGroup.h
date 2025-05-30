@@ -14,11 +14,13 @@ protected:
   // actual card data
   std::vector<CardItem> cards = {};
   Renderer* renderer;
+  virtual void MoveToGroup(int index, CardGroup* to) = 0;
 public:
   CardGroup(Renderer* renderer);
 
   // add cards to card vector
   void AddCard(CardItem card);
+  void AddCard(unsigned int id, unsigned int gameId);
   void AddCard(unsigned int id);
 
   Card GetCard(unsigned int index);
@@ -45,4 +47,5 @@ public:
   virtual ClickEvent ProcessClick(CollisionInfo info) = 0;
   virtual ClickEvent ProcessPreClick(CollisionInfo info) = 0;
   virtual void ReleaseClick() = 0;
+  void MoveToGroupByGameID(unsigned int gameId, CardGroup* to);
 };

@@ -1,4 +1,5 @@
 #include "FannedCardGroup.h"
+#include <memory>
 
 FannedCardGroup::FannedCardGroup(
     Renderer* renderer,
@@ -29,11 +30,11 @@ void FannedCardGroup::UpdateTick(double deltaTime) {
 }
 
 ClickEvent FannedCardGroup::ProcessClick(CollisionInfo info) {
-  return this->thisRenderer.ProcessClick(info);
+  return this->thisRenderer.ProcessClick(std::move(info));
 }
 
 ClickEvent FannedCardGroup::ProcessPreClick(CollisionInfo info) {
-  return this->thisRenderer.ProcessClick(info);
+  return this->thisRenderer.ProcessClick(std::move(info));
 }
 
 void FannedCardGroup::ReleaseClick(){
@@ -48,7 +49,22 @@ bool FannedCardGroup::CheckCollision(
   CollisionInfo* info
 ) const {
   if (this->thisRenderer.CheckCollision(renderer, x, y, collisionZ, info)) {
-    info->groupPointer = (FannedCardGroup*) this;
+    CollisionInfo newInfo = {
+      .isCard = false,
+      .groupPointer = (CardGroup*) this,
+    };
+
+    newInfo.innerCollision = std::make_unique<CollisionInfo>();
+    newInfo.innerCollision->innerCollision = std::move(info->innerCollision);
+    newInfo.innerCollision->isCard = info->isCard;
+    newInfo.innerCollision->cardIndex = info->cardIndex;
+    newInfo.innerCollision->groupPointer = info->groupPointer;
+
+    info->groupPointer = newInfo.groupPointer;
+    info->isCard = newInfo.isCard;
+    info->innerCollision = std::move(newInfo.innerCollision);
+    info->cardIndex = newInfo.cardIndex;
+
     return true;
   }
   return false;
@@ -85,6 +101,8 @@ void FannedCardGroup::MoveToGroup(int index, CardGroup* to) {
   CardItem cardCopy = {
     .card = cards[index].card,
   };
+  std::cout << "initial game id: " << cards[index].card.GetGameID() << std::endl;
+  std::cout << "new game id: " << cardCopy.card.GetGameID() << std::endl;
   cardCopy.renderData.displayedPosition = (to->WorldSpaceToThisSpace())*this->thisRenderer.transform*v;
 
   to->AddCard(cardCopy);

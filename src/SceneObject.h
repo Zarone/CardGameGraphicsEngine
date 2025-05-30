@@ -5,17 +5,25 @@
 class SceneObject;
 
 typedef struct CollisionInfo {
-  // if the scene object has multiple items
-  // inside it, this identifies which one
-  // was actually hit
-  unsigned int collisionIndex; 
+  // True if the collision was with a card and
+  // not a SceneObject.
+  bool isCard;
+  
+  // If the collision was with a card (not 
+  // technically a SceneObject), then this will
+  // contain the index of the card within the 
+  // group
+  unsigned int cardIndex; 
 
-  // if the scene object has multiple groups
+  // If the scene object has multiple groups
   // inside it, this identifies which one was 
-  // hit. Individual collision indices are inside
-  // this group.
+  // hit. 
   SceneObject* groupPointer;
 
+  // If the collision also contained a collision
+  // with an inner element. Should be explicitly
+  // set to nullptr if no inner collision.
+  std::unique_ptr<CollisionInfo> innerCollision;
 } CollisionInfo;
 
 // this class is basically used when I want

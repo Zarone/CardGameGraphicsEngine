@@ -24,6 +24,8 @@ add_executable(${PROJECT_NAME}
   example/TestCardDatabaseSingleton.cpp
   example/TestCardInfo.cpp
   example/TestGameState.cpp
+  example/TestGameplayPhase.cpp
+  example/TestGameplayManager.cpp
   example/TestScene.cpp
   src/external/stb_image.cpp
   src/shaders/BasicVertex.cpp

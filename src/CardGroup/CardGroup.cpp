@@ -13,6 +13,13 @@ void CardGroup::AddCard(unsigned int id) {
   });
 }
 
+void CardGroup::AddCard(unsigned int id, unsigned int gameId) {
+  this->cards.push_back({
+    .card = Card(id, gameId),
+    .renderData = CardRenderingData()
+  });
+}
+
 void CardGroup::AddCard(CardItem card) {
   this->cards.push_back(card);
 }
@@ -23,4 +30,19 @@ Card CardGroup::GetCard(unsigned int index) {
 
 std::vector<CardItem>* CardGroup::GetCards() {
   return &this->cards;
+}
+
+void CardGroup::MoveToGroupByGameID(unsigned int gameID, CardGroup* to) {
+  int i = 0;
+  for (auto& card :  this->cards) {
+    std::cout << "ID: " << card.card.GetGameID() << ", looking for ID: " << gameID << std::endl;
+
+    if (card.card.GetGameID() == gameID) return this->MoveToGroup(i, to);
+
+    ++i;
+  }
+
+  std::cout << "No card found with that Game ID " << gameID << std::endl;
+
+  return;
 }

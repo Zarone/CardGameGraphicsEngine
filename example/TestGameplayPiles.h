@@ -1,0 +1,14 @@
+#pragma once
+
+enum Pile {
+  HAND,
+  RESERVE,
+  SPECIALS,
+  BATTLEFIELD,
+  DISCARD,
+  DECK,
+  OPP_HAND,
+  OPP_RESERVE,
+  OPP_SPECIALS,
+  OPP_BATTLEFIELD,
+};

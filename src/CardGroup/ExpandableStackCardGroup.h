@@ -9,6 +9,7 @@ private:
   StackedCardGroupRenderer stackRenderer;
   ExpandedStackCardGroupRenderer expandedRenderer;
   bool isExpanded = false;
+  void MoveToGroup(int index, CardGroup* to);
 public:
   ExpandableStackCardGroup(
     Renderer* renderer,
@@ -20,11 +21,11 @@ public:
   void SetNumHighlightedCards(int num);
   void SetDirtyPosition(bool dirty);
   const glm::mat4 WorldSpaceToThisSpace();
-  void MoveToGroup(int index, CardGroup* to);
   void OnClose();
   
   void Render(Renderer* renderer);
   void UpdateTick(double deltaTime);
+  void ProcessScroll(CollisionInfo info, double yOffset);
   ClickEvent ProcessClick(CollisionInfo info);
   ClickEvent ProcessPreClick(CollisionInfo info);
   void ReleaseClick();

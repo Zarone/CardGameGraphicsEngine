@@ -1,4 +1,5 @@
 #pragma once
+#include "TestGameplayManager.h"
 #include "../src/GameState.h"
 #include "../example/TestCardDatabaseSingleton.h"
 #include "../src/SimpleRenderObjects/BoundButton.h"
@@ -21,6 +22,7 @@ private:
   ExpandableStackCardGroup discardPile;
   BoundButton passTurn;
   TestCardDatabaseSingleton* database;
+  TestGameplayManager gameplayManager;
 
   void EndTurnButtonPress();
 public:

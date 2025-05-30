@@ -43,7 +43,7 @@ void Scene::ProcessCollision(double x, double y, double* collisionZ, bool preCli
     if (objectCollision && z < minZ) {
       minZ = z;
       selectedObject = &object;
-      collisionInfo = info;
+      collisionInfo = std::move(info);
     }
 
     if (!preClick) {
@@ -56,9 +56,9 @@ void Scene::ProcessCollision(double x, double y, double* collisionZ, bool preCli
     ClickEvent event;
 
     if (preClick) {
-      event = (*selectedObject)->ProcessPreClick(collisionInfo);
+      event = (*selectedObject)->ProcessPreClick(std::move(collisionInfo));
     } else {
-      event = (*selectedObject)->ProcessClick(collisionInfo);
+      event = (*selectedObject)->ProcessClick(std::move(collisionInfo));
     }
 
     if (!preClick && event.sceneSwap) {
@@ -124,12 +124,12 @@ void Scene::SetupScrollCallback(WindowManager* window) {
       if (objectCollision && z < minZ) {
         minZ = z;
         selectedObject = &object;
-        collisionInfo = info;
+        collisionInfo = std::move(info);
       }
     }
 
     if (selectedObject != nullptr) {
-      (*selectedObject)->ProcessScroll(collisionInfo, yOffset);
+      (*selectedObject)->ProcessScroll(std::move(collisionInfo), yOffset);
     }
 
     return;

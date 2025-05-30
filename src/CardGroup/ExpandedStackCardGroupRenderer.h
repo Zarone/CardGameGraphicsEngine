@@ -18,7 +18,7 @@ private:
     const CursorData& renderData,
     int size,
     int* cardIndex
-  );
+  ) const;
 
   bool GetInsideHandBoundary(
     Renderer* renderer,
@@ -51,7 +51,7 @@ private:
   BoundButton closeExpandedView;
   glm::mat4 closeExpandedTransform;
 
-  glm::vec3 GetCardPosition(int i);
+  glm::vec3 GetCardPosition(int i) const;
 
 public:
   ExpandedStackCardGroupRenderer(

@@ -2,6 +2,7 @@
 #include "./TestGameState.h"
 #include "./TestSceneData.h"
 #include "./TestCardInfo.h"
+#include "TestGameplayPiles.h"
 
 TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* database):
   hand(
@@ -116,66 +117,63 @@ TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* data
   oppHand.AddCard(2);
   oppHand.AddCard(3);
 
-  hand.AddCard(0);
-  hand.AddCard(2);
-  hand.AddCard(3);
-  hand.AddCard(0);
-  hand.AddCard(2);
-  hand.AddCard(3);
-  hand.AddCard(0);
-  hand.AddCard(2);
-  hand.AddCard(3);
-  hand.AddCard(0);
-  hand.AddCard(2);
-  hand.AddCard(3);
-  hand.AddCard(0);
-  hand.AddCard(2);
-  hand.AddCard(3);
-  hand.AddCard(0);
-  hand.AddCard(2);
-  hand.AddCard(3);
-  hand.AddCard(0);
-  hand.AddCard(2);
-  hand.AddCard(3);
-  hand.AddCard(0);
-  hand.AddCard(2);
-  hand.AddCard(3);
-  hand.AddCard(0);
-  hand.AddCard(2);
-  hand.AddCard(3);
+  hand.AddCard(0, 0);
+  hand.AddCard(2, 1);
+  hand.AddCard(3, 2);
+  hand.AddCard(0, 3);
+  hand.AddCard(2, 4);
+  hand.AddCard(3, 5);
+  hand.AddCard(0, 6);
+  hand.AddCard(2, 7);
+  hand.AddCard(3, 8);
+  hand.AddCard(0, 9);
+  hand.AddCard(1, 10);
 
-  AddObject(&hand);
-  AddObject(&oppHand);
-  AddObject(&reserve);
-  AddObject(&oppReserve);
-  AddObject(&battlefield);
-  AddObject(&oppBatlefield);
-  AddObject(&specials);
-  AddObject(&oppSpecials);
+  AddCardGroup(&hand, HAND);
+  AddCardGroup(&oppHand, OPP_HAND);
+  AddCardGroup(&reserve, RESERVE);
+  AddCardGroup(&oppReserve, OPP_RESERVE);
+  AddCardGroup(&battlefield, BATTLEFIELD);
+  AddCardGroup(&oppBatlefield, OPP_BATTLEFIELD);
+  AddCardGroup(&specials, SPECIALS);
+  AddCardGroup(&oppSpecials, OPP_SPECIALS);
 
   renderer->textureMap.SetupTexturePath("endturn");
   AddObject(&passTurn);
-  AddObject(&deck);
-  AddObject(&discardPile);
+  AddCardGroup(&deck, DECK);
+  AddCardGroup(&discardPile, DISCARD);
 }
 
 ClickEvent TestGameState::ProcessClick(CollisionInfo info) {
   SceneObject* src = (SceneObject*) info.groupPointer;
-  //std::cout << "ProcessClick in TestGameState with groupPointer: " << info.groupPointer << std::endl;
 
   if (src == &this->hand) {
     std::cout << "hand collision recognized" << std::endl;
 
-    unsigned int cardIndex = info.collisionIndex;
+    if (info.innerCollision == nullptr) {
+      std::cout << "hand collision had no inner collision. Panic behavior." << std::endl;
+      return {};
+    }
+
+    if (!info.innerCollision->isCard) {
+      std::cout << "hand collision isn't with card, so not sure what to do. Panic behavior." << std::endl;
+      return {};
+    }
+
+    unsigned int cardIndex = info.innerCollision->cardIndex;
     Card card = this->hand.GetCard(cardIndex);
     TestCardInfo* cardInfo = this->database->GetInfo(card.GetID());
-    if (cardInfo->type == TestCardInfo::CardType::BASIC_CHARACTER_CARD) {
-      std::cout << "playing basic character" << std::endl;
-      this->hand.MoveToGroup(info.collisionIndex, &this->discardPile);
-      //this->hand.MoveToGroup(info.collisionIndex, &this->reserve);
-    } else if (cardInfo->type == TestCardInfo::CardType::SPECIAL_CHARACTER_CARD) {
-      std::cout << "how do you have that in your hand... :(" << std::endl;
-      this->hand.MoveToGroup(info.collisionIndex, &this->deck);
+
+    UpdateInfo update = this->gameplayManager.RequestUpdate({
+      .type = SELECT_CARD,
+      .selectedCard = card.GetGameID(),
+      .from = HAND
+    });
+
+    for (CardMovement& move : update.movements) {
+      CardGroup* from = cardGroupMap.at(move.from);
+      CardGroup* to = cardGroupMap.at(move.to);
+      from->MoveToGroupByGameID(move.cardId, to);
     }
 
   } else if (src == &this->oppHand) {
@@ -184,12 +182,35 @@ ClickEvent TestGameState::ProcessClick(CollisionInfo info) {
     std::cout << "reserve click recognized" << std::endl;
   } else if (src == &this->discardPile) {
     std::cout << "discard pile click recognized" << std::endl;
-    src->ProcessClick(info);
+
+    if (info.isCard) {
+      unsigned int cardIndex = info.cardIndex;
+      std::cout << "Discard card with index " << cardIndex << " selected" << std::endl;
+      Card card = this->discardPile.GetCard(cardIndex);
+      std::cout << "Discard card with id " << card.GetGameID() << " selected" << std::endl;
+      TestCardInfo* cardInfo = this->database->GetInfo(card.GetID());
+
+      UpdateInfo update = this->gameplayManager.RequestUpdate({
+        .type = SELECT_CARD,
+        .selectedCard = card.GetGameID(),
+        .from = DISCARD
+      });
+
+      for (CardMovement& move : update.movements) {
+        CardGroup* from = cardGroupMap.at(move.from);
+        CardGroup* to = cardGroupMap.at(move.to);
+        from->MoveToGroupByGameID(move.cardId, to);
+      }
+    } else {
+      std::cout << "discard collision had no card info. Sending to discard." << std::endl;
+      src->ProcessClick(std::move(info));
+    }
   } else if (src == &this->deck) {
     std::cout << "deck click recognized" << std::endl;
-    src->ProcessClick(info);
+    src->ProcessClick(std::move(info));
   } else {
-    src->ProcessClick(info);
+    std::cout << "other click registered" << std::endl;
+    src->ProcessClick(std::move(info));
   }
 
   return {
@@ -200,7 +221,7 @@ ClickEvent TestGameState::ProcessClick(CollisionInfo info) {
 void TestGameState::ProcessScroll(CollisionInfo info, double yOffset) {
   SceneObject* src = (SceneObject*) info.groupPointer;
 
-  src->ProcessScroll(info, yOffset);
+  src->ProcessScroll(std::move(info), yOffset);
 }
 
 void TestGameState::EndTurnButtonPress() {
@@ -211,7 +232,7 @@ void TestGameState::LoadProperShader(Renderer* renderer, CardGroup* group) {
   int highlight = 0;
   if (&this->hand == group) {
     for (CardItem& card : *group->GetCards()) {
-      if (database->GetInfo(card.card.GetID())->type == TestCardInfo::CardType::BASIC_CHARACTER_CARD) {
+      if (this->gameplayManager.IsPlayableCard(card.card.GetGameID())) {
         card.renderData.shader = renderer->GetShader("highlightCardShader");
         highlight++;
       } else {
@@ -219,18 +240,25 @@ void TestGameState::LoadProperShader(Renderer* renderer, CardGroup* group) {
       }
     }
   } else if (&this->discardPile == group) {
-    std::vector<CardItem>* cards = group->GetCards();
-    auto startIter = cards->begin();
-    auto endIter = cards->end();
-    int groupSize = cards->size();
-    if (groupSize != 0) {
-      for (auto iter = startIter; iter < endIter-1; ++iter) {
-        (*iter).renderData.shader = renderer->GetShader("cardShader");
+    if (this->discardPile.GetIsExpanded()) {
+      for (CardItem& card : *group->GetCards()) {
+        if (this->gameplayManager.IsPlayableCard(card.card.GetGameID())) {
+          card.renderData.shader = renderer->GetShader("highlightCardShader");
+          highlight++;
+        } else {
+          card.renderData.shader = renderer->GetShader("cardShader");
+        }
       }
+    } else {
+      std::vector<CardItem>* cards = group->GetCards();
+      auto startIter = cards->begin();
+      auto endIter = cards->end();
+      int groupSize = cards->size();
+      if (groupSize != 0) {
+        for (auto iter = startIter; iter < endIter-1; ++iter) {
+          (*iter).renderData.shader = renderer->GetShader("cardShader");
+        }
 
-      if (this->discardPile.GetIsExpanded()) {
-        cards->at(groupSize-1).renderData.shader = renderer->GetShader("cardShader");
-      } else {
         cards->at(groupSize-1).renderData.shader = renderer->GetShader("highlightCardShader");
         highlight++;
       }

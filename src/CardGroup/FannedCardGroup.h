@@ -6,6 +6,7 @@ class FannedCardGroup : public CardGroup
 {
 private:
   FannedCardGroupRenderer thisRenderer;
+  void MoveToGroup(int index, CardGroup* to);
 public:
   FannedCardGroup(
     Renderer* renderer,
@@ -28,9 +29,7 @@ public:
     double* collisionZ, 
     CollisionInfo* info
   ) const;
-
   void SetNumHighlightedCards(int num);
   void SetDirtyPosition(bool dirty);
   const glm::mat4 WorldSpaceToThisSpace();
-  void MoveToGroup(int index, CardGroup* to);
 };

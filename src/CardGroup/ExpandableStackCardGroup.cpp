@@ -79,12 +79,18 @@ void ExpandableStackCardGroup::UpdateTick(double deltaTime) {
 
 ClickEvent ExpandableStackCardGroup::ProcessClick(CollisionInfo info) {
   if (isExpanded) {
-    return this->expandedRenderer.ProcessClick(info);
+    return this->expandedRenderer.ProcessClick(std::move(info));
   } else {
     this->isExpanded = true;
     this->stackRenderer.SetDirtyPosition(true);
     this->expandedRenderer.SetDirtyPosition(true);
-    return this->stackRenderer.ProcessClick(info);
+    return this->stackRenderer.ProcessClick(std::move(info));
+  }
+}
+
+void ExpandableStackCardGroup::ProcessScroll(CollisionInfo info, double yOffset) {
+  if (isExpanded) {
+    return this->expandedRenderer.ProcessScroll(std::move(info), yOffset);
   }
 }
 
@@ -93,7 +99,7 @@ ClickEvent ExpandableStackCardGroup::ProcessPreClick(CollisionInfo info) {
     std::cout << "You forgot to implement expanded processpreclick" << std::endl;
     return {};
   } else {
-    return this->stackRenderer.ProcessPreClick(info);
+    return this->stackRenderer.ProcessPreClick(std::move(info));
   }
 }
 
@@ -114,7 +120,10 @@ bool ExpandableStackCardGroup::CheckCollision(
 ) const {
   info->groupPointer = (ExpandableStackCardGroup*)this;
   if (isExpanded) {
-    return this->expandedRenderer.CheckCollision(renderer, x, y, collisionZ, info);
+
+    bool collision = this->expandedRenderer.CheckCollision(renderer, x, y, collisionZ, info);
+    info->groupPointer = (CardGroup*) this;
+    return collision;
   } else {
     return this->stackRenderer.CheckCollision(renderer, x, y, collisionZ, info);
   }

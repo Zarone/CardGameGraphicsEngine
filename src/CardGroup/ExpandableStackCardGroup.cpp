@@ -140,7 +140,7 @@ void ExpandableStackCardGroup::SetNumHighlightedCards(int num){
 
 void ExpandableStackCardGroup::SetDirtyPosition(bool dirty) {
   if (isExpanded) {
-    std::cout << "You forgot to implement expanded setDirtyPosition" << std::endl;
+    this->expandedRenderer.SetDirtyPosition(dirty);
     return;
   } else {
     this->stackRenderer.SetDirtyPosition(dirty); 

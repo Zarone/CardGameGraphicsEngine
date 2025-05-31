@@ -8,12 +8,8 @@ Right now, the application is very barebones. The application opens to a main me
 ![Screenshot 2](./README/2.png "Screenshot 2")
 
 ### TODO:
-- Fix issues:
-  - Top card of discard pile remains static sometimes
-  - should close discard when card is clicked from it. Or should at least handle it correctly visually.
 - Add visible scroll bar for expanded view
 - Right click to expand view of single card
-- Click event for cards in expanded view
 - Move ProcessClick and ProcessScroll from the testGameState
   - Everything in the example directory should be specific to the card game being implemented, not a part of the engine. So the ProcessClick and ProcessScroll should be abstracted, perhaps with some event handler creator for all inner sceneObjects
 - Proper startup screen in example directory

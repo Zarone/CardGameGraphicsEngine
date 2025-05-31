@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vector>
+#include <set>
 #include "TestGameplayPhase.h"
 #include "TestGameplayPiles.h"
 
@@ -27,7 +27,7 @@ struct GameAction {
 
 class TestGameplayManager {
 private:
-  std::vector<unsigned int> selectedCards;
+  std::set<unsigned int> selectedCards;
   TestGameplayPhase phase;
 public:
   TestGameplayManager();

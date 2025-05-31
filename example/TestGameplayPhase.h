@@ -15,6 +15,9 @@ private:
   std::vector<unsigned int> playableCardIds;
 
 public:
+  GameMode GetMode();
+  void SetMode(GameMode mode);
   bool IsPlayableCard(unsigned int id);
+  void  SetPlayableCards(std::vector<unsigned int> cards);
   TestGameplayPhase(bool goingFirst);
 };

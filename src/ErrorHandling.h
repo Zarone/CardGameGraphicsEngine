@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <list>
 #include <iostream>
+#include <set>
 
 //#define DEBUG
 #ifdef DEBUG
@@ -30,6 +31,15 @@ void PrintVector(std::ostream& os, std::list<T> const &map)
 }
 template<typename T>
 void PrintVector(std::ostream& os, std::vector<T> const &map)
+{
+  os << "printing vector: ({addr}, {val})" << std::endl;
+  for (auto &pair: map) {
+    os << "(" << &pair << ", " << pair << ")" << std::endl;
+  }
+}
+
+template<typename T>
+void PrintSet(std::ostream& os, std::set<T> const &map)
 {
   os << "printing vector: ({addr}, {val})" << std::endl;
   for (auto &pair: map) {

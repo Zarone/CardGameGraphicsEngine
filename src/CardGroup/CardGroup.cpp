@@ -35,7 +35,6 @@ std::vector<CardItem>* CardGroup::GetCards() {
 void CardGroup::MoveToGroupByGameID(unsigned int gameID, CardGroup* to) {
   int i = 0;
   for (auto& card :  this->cards) {
-    std::cout << "ID: " << card.card.GetGameID() << ", looking for ID: " << gameID << std::endl;
 
     if (card.card.GetGameID() == gameID) return this->MoveToGroup(i, to);
 

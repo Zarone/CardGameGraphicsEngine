@@ -101,8 +101,7 @@ void FannedCardGroup::MoveToGroup(int index, CardGroup* to) {
   CardItem cardCopy = {
     .card = cards[index].card,
   };
-  std::cout << "initial game id: " << cards[index].card.GetGameID() << std::endl;
-  std::cout << "new game id: " << cardCopy.card.GetGameID() << std::endl;
+
   cardCopy.renderData.displayedPosition = (to->WorldSpaceToThisSpace())*this->thisRenderer.transform*v;
 
   to->AddCard(cardCopy);

@@ -128,6 +128,8 @@ TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* data
   hand.AddCard(3, 8);
   hand.AddCard(0, 9);
   hand.AddCard(1, 10);
+  hand.AddCard(4, 11);
+  hand.AddCard(5, 12);
 
   AddCardGroup(&hand, HAND);
   AddCardGroup(&oppHand, OPP_HAND);

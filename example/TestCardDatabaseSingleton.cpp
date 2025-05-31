@@ -17,6 +17,14 @@ TestCardInfo TestCardDatabaseSingleton::IDToInfo[] = {
     TestCardInfo::CardType::BASIC_CHARACTER_CARD,
     "card4"
   },
+  {
+    TestCardInfo::CardType::EVENT,
+    "card5"
+  },
+  {
+    TestCardInfo::CardType::ACTION,
+    "card6"
+  },
 };
 
 TestCardDatabaseSingleton::TestCardDatabaseSingleton() {

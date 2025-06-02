@@ -11,6 +11,10 @@ bool TestGameplayManager::IsPlayableCard(unsigned int id) {
   return this->phase.IsPlayableCard(id);
 }
 
+bool TestGameplayManager::IsSelectedCard(unsigned int id) {
+  return this->selectedCards.find(id) != this->selectedCards.end();
+}
+
 UpdateInfo TestGameplayManager::RequestUpdate(GameAction action) {
   if (this->phase.GetMode() == MY_TURN) {
     std::vector<CardMovement> movements = {{
@@ -32,8 +36,25 @@ UpdateInfo TestGameplayManager::RequestUpdate(GameAction action) {
       this->selectedCards.erase(action.selectedCard);
     }
     PrintSet(std::cout, this->selectedCards);
-    return {
-      .movements = {}
-    };
+
+    std::vector<CardMovement> movements = {};
+    for (unsigned int el : this->selectedCards) {
+      CardMovement movement = {
+        .cardId = el,
+        .from = HAND,
+        .to = DISCARD
+      };
+      movements.push_back(movement);
+    }
+
+    if (this->selectedCards.size() == 2) {
+      return {
+        .movements = movements
+      };
+    } else {
+      return {
+        .movements = {}
+      };
+    }
   }
 }

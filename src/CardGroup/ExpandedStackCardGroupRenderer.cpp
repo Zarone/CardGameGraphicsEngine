@@ -1,5 +1,6 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "ExpandedStackCardGroupRenderer.h"
+#include "../shaders/allShaders.h"
 
 ExpandedStackCardGroupRenderer::ExpandedStackCardGroupRenderer(
   Renderer* renderer,
@@ -11,7 +12,7 @@ ExpandedStackCardGroupRenderer::ExpandedStackCardGroupRenderer(
       Material(
         {
           .hasTexture=false,
-          .shader=renderer->GetShader("basicShader"),
+          .shader=renderer->GetShader(BasicShader),
           .color=glm::vec4(0.1f,0.1f,0.1f,0.9f)
         }
       )
@@ -23,7 +24,7 @@ ExpandedStackCardGroupRenderer::ExpandedStackCardGroupRenderer(
       Material(
         {
           .hasTexture=false,
-          .shader=renderer->GetShader("basicShader"),
+          .shader=renderer->GetShader(BasicShader),
           .color=glm::vec4(0.1f,0.1f,0.1f,0.9f)
         }
       )
@@ -35,7 +36,7 @@ ExpandedStackCardGroupRenderer::ExpandedStackCardGroupRenderer(
       Material(
         {
           .hasTexture=false,
-          .shader=renderer->GetShader("basicShader"),
+          .shader=renderer->GetShader(BasicShader),
           .color=glm::vec4(0.1f,0.1f,0.1f,0.9f)
         }
       )
@@ -47,7 +48,7 @@ ExpandedStackCardGroupRenderer::ExpandedStackCardGroupRenderer(
       Material(
         {
           .hasTexture=false,
-          .shader=renderer->GetShader("basicShader"),
+          .shader=renderer->GetShader(BasicShader),
           .color=glm::vec4(0.73f,0.70f,0.66f,0.9f)
         }
       )
@@ -59,7 +60,7 @@ ExpandedStackCardGroupRenderer::ExpandedStackCardGroupRenderer(
     Material(
       {
         .hasTexture=false,
-        .shader=renderer->GetShader("basicShader"),
+        .shader=renderer->GetShader(BasicShader),
         .color=glm::vec4(1.f,0.f,0.f,1.f)
       }
     ),
@@ -307,15 +308,23 @@ void ExpandedStackCardGroupRenderer::Render(
   }
 
   const int transformVertexSize = sizeof(CardTransformVertex)/sizeof(float);
+
+  std::set<Shader*> shaders = {};
+  for (CardItem& card : *this->cardsPointer){
+    shaders.insert(card.renderData.shader);
+  }
+
   if (this->dirtyDisplay) {
     // update buffer for relative position and rotation
     float buffer[transformVertexSize*size];
 
     // load display info from cards into buffer
-    Shader* cardShader = renderer->GetShader("cardShader");
-    this->LoadPositions(buffer, cardShader, 0, size-this->highlightedCards, size);
-    cardShader = renderer->GetShader("highlightCardShader");
-    this->LoadPositions(buffer, cardShader, size-this->highlightedCards, this->highlightedCards, size);
+    int offset = 0;
+    for (Shader* const& shader : shaders) {
+      int thisSize = this->GetCardsWithShader(shader);
+      this->LoadPositions(buffer, shader, offset, thisSize, size, false);
+      offset+=thisSize;
+    }
 
     this->transformBuffer.OverwriteData(buffer, 0, size*sizeof(CardTransformVertex));
   }
@@ -328,40 +337,30 @@ void ExpandedStackCardGroupRenderer::Render(
   this->indexBuffer.Bind();
   this->transformBuffer.Bind();
 
-  Shader* cardShader = renderer->GetShader("cardShader");
-  cardShader->Bind();
   glm::mat4 identity = glm::identity<glm::mat4>();
-  cardShader->SetUniform4fv("u_projMatrix", false, glm::value_ptr(identity));
-  cardShader->SetUniform4fv("u_cameraMatrix", false, glm::value_ptr(identity));
-  cardShader->SetUniform4fv("u_modelMatrix", false, glm::value_ptr(this->transform));
-  cardShader->SetInstancedTextures(maxBindableTextures, &renderer->textureMap);
 
   this->PrepareTextures(&renderer->textureMap, 0, size);
 
   // rendering
   if (size != 0) {
-    this->BindAndDrawAllFrontFaces(
-      renderer,
-      cardShader,
-      maxBindableTextures,
-      0,
-      size-this->highlightedCards,
-      size, false
-    );
-    if (this->highlightedCards != 0) {
-      cardShader = renderer->GetShader("highlightCardShader");
-      cardShader->SetUniform4fv("u_projMatrix", false, glm::value_ptr(identity));
-      cardShader->SetUniform4fv("u_cameraMatrix", false, glm::value_ptr(identity));
-      cardShader->SetUniform4fv("u_modelMatrix", false, glm::value_ptr(this->transform));
-      cardShader->SetInstancedTextures(maxBindableTextures, &renderer->textureMap);
+    int offset = 0;
+    for (Shader* const& shader : shaders) {
+      shader->Bind();
+      shader->SetUniform4fv("u_projMatrix", false, glm::value_ptr(identity));
+      shader->SetUniform4fv("u_cameraMatrix", false, glm::value_ptr(identity));
+      shader->SetUniform4fv("u_modelMatrix", false, glm::value_ptr(this->transform));
+      shader->SetInstancedTextures(maxBindableTextures, &renderer->textureMap);
+      int thisSize = this->GetCardsWithShader(shader);
       this->BindAndDrawAllFrontFaces(
         renderer,
-        cardShader,
+        shader,
         maxBindableTextures,
-        size-this->highlightedCards,
-        this->highlightedCards,
-        size, false
+        offset,
+        thisSize,
+        size, 
+        zFlipped
       );
+      offset+=thisSize;
     }
   }
 

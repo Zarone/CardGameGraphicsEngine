@@ -117,8 +117,10 @@ protected:
     double* zAtCursor,
     double* xScale
   ) const;
+
+  int GetCardsWithShader(Shader* shader, int indexGreaterThanOrEqualTo = 0);
 public:
-  int highlightedCards = 0;
+  //int highlightedCards = 0;
 
   glm::mat4 transform;
 

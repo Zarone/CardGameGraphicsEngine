@@ -249,3 +249,13 @@ bool CardGroupRenderer::IsInsideScreenRectangle(
 
   return true;
 }
+
+int CardGroupRenderer::GetCardsWithShader(Shader* shader, int indexGreaterThanOrEqualTo) {
+  int count = 0;
+  int index = 0;
+  for (CardItem& card : *this->cardsPointer) {
+    if (index >= indexGreaterThanOrEqualTo && card.renderData.shader == shader) count++;
+    ++index;
+  }
+  return count;
+}

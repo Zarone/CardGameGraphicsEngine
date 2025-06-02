@@ -1,6 +1,14 @@
 #pragma once
 #include <string>
 
+enum ShaderID {
+  ButtonShader,
+  CardShader,
+  HighlightCardShader,
+  SelectedCardShader,
+  BasicShader
+};
+
 namespace myShaders {
   extern std::string basicVertex;
   extern std::string basicFragment;
@@ -10,4 +18,5 @@ namespace myShaders {
   extern std::string textureFragment;
   extern std::string highlightedCardVertex;
   extern std::string highlightedCardFragment;
+  extern std::string selectedCardFragment;
 }

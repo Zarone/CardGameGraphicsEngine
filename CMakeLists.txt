@@ -36,6 +36,7 @@ add_executable(${PROJECT_NAME}
   src/shaders/HighlightedCardFragment.cpp
   src/shaders/TextureVertex.cpp
   src/shaders/TextureFragment.cpp
+  src/shaders/SelectedCardFragment.cpp
   src/CardGroup/CardItem.cpp
   src/CardGroup/CardGroup.cpp
   src/CardGroup/CardGroupRenderer.cpp

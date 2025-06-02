@@ -3,6 +3,7 @@
 #include "./TestSceneData.h"
 #include "./TestCardInfo.h"
 #include "TestGameplayPiles.h"
+#include "../src/shaders/allShaders.h"
 
 TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* database):
   hand(
@@ -90,7 +91,7 @@ TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* data
       .hasTexture=true,
       .textureMap=&renderer->textureMap,
       .textureAddr="endturn",
-      .shader=renderer->GetShader("buttonShader"),
+      .shader=renderer->GetShader(ButtonShader),
       .color=glm::vec4(1.0f, 0, 0, 1.0f),
     }),
     std::bind(&TestGameState::EndTurnButtonPress, this)
@@ -178,6 +179,8 @@ ClickEvent TestGameState::ProcessClick(CollisionInfo info) {
       from->MoveToGroupByGameID(move.cardId, to);
     }
 
+    this->hand.ProcessClick(std::move(info));
+
   } else if (src == &this->oppHand) {
     std::cout << "opp hand collision recognized" << std::endl;
   } else if (src == &this->reserve) {
@@ -231,24 +234,23 @@ void TestGameState::EndTurnButtonPress() {
 }
 
 void TestGameState::LoadProperShader(Renderer* renderer, CardGroup* group) {
-  int highlight = 0;
   if (&this->hand == group) {
     for (CardItem& card : *group->GetCards()) {
-      if (this->gameplayManager.IsPlayableCard(card.card.GetGameID())) {
-        card.renderData.shader = renderer->GetShader("highlightCardShader");
-        highlight++;
+      if (this->gameplayManager.IsSelectedCard(card.card.GetGameID())) {
+        card.renderData.shader = renderer->GetShader(SelectedCardShader); 
+      } else if (this->gameplayManager.IsPlayableCard(card.card.GetGameID())) {
+        card.renderData.shader = renderer->GetShader(HighlightCardShader);
       } else {
-        card.renderData.shader = renderer->GetShader("cardShader");
+        card.renderData.shader = renderer->GetShader(CardShader);
       }
     }
   } else if (&this->discardPile == group) {
     if (this->discardPile.GetIsExpanded()) {
       for (CardItem& card : *group->GetCards()) {
         if (this->gameplayManager.IsPlayableCard(card.card.GetGameID())) {
-          card.renderData.shader = renderer->GetShader("highlightCardShader");
-          highlight++;
+          card.renderData.shader = renderer->GetShader(HighlightCardShader);
         } else {
-          card.renderData.shader = renderer->GetShader("cardShader");
+          card.renderData.shader = renderer->GetShader(CardShader);
         }
       }
     } else {
@@ -258,19 +260,17 @@ void TestGameState::LoadProperShader(Renderer* renderer, CardGroup* group) {
       int groupSize = cards->size();
       if (groupSize != 0) {
         for (auto iter = startIter; iter < endIter-1; ++iter) {
-          (*iter).renderData.shader = renderer->GetShader("cardShader");
+          (*iter).renderData.shader = renderer->GetShader(CardShader);
         }
 
-        cards->at(groupSize-1).renderData.shader = renderer->GetShader("highlightCardShader");
-        highlight++;
+        cards->at(groupSize-1).renderData.shader = renderer->GetShader(HighlightCardShader);
       }
     }
   } else {
     for (auto& card : *group->GetCards()) {
-      card.renderData.shader = renderer->GetShader("cardShader");
+      card.renderData.shader = renderer->GetShader(CardShader);
     }
   }
-  group->SetNumHighlightedCards(highlight);
 }
 
 void TestGameState::Render(Renderer* renderer) {

@@ -30,6 +30,7 @@ void FannedCardGroup::UpdateTick(double deltaTime) {
 }
 
 ClickEvent FannedCardGroup::ProcessClick(CollisionInfo info) {
+  this->SetDirtyPosition(true);
   return this->thisRenderer.ProcessClick(std::move(info));
 }
 
@@ -68,10 +69,6 @@ bool FannedCardGroup::CheckCollision(
     return true;
   }
   return false;
-}
-
-void FannedCardGroup::SetNumHighlightedCards(int num){
-  this->thisRenderer.highlightedCards=num;
 }
 
 void FannedCardGroup::SetDirtyPosition(bool dirty) {

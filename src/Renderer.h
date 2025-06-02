@@ -9,13 +9,14 @@
 #include "CardDatabaseSingleton.h"
 #include "CursorData.h"
 #include "Shader.h"
+#include "./shaders/allShaders.h"
 
 class Renderer
 {
 private:
   WindowManager* window;
 public:
-  std::unordered_map<std::string, Shader> shaderMap;
+  std::unordered_map<ShaderID, Shader> shaderMap;
   TextureMap textureMap;
   glm::mat4 projMatrix;
   glm::mat4 cameraMatrix;
@@ -42,11 +43,11 @@ public:
 
   void GetCursorPosition(CursorData* cursorData);
 
-  void SetupShader(const std::string& shaderName, const std::string& vertex, const std::string& fragment);
+  void SetupShader(const ShaderID id, const std::string& vertex, const std::string& fragment);
 
   void ResetShaders();
 
-  Shader* GetShader(const std::string& name);
+  Shader* GetShader(const ShaderID id);
 
   float GetAspectRatio();
 };

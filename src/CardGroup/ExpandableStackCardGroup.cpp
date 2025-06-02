@@ -129,15 +129,6 @@ bool ExpandableStackCardGroup::CheckCollision(
   }
 }
 
-void ExpandableStackCardGroup::SetNumHighlightedCards(int num){
-  if (isExpanded) {
-    this->expandedRenderer.highlightedCards=num;
-    return;
-  } else {
-    this->stackRenderer.highlightedCards=num;
-  }
-}
-
 void ExpandableStackCardGroup::SetDirtyPosition(bool dirty) {
   if (isExpanded) {
     this->expandedRenderer.SetDirtyPosition(dirty);

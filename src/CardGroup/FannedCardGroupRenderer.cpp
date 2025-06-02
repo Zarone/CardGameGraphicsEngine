@@ -47,7 +47,7 @@ FannedCardGroupRenderer::FannedCardGroupRenderer(
       Material(
         {
           .hasTexture=false,
-          .shader=renderer->GetShader("basicShader"),
+          .shader=renderer->GetShader(BasicShader),
           .color=glm::vec4(0.5f,0.5f,0.5f,0.5f)
         }
       )
@@ -495,6 +495,11 @@ void FannedCardGroupRenderer::Render(
 
   const int transformVertexSize = sizeof(CardTransformVertex)/sizeof(float);
 
+  std::set<Shader*> shaders = {};
+  for (CardItem& card : *this->cardsPointer){
+    shaders.insert(card.renderData.shader);
+  }
+
   // if we need to update the
   // displayed position
   if (this->dirtyDisplay) {
@@ -503,10 +508,12 @@ void FannedCardGroupRenderer::Render(
     float buffer[transformVertexSize*size];
 
     // load display info from cards into buffer
-    Shader* cardShader = renderer->GetShader("cardShader");
-    this->LoadPositions(buffer, cardShader, 0, size-this->highlightedCards, size);
-    cardShader = renderer->GetShader("highlightCardShader");
-    this->LoadPositions(buffer, cardShader, size-this->highlightedCards, this->highlightedCards, size);
+    int offset = 0;
+    for (Shader* const& shader : shaders) {
+      int thisSize = this->GetCardsWithShader(shader);
+      this->LoadPositions(buffer, shader, offset, thisSize, size, false);
+      offset+=thisSize;
+    }
 
     this->transformBuffer.OverwriteData(buffer, 0, size*sizeof(CardTransformVertex));
   }
@@ -519,12 +526,6 @@ void FannedCardGroupRenderer::Render(
   this->indexBuffer.Bind();
   this->transformBuffer.Bind();
 
-  Shader* cardShader = renderer->GetShader("cardShader");
-  cardShader->Bind();
-  cardShader->SetUniform4fv("u_projMatrix", false, glm::value_ptr(projMatrix));
-  cardShader->SetUniform4fv("u_cameraMatrix", false, glm::value_ptr(camMatrix));
-  cardShader->SetUniform4fv("u_modelMatrix", false, glm::value_ptr(this->transform));
-  cardShader->SetInstancedTextures(maxBindableTextures, &renderer->textureMap);
 
   this->PrepareTextures(&renderer->textureMap, 0, size);
 
@@ -533,28 +534,24 @@ void FannedCardGroupRenderer::Render(
   // bind textures and shift buffer for
   // rendering
   if (size != 0) {
-    this->BindAndDrawAllFrontFaces(
-      renderer,
-      cardShader,
-      maxBindableTextures,
-      0,
-      size-this->highlightedCards,
-      size, zFlipped
-    );
-    if (this->highlightedCards != 0) {
-      cardShader = renderer->GetShader("highlightCardShader");
-      cardShader->SetUniform4fv("u_projMatrix", false, glm::value_ptr(projMatrix));
-      cardShader->SetUniform4fv("u_cameraMatrix", false, glm::value_ptr(camMatrix));
-      cardShader->SetUniform4fv("u_modelMatrix", false, glm::value_ptr(this->transform));
-      cardShader->SetInstancedTextures(maxBindableTextures, &renderer->textureMap);
+    int offset = 0;
+    for (Shader* const& shader : shaders) {
+      shader->Bind();
+      shader->SetUniform4fv("u_projMatrix", false, glm::value_ptr(projMatrix));
+      shader->SetUniform4fv("u_cameraMatrix", false, glm::value_ptr(camMatrix));
+      shader->SetUniform4fv("u_modelMatrix", false, glm::value_ptr(this->transform));
+      shader->SetInstancedTextures(maxBindableTextures, &renderer->textureMap);
+      int thisSize = this->GetCardsWithShader(shader);
       this->BindAndDrawAllFrontFaces(
         renderer,
-        cardShader,
+        shader,
         maxBindableTextures,
-        size-this->highlightedCards,
-        this->highlightedCards,
-        size, zFlipped
+        offset,
+        thisSize,
+        size, 
+        zFlipped
       );
+      offset+=thisSize;
     }
   }
 

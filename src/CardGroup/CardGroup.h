@@ -28,7 +28,6 @@ public:
   std::vector<CardItem>* GetCards();
 
   // Setters for derived classes
-  virtual void SetNumHighlightedCards(int num) = 0;
   virtual void SetDirtyPosition(bool dirty) = 0;
 
   // Getters for derived classes

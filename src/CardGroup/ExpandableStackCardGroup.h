@@ -18,7 +18,6 @@ public:
     bool zFlipped
   );
 
-  void SetNumHighlightedCards(int num);
   void SetDirtyPosition(bool dirty);
   const glm::mat4 WorldSpaceToThisSpace();
   void OnClose();

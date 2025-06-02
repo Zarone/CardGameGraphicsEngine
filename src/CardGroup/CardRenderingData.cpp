@@ -1,7 +1,7 @@
 #include "CardRenderingData.h"
 #include <iostream>
 
-const double CardRenderingData::animationDuration = 0.1f;
+const double CardRenderingData::animationDuration = 0.15f;
 
 float CardRenderingData::cardHeightRatio = 1.396f;
 

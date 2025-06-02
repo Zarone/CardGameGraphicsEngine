@@ -46,22 +46,22 @@ void Renderer::GetCursorPosition(CursorData* cursorData) {
   this->window->GetCursorPosition(&cursorData->cursorX, &cursorData->cursorY);
 }
 
-void Renderer::SetupShader(const std::string& shaderName, const std::string& vertex, const std::string& fragment) {
+void Renderer::SetupShader(const ShaderID shaderID, const std::string& vertex, const std::string& fragment) {
   this->shaderMap.emplace(
     std::piecewise_construct,
-    std::forward_as_tuple(shaderName),
+    std::forward_as_tuple(shaderID),
     std::forward_as_tuple(vertex, fragment)
   );
 }
 
 void Renderer::ResetShaders() {
-  this->shaderMap = std::unordered_map<std::string, Shader>();
+  this->shaderMap = std::unordered_map<ShaderID, Shader>();
 }
 
-Shader* Renderer::GetShader(const std::string& name) {
-  auto shader = this->shaderMap.find(name);
+Shader* Renderer::GetShader(const ShaderID id) {
+  auto shader = this->shaderMap.find(id);
   if (shader == this->shaderMap.end()) {
-    std::cout << "Could not find shader " << name << std::endl;
+    std::cout << "Could not find shader " << id << std::endl;
     return nullptr;
   } else {
     return &(shader->second);

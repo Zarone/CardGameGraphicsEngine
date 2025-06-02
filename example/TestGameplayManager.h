@@ -32,5 +32,6 @@ private:
 public:
   TestGameplayManager();
   bool IsPlayableCard(unsigned int id);
+  bool IsSelectedCard(unsigned int id);
   UpdateInfo RequestUpdate(GameAction action);
 };

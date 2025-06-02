@@ -18,6 +18,6 @@ public:
   GameMode GetMode();
   void SetMode(GameMode mode);
   bool IsPlayableCard(unsigned int id);
-  void  SetPlayableCards(std::vector<unsigned int> cards);
+  void SetPlayableCards(std::vector<unsigned int> cards);
   TestGameplayPhase(bool goingFirst);
 };

@@ -10,6 +10,7 @@ Right now, the application is very barebones. The application opens to a main me
 ### TODO:
 - Make test server to handle gamestate
 - use expandedCardGroupRenderer for temporary groups (i.e. look at the top 5 cards of your deck)
+- Make number of card render groups arbitrary, and add one for cards that have been selected.
 - Add visible scroll bar for expanded view
 - Right click to expand view of single card
 - Move ProcessClick and ProcessScroll from the testGameState

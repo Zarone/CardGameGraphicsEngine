@@ -12,6 +12,7 @@ struct CardMovement {
 
 struct UpdateInfo {
   std::vector<CardMovement> movements;  
+  bool phaseChange;
 };
 
 enum GameActionType {
@@ -34,4 +35,5 @@ public:
   bool IsPlayableCard(unsigned int id);
   bool IsSelectedCard(unsigned int id);
   UpdateInfo RequestUpdate(GameAction action);
+  GameMode GetPhase();
 };

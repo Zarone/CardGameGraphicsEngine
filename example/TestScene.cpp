@@ -15,6 +15,12 @@ void TestScene::Swap(unsigned int sceneIndex) {
   this->renderer.ResetShaders();
   switch ((TestSceneID)sceneIndex) {
     case TestSceneID::GAME_SCREEN: {
+      // Debug Camera
+      //this->SetupCamera(
+        //glm::vec3(0.0f, 0.0f, 10.f),
+        //glm::vec3(0.0f, 0.0f, -1.0f)
+      //);
+
       // Side View Camera
       this->SetupCamera(
         glm::vec3(0.0f, 4.5f, 9.8f),

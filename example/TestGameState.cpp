@@ -108,6 +108,7 @@ TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* data
     -90.0f,
     false
   ),
+  palette(renderer),
   database(database)
 {
 
@@ -142,9 +143,71 @@ TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* data
   AddCardGroup(&oppSpecials, OPP_SPECIALS);
 
   renderer->textureMap.SetupTexturePath("endturn");
+  AddObject(&palette);
   AddObject(&passTurn);
   AddCardGroup(&deck, DECK);
   AddCardGroup(&discardPile, DISCARD);
+
+  this->LoadCommandPalette();
+}
+
+void TestGameState::LoadCommandPalette() {
+  GameMode mode = this->gameplayManager.GetPhase();
+  switch (mode) {
+    case MY_TURN:
+      palette.SetButtons({
+        {
+          .name="End Turn", 
+          .func=std::bind(&TestGameState::EndTurnButtonPress, this)
+        },
+        {
+          .name="Attack",
+          .func=[]() {
+            std::cout << "Attack declared" << std::endl;
+          }
+        }
+      });
+      break; 
+    case OPPONENT_TURN:
+      break; 
+    case SELECTING_CARDS:
+      palette.SetButtons({
+        {
+          .name="End Selection",
+          .func=[]() {
+            std::cout << "End Selection Pressed1" << std::endl;
+          }
+        },
+        {
+          .name="End Selection",
+          .func=[]() {
+            std::cout << "End Selection Pressed2" << std::endl;
+          }
+        },
+        {
+          .name="End Selection",
+          .func=[]() {
+            std::cout << "End Selection Pressed3" << std::endl;
+          }
+        },
+        {
+          .name="End Selection",
+          .func=[]() {
+            std::cout << "End Selection Pressed4" << std::endl;
+          }
+        },
+        {
+          .name="End Selection",
+          .func=[]() {
+            std::cout << "End Selection Pressed5" << std::endl;
+          }
+        },
+      });
+      break; 
+    default:
+      std::cout << "Unknown gamemode encountered while loading command palette" << std::endl;
+      break;
+  }
 }
 
 ClickEvent TestGameState::ProcessClick(CollisionInfo info) {
@@ -172,6 +235,10 @@ ClickEvent TestGameState::ProcessClick(CollisionInfo info) {
       .selectedCard = card.GetGameID(),
       .from = HAND
     });
+
+    if (update.phaseChange) {
+      this->LoadCommandPalette();
+    }
 
     for (CardMovement& move : update.movements) {
       CardGroup* from = cardGroupMap.at(move.from);
@@ -213,6 +280,8 @@ ClickEvent TestGameState::ProcessClick(CollisionInfo info) {
   } else if (src == &this->deck) {
     std::cout << "deck click recognized" << std::endl;
     src->ProcessClick(std::move(info));
+  } else if (src == &this->palette) {
+    this->palette.ProcessClick(std::move(info));
   } else {
     std::cout << "other click registered" << std::endl;
     src->ProcessClick(std::move(info));

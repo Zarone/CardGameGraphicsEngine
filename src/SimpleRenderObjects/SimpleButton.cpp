@@ -68,7 +68,6 @@ bool SimpleButton::CheckCollision(
     return false;
   }
 
-  SceneObject* test = (SceneObject*)this;
   info->groupPointer = (SimpleButton*)this;
   return true;
 }
@@ -120,4 +119,9 @@ void SimpleButton::ReleaseClick() {
     this->pressedDown = false;
     this->material.color.w *= 2.f;
   }
+}
+
+void SimpleButton::TogglePerspective(bool perspective) {
+  this->perspective = perspective;
+  this->SetupProjectedVertices(&this->transform);
 }

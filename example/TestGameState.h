@@ -6,6 +6,7 @@
 #include "../src/shaders/allShaders.h"
 #include "../src/CardGroup/FannedCardGroup.h"
 #include "../src/CardGroup/ExpandableStackCardGroup.h"
+#include "../src/Scene/CommandPalette.h"
 
 class TestGameState : public GameState
 {
@@ -21,10 +22,12 @@ private:
   ExpandableStackCardGroup deck;
   ExpandableStackCardGroup discardPile;
   BoundButton passTurn;
+  CommandPalette palette;
   TestCardDatabaseSingleton* database;
   TestGameplayManager gameplayManager;
 
   void EndTurnButtonPress();
+  void LoadCommandPalette();
 public:
   TestGameState(Renderer* renderer, TestCardDatabaseSingleton* database);
   ClickEvent ProcessClick(CollisionInfo info);

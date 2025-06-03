@@ -27,4 +27,8 @@ public:
   void SetupProjectedVertices(glm::mat4* transform);
   void SetTransform(glm::mat4* transform);
   void ReleaseClick();
+  
+  // have to override to make sure projected
+  // vertices are recalculated
+  void TogglePerspective(bool perspective);
 };

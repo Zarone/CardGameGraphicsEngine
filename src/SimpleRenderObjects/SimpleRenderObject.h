@@ -30,7 +30,7 @@ public:
   );
 
   virtual void SetTransform(glm::mat4* transform);
-  void TogglePerspective(bool perspective);
+  virtual void TogglePerspective(bool perspective);
 
   void Render(Renderer* renderer);
   void UpdateTick(double deltaTime);

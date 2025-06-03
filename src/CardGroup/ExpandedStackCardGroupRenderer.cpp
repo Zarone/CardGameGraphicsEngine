@@ -178,8 +178,6 @@ bool ExpandedStackCardGroupRenderer::CheckCollision(
   if (selectedObject == nullptr) return false;
 
   *collisionZ = bestCollisionZ;
-  //*collisionInfo = bestCollisionInfo;
-
   if (selectedObject == &cardContainerPlane) {
     std::cout << "Unimplemented collision function for cards of ExpandedStackCardGroup" << std::endl;
     collisionInfo->innerCollision = nullptr;

@@ -58,6 +58,7 @@ add_executable(${PROJECT_NAME}
   src/Card/CardInfo.cpp
   src/Helper/ErrorHandling.cpp
   src/Scene/GameState.cpp
+  src/Scene/CommandPalette.cpp
   src/Helper/MathHelper.cpp
   src/HelperRendering/Renderer.cpp
   src/Scene/Scene.cpp

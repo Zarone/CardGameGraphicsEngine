@@ -26,9 +26,14 @@ UpdateInfo TestGameplayManager::RequestUpdate(GameAction action) {
       this->phase.SetMode(SELECTING_CARDS);
       this->phase.SetPlayableCards({0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11});
       this->selectedCards = {};
+      return {
+        .movements = movements,
+        .phaseChange = true 
+      };
     } 
     return {
-      .movements = movements
+      .movements = movements,
+      .phaseChange = false
     };
   } else {
     std::pair<std::set<unsigned int>::iterator, bool> res = this->selectedCards.insert(action.selectedCard);
@@ -48,13 +53,20 @@ UpdateInfo TestGameplayManager::RequestUpdate(GameAction action) {
     }
 
     if (this->selectedCards.size() == 2) {
+      this->phase.SetMode(MY_TURN);
       return {
-        .movements = movements
+        .movements = movements,
+        .phaseChange = true
       };
     } else {
       return {
-        .movements = {}
+        .movements = {},
+        .phaseChange = false
       };
     }
   }
+}
+
+GameMode TestGameplayManager::GetPhase() {
+  return this->phase.GetMode();
 }

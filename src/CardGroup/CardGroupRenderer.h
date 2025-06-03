@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../SceneObject.h"
+#include "../Scene/SceneObject.h"
 #include "../CardGroup/CardItem.h"
 #include "../HelperOpenGL/VertexArray.h"
 #include "../HelperOpenGL/IndexBuffer.h"

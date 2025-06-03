@@ -30,7 +30,6 @@ void FannedCardGroup::UpdateTick(double deltaTime) {
 }
 
 ClickEvent FannedCardGroup::ProcessClick(CollisionInfo info) {
-  this->SetDirtyPosition(true);
   return this->thisRenderer.ProcessClick(std::move(info));
 }
 

@@ -4,7 +4,7 @@
 
 #include "Texture.h"
 #include "TextureLRU.h"
-#include "CardDatabaseSingleton.h"
+#include "../Card/CardDatabaseSingleton.h"
 
 class TextureMap
 {

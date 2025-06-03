@@ -1,5 +1,5 @@
 #include "VertexArray.h"
-#include "../ErrorHandling.h"
+#include "../Helper/ErrorHandling.h"
 #include <GL/glew.h>
 
 VertexArray::VertexArray() {

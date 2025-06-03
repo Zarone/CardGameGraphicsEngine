@@ -6,10 +6,10 @@
 
 #include "WindowManager.h"
 #include "TextureMap.h"
-#include "CardDatabaseSingleton.h"
-#include "CursorData.h"
+#include "../Card/CardDatabaseSingleton.h"
+#include "../Helper/CursorData.h"
 #include "Shader.h"
-#include "./shaders/allShaders.h"
+#include "../shaders/allShaders.h"
 
 class Renderer
 {

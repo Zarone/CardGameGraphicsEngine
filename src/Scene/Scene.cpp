@@ -1,5 +1,5 @@
 #include "Scene.h"
-#include "ErrorHandling.h"
+#include "../Helper/ErrorHandling.h"
 
 Scene::Scene(
   WindowManager* windowManager,

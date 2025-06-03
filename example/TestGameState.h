@@ -1,6 +1,6 @@
 #pragma once
 #include "TestGameplayManager.h"
-#include "../src/GameState.h"
+#include "../src/Scene/GameState.h"
 #include "../example/TestCardDatabaseSingleton.h"
 #include "../src/SimpleRenderObjects/BoundButton.h"
 #include "../src/shaders/allShaders.h"

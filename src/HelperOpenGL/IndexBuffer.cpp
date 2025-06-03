@@ -1,6 +1,6 @@
 #include <GL/glew.h>
 #include "IndexBuffer.h"
-#include "../ErrorHandling.h"
+#include "../Helper/ErrorHandling.h"
 
 IndexBuffer::IndexBuffer() {}
 

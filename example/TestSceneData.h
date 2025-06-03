@@ -1,6 +1,6 @@
 #pragma once
-#include "../src/SceneData.h"
-#include "../src/Card.h"
+#include "../src/Scene/SceneData.h"
+#include "../src/Card/Card.h"
 
 enum TestSceneID {
   UNINITIALIZED = 0,

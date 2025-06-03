@@ -2,7 +2,7 @@
 
 #include "SimpleButton.h"
 #include "../shaders/allShaders.h"
-#include "../MathHelper.h"
+#include "../Helper/MathHelper.h"
 
 SimpleButton::SimpleButton(
   Renderer* renderer,

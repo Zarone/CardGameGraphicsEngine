@@ -24,8 +24,8 @@ add_executable(${PROJECT_NAME}
   example/TestCardDatabaseSingleton.cpp
   example/TestCardInfo.cpp
   example/TestGameState.cpp
-  example/TestGameplayPhase.cpp
   example/TestGameplayManager.cpp
+  example/TestGameplayPhase.cpp
   example/TestScene.cpp
   src/external/stb_image.cpp
   src/shaders/BasicVertex.cpp
@@ -54,18 +54,18 @@ add_executable(${PROJECT_NAME}
   src/SimpleRenderObjects/SimpleButton.cpp
   src/SimpleRenderObjects/SimplePlane.cpp
   src/SimpleRenderObjects/SimpleRenderObject.cpp
-  src/Card.cpp
-  src/CardInfo.cpp
-  src/ErrorHandling.cpp
-  src/GameState.cpp
-  src/MathHelper.cpp
-  src/Renderer.cpp
-  src/Scene.cpp
-  src/Shader.cpp
-  src/Texture.cpp
-  src/TextureLRU.cpp
-  src/TextureMap.cpp
-  src/WindowManager.cpp
+  src/Card/Card.cpp
+  src/Card/CardInfo.cpp
+  src/Helper/ErrorHandling.cpp
+  src/Scene/GameState.cpp
+  src/Helper/MathHelper.cpp
+  src/HelperRendering/Renderer.cpp
+  src/Scene/Scene.cpp
+  src/HelperRendering/Shader.cpp
+  src/HelperRendering/Texture.cpp
+  src/HelperRendering/TextureLRU.cpp
+  src/HelperRendering/TextureMap.cpp
+  src/HelperRendering/WindowManager.cpp
   src/main.cpp
 )
 
@@ -73,9 +73,9 @@ add_executable(test
   src/external/stb_image.cpp
   test/main.cpp
   test/TestTextureLRU.cpp
-  src/TextureLRU.cpp
-  src/Texture.cpp
-  src/ErrorHandling.cpp
+  src/HelperRendering/TextureLRU.cpp
+  src/HelperRendering/Texture.cpp
+  src/Helper/ErrorHandling.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE glfw GLEW::GLEW glm)

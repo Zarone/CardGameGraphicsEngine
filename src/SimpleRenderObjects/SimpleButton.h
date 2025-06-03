@@ -1,7 +1,7 @@
 #pragma once
 
 #include "SimplePlane.h"
-#include "../Material.h"
+#include "../HelperRendering/Material.h"
 
 class SimpleButton : public SimplePlane
 {

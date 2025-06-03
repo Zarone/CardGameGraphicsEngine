@@ -81,6 +81,6 @@ public:
     double* collisionZ,
     CollisionInfo* collisioInfo
   ) const;
-
+  ClickEvent ProcessClick(CollisionInfo info);
   bool wasInsideBoundary;
 };

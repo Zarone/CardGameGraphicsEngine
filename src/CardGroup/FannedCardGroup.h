@@ -29,7 +29,6 @@ public:
     double* collisionZ, 
     CollisionInfo* info
   ) const;
-  void SetNumHighlightedCards(int num);
   void SetDirtyPosition(bool dirty);
   const glm::mat4 WorldSpaceToThisSpace();
 };

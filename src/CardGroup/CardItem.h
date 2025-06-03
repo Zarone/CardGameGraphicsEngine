@@ -1,5 +1,5 @@
 #pragma once
-#include "../Card.h"
+#include "../Card/Card.h"
 #include "CardRenderingData.h"
 
 typedef struct CardItem {

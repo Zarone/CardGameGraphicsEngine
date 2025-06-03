@@ -2,7 +2,7 @@
 #include <GL/glew.h>
 #include <iostream>
 #include "WindowManager.h"
-#include "ErrorHandling.h"
+#include "../Helper/ErrorHandling.h"
 
 WindowManager::WindowManager() {
   /* Initialize the library */

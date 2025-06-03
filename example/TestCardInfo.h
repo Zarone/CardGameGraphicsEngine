@@ -1,5 +1,5 @@
 #pragma once
-#include "../src/CardInfo.h"
+#include "../src/Card/CardInfo.h"
 
 
 class TestCardInfo : public CardInfo {

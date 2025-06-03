@@ -4,9 +4,9 @@
 
 #include "../HelperOpenGL/VertexArray.h"
 #include "../HelperOpenGL/IndexBuffer.h"
-#include "../Renderer.h"
-#include "../SceneObject.h"
-#include "../Material.h"
+#include "../HelperRendering/Renderer.h"
+#include "../Scene/SceneObject.h"
+#include "../HelperRendering/Material.h"
 
 class SimpleRenderObject : public SceneObject
 {

@@ -1,5 +1,5 @@
 #include <iostream>
-#include "ErrorHandling.h"
+#include "../Helper/ErrorHandling.h"
 #include "TextureLRU.h"
 
 TextureLRU::TextureLRU() {

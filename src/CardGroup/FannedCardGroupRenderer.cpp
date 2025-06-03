@@ -588,6 +588,12 @@ void FannedCardGroupRenderer::Render(
   }
 }
 
+ClickEvent FannedCardGroupRenderer::ProcessClick(CollisionInfo info) {
+  this->dirtyDisplay = true;
+  this->dirtyPosition = true;
+  return {.sceneSwap = false};
+}
+
 const glm::mat4 FannedCardGroupRenderer::WorldSpaceToThisSpace() {
   return glm::inverse(this->transform);
 }

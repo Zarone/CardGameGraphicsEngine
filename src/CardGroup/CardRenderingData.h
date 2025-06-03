@@ -3,7 +3,7 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 
-#include "../Material.h"
+#include "../HelperRendering/Material.h"
 
 class CardRenderingData
 {

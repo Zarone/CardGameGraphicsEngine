@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Renderer.h"
+#include "../HelperRendering/Renderer.h"
 
 class SceneObject;
 

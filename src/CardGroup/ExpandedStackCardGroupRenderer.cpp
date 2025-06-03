@@ -402,7 +402,6 @@ void ExpandedStackCardGroupRenderer::ProcessScroll(CollisionInfo info, double yO
     0,
     fmin(rows*CardRenderingData::cardHeightRatio*cardScaleXY + (rows-1) * verticalWhitespaceInContainer - this->height/renderer->GetAspectRatio(), this->scrollPosition - yOffset)
   );
-  std::cout << "Scroll Position: " << this->scrollPosition << std::endl;
   this->dirtyPosition = true;
   this->dirtyDisplay = true;
 }

@@ -1,5 +1,5 @@
 #pragma once
-#include "../src/CardDatabaseSingleton.h"
+#include "../src/card/CardDatabaseSingleton.h"
 #include "./TestCardInfo.h"
 
 class TestCardDatabaseSingleton : public CardDatabaseSingleton {

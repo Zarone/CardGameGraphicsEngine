@@ -14,7 +14,7 @@ struct ButtonArgs {
 
 class CommandPalette : public SceneObject {
 private:
-    std::vector<BoundButton> buttons;
+    std::vector<std::pair<const std::string, BoundButton>> buttons;
     Renderer* renderer;
     TextRenderer* textRenderer;
 

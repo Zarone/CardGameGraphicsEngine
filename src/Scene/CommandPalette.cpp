@@ -18,51 +18,57 @@ CommandPalette::~CommandPalette() {
 }
 
 void CommandPalette::SetButtons(std::vector<ButtonArgs> buttons) {
-    this->buttons = std::vector<BoundButton>();
-    int size = buttons.size();
-    int renderedSize = fmin(size, 3);
+  this->buttons = std::vector<std::pair<const std::string, BoundButton>>();
+  int size = buttons.size();
+  int renderedSize = fmin(size, 3);
 
-    float radius = 0.4f; // Radius of the semicircle
-    float startAngle = 0.0f; // Start right of semicircle
+  float radius = 0.4f; // Radius of the semicircle
+  float startAngle = 0.0f; // Start right of semicircle
 
-    float angleStep = -M_PI / 2 / renderedSize; // Evenly space buttons along semicircle
+  float angleStep = -M_PI / 2 / renderedSize; // Evenly space buttons along semicircle
+  
+  double xScale = 3.2f;
+  for (int i = 0; i < renderedSize; i++) {
+    float angle = startAngle + (angleStep * i);
+    float x = -1.0f + (radius * cos(angle))/this->renderer->GetAspectRatio();
+    float y = 0.5 + radius * sin(angle);
     
-    double xScale = 3.2f;
-    for (int i = 0; i < renderedSize; i++) {
-        float angle = startAngle + (angleStep * i);
-        float x = -1.0f + (radius * cos(angle))/this->renderer->GetAspectRatio();
-        float y = 0.5 + radius * sin(angle);
-        
-        glm::mat4 transform = glm::translate(glm::identity<glm::mat4>(), glm::vec3(x, y, 0.0f));
-        double scale = 0.1f;
-        transform = glm::scale(transform, glm::vec3(xScale*scale/this->renderer->GetAspectRatio(), scale, 1.0f));
-        BoundButton newButton = BoundButton(
-            this->renderer,
-            transform,
-            Material({
-                .hasTexture=false,
-                .shader=renderer->GetShader(BasicShader),
-                .color=glm::vec4(0.7f, 0.7f, 0.75f, 1.0f),
-            }),
-            buttons[i].func
-        );
-        newButton.TogglePerspective(false);
-        this->buttons.push_back(std::move(newButton));
-    }
+    glm::mat4 transform = glm::translate(glm::identity<glm::mat4>(), glm::vec3(x, y, 0.0f));
+    double scale = 0.1f;
+    transform = glm::scale(transform, glm::vec3(xScale*scale/this->renderer->GetAspectRatio(), scale, 1.0f));
+    BoundButton newButton = BoundButton(
+      this->renderer,
+      transform,
+      Material({
+        .hasTexture=false,
+        .shader=renderer->GetShader(BasicShader),
+        .color=glm::vec4(0.7f, 0.7f, 0.75f, 1.0f),
+      }),
+      buttons[i].func
+    );
+    newButton.TogglePerspective(false);
+    this->buttons.push_back(
+      std::pair<const std::string&, BoundButton>(
+        buttons[i].text, 
+        std::move(newButton)
+      )
+    );
+  }
 }
 
 void CommandPalette::Render(Renderer* renderer) {
   // Render buttons
-  for (BoundButton& button : this->buttons) {
-    button.Render(renderer);
+  for (std::pair<const std::string, BoundButton>& buttonPair : this->buttons) {
+    buttonPair.second.Render(renderer);
   }
 
   // Render text on top of buttons if text renderer is available
   if (textRenderer) {
     for (size_t i = 0; i < this->buttons.size(); i++) {
-      const BoundButton& button = this->buttons[i];
+      const BoundButton& button = this->buttons[i].second;
+      const std::string& text = this->buttons[i].first;
       glm::vec4 screenPos = button.GetTransform() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-      
+
       // Debug output
       CursorData data;
       renderer->GetCursorPosition(&data);
@@ -70,21 +76,21 @@ void CommandPalette::Render(Renderer* renderer) {
       double scale = 0.002f;
       
       // Center text on button
-      float textWidth = textRenderer->GetTextWidth("test button", scale);
-      float textHeight = textRenderer->GetTextHeight("test button", scale);
+      float textWidth = textRenderer->GetTextWidth(text, scale);
+      float textHeight = textRenderer->GetTextHeight(text, scale);
       float x = screenPos.x - textWidth / 2.0f;
       float y = screenPos.y - textHeight / 2.0f;
       
-      glm::vec4 textColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f); // White color
-      textRenderer->RenderText(renderer, "test button", x, y, scale, textColor);
+      glm::vec4 textColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f); // White color
+      textRenderer->RenderText(renderer, text, x, y, scale, textColor);
     }
   }
 }
 
 void CommandPalette::UpdateTick(double deltaTime) {
-    for (BoundButton& button : this->buttons) {
-        button.UpdateTick(deltaTime);
-    }
+  for (std::pair<const std::string, BoundButton>& buttonPair : this->buttons) {
+    buttonPair.second.UpdateTick(deltaTime);
+  }
 }
 
 bool CommandPalette::CheckCollision(
@@ -94,45 +100,46 @@ bool CommandPalette::CheckCollision(
     double* collisionZ, 
     CollisionInfo* collisionInfo 
 ) const {
-    CollisionInfo bestCollisionInfo;
-    double bestCollisionZ = MAXFLOAT;
+  CollisionInfo bestCollisionInfo;
+  double bestCollisionZ = MAXFLOAT;
 
-    const SceneObject* selectedObject = nullptr;
+  const SceneObject* selectedObject = nullptr;
 
-    for (const BoundButton& button : this->buttons) {
-        CollisionInfo localCollisionInfo;
-        double localCollisionZ = MAXFLOAT;
-        bool objectCollision = button.CheckCollision(renderer, x, y, &localCollisionZ, &localCollisionInfo);
+  for (int i = 0; i < buttons.size(); ++i) {
+    const BoundButton& button = buttons[i].second;
+    CollisionInfo localCollisionInfo;
+    double localCollisionZ = MAXFLOAT;
+    bool objectCollision = button.CheckCollision(renderer, x, y, &localCollisionZ, &localCollisionInfo);
 
-        if (objectCollision && localCollisionZ < bestCollisionZ) {
-            bestCollisionZ = localCollisionZ;
-            selectedObject = &button;
-            bestCollisionInfo = std::move(localCollisionInfo);
-        }
+    if (objectCollision && localCollisionZ < bestCollisionZ) {
+        bestCollisionZ = localCollisionZ;
+        selectedObject = &button;
+        bestCollisionInfo = std::move(localCollisionInfo);
     }
+  }
 
-    if (selectedObject == nullptr) return false;
+  if (selectedObject == nullptr) return false;
 
-    collisionInfo->innerCollision = std::make_unique<CollisionInfo>();
-    collisionInfo->innerCollision->groupPointer = bestCollisionInfo.groupPointer;
-    collisionInfo->innerCollision->cardIndex = bestCollisionInfo.cardIndex;
-    collisionInfo->innerCollision->isCard = bestCollisionInfo.isCard;
-    collisionInfo->innerCollision->innerCollision = std::move(bestCollisionInfo.innerCollision);
+  collisionInfo->innerCollision = std::make_unique<CollisionInfo>();
+  collisionInfo->innerCollision->groupPointer = bestCollisionInfo.groupPointer;
+  collisionInfo->innerCollision->cardIndex = bestCollisionInfo.cardIndex;
+  collisionInfo->innerCollision->isCard = bestCollisionInfo.isCard;
+  collisionInfo->innerCollision->innerCollision = std::move(bestCollisionInfo.innerCollision);
 
-    collisionInfo->isCard = false;
-    collisionInfo->groupPointer = (SceneObject*) this;
+  collisionInfo->isCard = false;
+  collisionInfo->groupPointer = (SceneObject*) this;
 
-    *collisionZ = bestCollisionZ;
+  *collisionZ = bestCollisionZ;
 
-    return true;
+  return true;
 }
 
 ClickEvent CommandPalette::ProcessClick(CollisionInfo info) {
-    return info.innerCollision->groupPointer->ProcessClick(std::move(info));
+  return info.innerCollision->groupPointer->ProcessClick(std::move(info));
 }
 
 ClickEvent CommandPalette::ProcessPreClick(CollisionInfo info) {
-    return {};
+  return {};
 }
 
 void CommandPalette::ReleaseClick() {

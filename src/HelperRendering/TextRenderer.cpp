@@ -45,10 +45,6 @@ TextRenderer::TextRenderer(
     renderer->textureMap.SetupFontTexturePath(fontPath + std::to_string(c), face->glyph->bitmap.buffer, face->glyph->bitmap.width, face->glyph->bitmap.rows);
     int textureSlot = renderer->textureMap.RequestBind(renderer->maxBindableTextures, fontPath + std::to_string(c));
     
-    // Debug output
-    std::cout << "Loaded character '" << c << "' with size: " << face->glyph->bitmap.width << "x" << face->glyph->bitmap.rows 
-              << " at slot " << textureSlot << std::endl;
-
     // Store character for later use
     Character character = {
       glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
@@ -97,7 +93,7 @@ TextRenderer::TextRenderer(
     uniform vec4 textColor;
 
     void main() {
-      vec4 sampled = vec4(1.0, 0.0, 0.0, texture(text, TexCoords).r);
+      vec4 sampled = vec4(1.0, 1.0, 1.0, texture(text, TexCoords).r);
       color = textColor * sampled;
     }
   )";
@@ -123,7 +119,6 @@ void TextRenderer::RenderText(Renderer* renderer, const std::string& text, float
   // Iterate through all characters of string
   for (char c : text) {
     Character ch = Characters[c];
-    std::cout << "c: " << c << std::endl;
 
     float xpos = x + ch.Bearing.x * scale;
     float ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
@@ -147,7 +142,6 @@ void TextRenderer::RenderText(Renderer* renderer, const std::string& text, float
       renderer->maxBindableTextures,
       this->fontPath + std::to_string(c)
     );
-    std::cout << "textureSlot: " << textureSlot << std::endl;
     
     // Make sure texture is bound before setting uniform
     GLCall(glActiveTexture(GL_TEXTURE0 + textureSlot));
@@ -163,9 +157,7 @@ void TextRenderer::RenderText(Renderer* renderer, const std::string& text, float
 
     // Advance cursors for next glyph
     x += (ch.Advance >> 6) * scale; // Bitshift by 6 to get value in pixels (2^6 = 64)
-    std::cout << "x: " << x << std::endl;
   }
-  std::cout << "x END" << std::endl;
 
 }
 

@@ -37,10 +37,10 @@ bool GameState::CheckCollision(Renderer* renderer, double x, double y, double* c
   };
 
   double tempZ;
-  CollisionInfo tempInfo;
   bool objectCollision = false;
 
   for (SceneObject* group : this->nonCardGroups) {
+    CollisionInfo tempInfo;
     objectCollision = group->CheckCollision(renderer, x, y, &tempZ, &tempInfo);
     if (objectCollision && tempZ < minZ) {
       minZ = tempZ;
@@ -49,11 +49,12 @@ bool GameState::CheckCollision(Renderer* renderer, double x, double y, double* c
     }
   }
   for (SceneObject* group : this->cardGroups) {
+    CollisionInfo tempInfo;
     objectCollision = group->CheckCollision(renderer, x, y, &tempZ, &tempInfo);
     if (objectCollision && tempZ < minZ) {
       minZ = tempZ;
       collisionInfo = std::move(tempInfo);
-      //collisionInfo.groupPointer = (void*)group;
+      // collisionInfo.groupPointer = group;
     }
   }
 

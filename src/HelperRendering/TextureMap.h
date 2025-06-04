@@ -18,6 +18,7 @@ private:
 public:
   TextureMap();
   void SetupTexturePath(const std::string& path);
+  void SetupFontTexturePath(const std::string& path, unsigned char* buffer, unsigned int width, unsigned int height);
   void SetupCardDataBase(CardDatabaseSingleton* database);
 
   void SetupCard(unsigned int id);

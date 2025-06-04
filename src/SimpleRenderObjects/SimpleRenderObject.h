@@ -30,6 +30,8 @@ public:
   );
 
   virtual void SetTransform(glm::mat4* transform);
+  glm::mat4 GetTransform() const;
+
   virtual void TogglePerspective(bool perspective);
 
   void Render(Renderer* renderer);

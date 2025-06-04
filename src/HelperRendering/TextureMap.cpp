@@ -15,11 +15,35 @@ void TextureMap::SetupCardDataBase(CardDatabaseSingleton* database) {
 void TextureMap::SetupTexturePath(const std::string& path) {
   auto texture = this->map.find(path);
   if (texture == this->map.end()) {
+    std::cout << "SetupTexturePath: " << path << std::endl;
     this->map.emplace(
       std::piecewise_construct,
       std::forward_as_tuple(path),
       std::forward_as_tuple(TextureMap::pathPrefix + path + ".jpg"));
   }
+
+  //std::cout << "PrintMapToStream(std::cout, this->map)" << std::endl;
+  //PrintMapToStream(std::cout, this->map);
+
+  //std::cout << "this->lru.PrintData();" << std::endl;
+  //this->lru.PrintData();
+}
+
+void TextureMap::SetupFontTexturePath(const std::string& path, unsigned char* buffer, unsigned int width, unsigned int height) {
+  auto texture = this->map.find(path);
+  if (texture == this->map.end()) {
+    std::cout << "SetupFontTexturePath: " << path << std::endl;
+    this->map.emplace(
+      std::piecewise_construct,
+      std::forward_as_tuple(path),
+      std::forward_as_tuple(buffer, width, height));
+  }
+
+  //std::cout << "PrintMapToStream(std::cout, this->map)" << std::endl;
+  //PrintMapToStream(std::cout, this->map);
+
+  //std::cout << "this->lru.PrintData();" << std::endl;
+  //this->lru.PrintData();
 }
 
 void TextureMap::SetupBack() {

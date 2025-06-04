@@ -18,6 +18,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(glm)
 
 find_package(GLEW)
+find_package(Freetype REQUIRED)
 
 # Add the executable with all source files
 add_executable(${PROJECT_NAME}
@@ -66,6 +67,7 @@ add_executable(${PROJECT_NAME}
   src/HelperRendering/Texture.cpp
   src/HelperRendering/TextureLRU.cpp
   src/HelperRendering/TextureMap.cpp
+  src/HelperRendering/TextRenderer.cpp
   src/HelperRendering/WindowManager.cpp
   src/main.cpp
 )
@@ -79,7 +81,7 @@ add_executable(test
   src/Helper/ErrorHandling.cpp
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE glfw GLEW::GLEW glm)
+target_link_libraries(${PROJECT_NAME} PRIVATE glfw GLEW::GLEW glm Freetype::Freetype)
 target_link_libraries(test PRIVATE GLEW::GLEW)
 
 if (APPLE)

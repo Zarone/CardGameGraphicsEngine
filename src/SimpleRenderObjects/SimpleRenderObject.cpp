@@ -13,6 +13,10 @@ SimpleRenderObject::SimpleRenderObject(
   this->SetTransform(&transform);
 }
 
+glm::mat4 SimpleRenderObject::GetTransform() const {
+  return this->transform;
+}
+
 void SimpleRenderObject::LoadIntoGPU() {
   int count = this->GetVertexCount();
   int triangleCount = count - 2;

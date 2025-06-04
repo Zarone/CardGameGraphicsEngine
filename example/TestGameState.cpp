@@ -157,11 +157,11 @@ void TestGameState::LoadCommandPalette() {
     case MY_TURN:
       palette.SetButtons({
         {
-          .name="End Turn", 
+          .text="End Turn", 
           .func=std::bind(&TestGameState::EndTurnButtonPress, this)
         },
         {
-          .name="Attack",
+          .text="Attack",
           .func=[]() {
             std::cout << "Attack declared" << std::endl;
           }
@@ -173,31 +173,31 @@ void TestGameState::LoadCommandPalette() {
     case SELECTING_CARDS:
       palette.SetButtons({
         {
-          .name="End Selection",
+          .text="End Selection",
           .func=[]() {
             std::cout << "End Selection Pressed1" << std::endl;
           }
         },
         {
-          .name="End Selection",
+          .text="End Selection",
           .func=[]() {
             std::cout << "End Selection Pressed2" << std::endl;
           }
         },
         {
-          .name="End Selection",
+          .text="End Selection",
           .func=[]() {
             std::cout << "End Selection Pressed3" << std::endl;
           }
         },
         {
-          .name="End Selection",
+          .text="End Selection",
           .func=[]() {
             std::cout << "End Selection Pressed4" << std::endl;
           }
         },
         {
-          .name="End Selection",
+          .text="End Selection",
           .func=[]() {
             std::cout << "End Selection Pressed5" << std::endl;
           }

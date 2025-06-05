@@ -17,6 +17,8 @@ private:
     std::vector<std::pair<const std::string, BoundButton>> buttons;
     Renderer* renderer;
     TextRenderer* textRenderer;
+    static constexpr float buttonScale = 0.1;
+    static constexpr int maxSize = 5;
 
 public:
     CommandPalette(Renderer* renderer);

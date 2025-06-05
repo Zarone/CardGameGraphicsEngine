@@ -17,24 +17,30 @@ CommandPalette::~CommandPalette() {
     }
 }
 
+float scaleMultiple(int i, int max){
+  float inner = ((float)(i))/(max+1);
+  return 1-inner*inner;
+}
+
 void CommandPalette::SetButtons(std::vector<ButtonArgs> buttons) {
   this->buttons = std::vector<std::pair<const std::string, BoundButton>>();
   int size = buttons.size();
-  int renderedSize = fmin(size, 3);
+  int renderedSize = fmin(size, maxSize);
 
   float radius = 0.4f; // Radius of the semicircle
   float startAngle = 0.0f; // Start right of semicircle
 
-  float angleStep = -M_PI / 2 / renderedSize; // Evenly space buttons along semicircle
+  float angleStep = -M_PI / 2 / maxSize; // Evenly space buttons along semicircle
   
-  double xScale = 3.2f;
+  double xScale = 4.0f;
   for (int i = 0; i < renderedSize; i++) {
     float angle = startAngle + (angleStep * i);
     float x = -1.0f + (radius * cos(angle))/this->renderer->GetAspectRatio();
     float y = 0.5 + radius * sin(angle);
     
-    glm::mat4 transform = glm::translate(glm::identity<glm::mat4>(), glm::vec3(x, y, 0.0f));
-    double scale = 0.1f;
+    float scale = scaleMultiple(i,maxSize)*buttonScale;
+    
+    glm::mat4 transform = glm::translate(glm::identity<glm::mat4>(), glm::vec3(x, y, i*0.1f+0.00001f));
     transform = glm::scale(transform, glm::vec3(xScale*scale/this->renderer->GetAspectRatio(), scale, 1.0f));
     BoundButton newButton = BoundButton(
       this->renderer,
@@ -73,7 +79,7 @@ void CommandPalette::Render(Renderer* renderer) {
       CursorData data;
       renderer->GetCursorPosition(&data);
       
-      double scale = 0.002f;
+      float scale = scaleMultiple(i,maxSize)*buttonScale*0.02f;
       
       // Center text on button
       float textWidth = textRenderer->GetTextWidth(text, scale);
@@ -81,8 +87,8 @@ void CommandPalette::Render(Renderer* renderer) {
       float x = screenPos.x - textWidth / 2.0f;
       float y = screenPos.y - textHeight / 2.0f;
       
-      glm::vec4 textColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f); // White color
-      textRenderer->RenderText(renderer, text, x, y, scale, textColor);
+      glm::vec4 textColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+      textRenderer->RenderText(renderer, text, x, y, screenPos.z, scale, textColor);
     }
   }
 }

@@ -31,7 +31,7 @@ public:
   TextRenderer(Renderer* renderer, const std::string& fontPath, unsigned int fontSize);
   ~TextRenderer();
 
-  void RenderText(Renderer* renderer, const std::string& text, float x, float y, float scale, glm::vec4& color);
+  void RenderText(Renderer* renderer, const std::string& text, float x, float y, float z, float scale, glm::vec4& color);
   float GetTextWidth(const std::string& text, float scale);
   float GetTextHeight(const std::string& text, float scale);
 }; 

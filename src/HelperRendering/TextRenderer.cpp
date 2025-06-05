@@ -79,7 +79,7 @@ TextRenderer::TextRenderer(
 
     void main() {
       // Use orthographic projection for 2D text
-      gl_Position = vec4(vertex.xy, -0.0001, 1.0);
+      gl_Position = projection*vec4(vertex.xy, 0.0, 1.0);
       TexCoords = vertex.zw;
     }
   )";
@@ -107,16 +107,17 @@ TextRenderer::~TextRenderer() {
   glDeleteBuffers(1, &VBO);
 }
 
-void TextRenderer::RenderText(Renderer* renderer, const std::string& text, float x, float y, float scale, glm::vec4& color) {
-  // Activate corresponding render state
+void TextRenderer::RenderText(Renderer* renderer, const std::string& text, float x, float y, float z, float scale, glm::vec4& color) {
   textShader->Bind();
   textShader->SetUniform4f("textColor", color);
-  textShader->SetUniform4fv("projection", false, glm::value_ptr(renderer->projMatrix));
+  
+  // Create a projection matrix that includes the z-coordinate
+  glm::mat4 textProjMatrix = glm::translate(glm::identity<glm::mat4>(), glm::vec3(0.0f, 0.0f, z-0.01f));
+  textShader->SetUniform4fv("projection", false, glm::value_ptr(textProjMatrix));
 
   GLCall(glActiveTexture(GL_TEXTURE0));
   GLCall(glBindVertexArray(VAO));
 
-  // Iterate through all characters of string
   for (char c : text) {
     Character ch = Characters[c];
 
@@ -137,7 +138,6 @@ void TextRenderer::RenderText(Renderer* renderer, const std::string& text, float
       { xpos + w, ypos + h,   1.0f, 0.0f }
     };
 
-    // Render glyph texture over quad
     int textureSlot = renderer->textureMap.RequestBind(
       renderer->maxBindableTextures,
       this->fontPath + std::to_string(c)
@@ -158,7 +158,6 @@ void TextRenderer::RenderText(Renderer* renderer, const std::string& text, float
     // Advance cursors for next glyph
     x += (ch.Advance >> 6) * scale; // Bitshift by 6 to get value in pixels (2^6 = 64)
   }
-
 }
 
 float TextRenderer::GetTextWidth(const std::string& text, float scale) {

@@ -30,6 +30,14 @@ void PrintVector(std::ostream& os, std::list<T> const &map)
   }
 }
 template<typename T>
+void PrintVector(std::ostream& os, std::list<T*> const &map)
+{
+  os << "printing vector: ({addr}, {val pointer}->{val in pointer})" << std::endl;
+  for (T * const & pair: map) {
+    os << "(" << &pair << ", " << pair << "->" << *pair << ")" << std::endl;
+  }
+}
+template<typename T>
 void PrintVector(std::ostream& os, std::vector<T> const &map)
 {
   os << "printing vector: ({addr}, {val})" << std::endl;

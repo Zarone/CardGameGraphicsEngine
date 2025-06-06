@@ -28,6 +28,7 @@ private:
 
   void EndTurnButtonPress();
   void LoadCommandPalette();
+  void ProcessAction(const GameAction& action);
 public:
   TestGameState(Renderer* renderer, TestCardDatabaseSingleton* database);
   ClickEvent ProcessClick(CollisionInfo info);

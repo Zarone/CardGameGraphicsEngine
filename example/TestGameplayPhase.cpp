@@ -22,3 +22,12 @@ TestGameplayPhase::TestGameplayPhase(bool goingFirst) {
 
   this->playableCardIds.push_back(12);
 }
+
+void TestGameplayPhase::SetSelectionRange(int min, int max) {
+  this->selectionMin = min;
+  this->selectionMax = max;
+}
+
+bool TestGameplayPhase::InSelectionRange(int value) {
+  return value >= this->selectionMin && value <= this->selectionMax;
+}

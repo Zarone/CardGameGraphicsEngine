@@ -171,54 +171,39 @@ void TestGameState::LoadCommandPalette() {
     case OPPONENT_TURN:
       break; 
     case SELECTING_CARDS:
-      palette.SetButtons({
-        {
-          .text="End Selection",
-          .func=[]() {
-            std::cout << "End Selection Pressed1" << std::endl;
-          }
-        },
-        {
-          .text="End Selection",
-          .func=[]() {
-            std::cout << "End Selection Pressed1" << std::endl;
-          }
-        },
-        {
-          .text="End Selection",
-          .func=[]() {
-            std::cout << "End Selection Pressed1" << std::endl;
-          }
-        },
-        {
-          .text="End Selection",
-          .func=[]() {
-            std::cout << "End Selection Pressed2" << std::endl;
-          }
-        },
-        {
-          .text="End Selection",
-          .func=[]() {
-            std::cout << "End Selection Pressed3" << std::endl;
-          }
-        },
-        {
-          .text="End Selection",
-          .func=[]() {
-            std::cout << "End Selection Pressed4" << std::endl;
-          }
-        },
-        {
-          .text="End Selection",
-          .func=[]() {
-            std::cout << "End Selection Pressed5" << std::endl;
-          }
-        },
-      });
+      if (this->gameplayManager.SelectionPossiblyDone()) {
+        palette.SetButtons({
+          {
+            .text="End Selection",
+            .func=[this]() {
+              this->ProcessAction({
+                .type = FINISH_SELECTION,
+              });
+            }
+          },
+        });
+      } else {
+        palette.SetButtons({
+        });
+      }
       break; 
     default:
       std::cout << "Unknown gamemode encountered while loading command palette" << std::endl;
       break;
+  }
+}
+
+void TestGameState::ProcessAction(const GameAction& action) {
+  UpdateInfo update = this->gameplayManager.RequestUpdate(action);
+
+  if (update.phaseChange) {
+    this->LoadCommandPalette();
+  }
+
+  for (CardMovement& move : update.movements) {
+    CardGroup* from = cardGroupMap.at(move.from);
+    CardGroup* to = cardGroupMap.at(move.to);
+    from->MoveToGroupByGameID(move.cardId, to);
   }
 }
 
@@ -242,21 +227,11 @@ ClickEvent TestGameState::ProcessClick(CollisionInfo info) {
     Card card = this->hand.GetCard(cardIndex);
     TestCardInfo* cardInfo = this->database->GetInfo(card.GetID());
 
-    UpdateInfo update = this->gameplayManager.RequestUpdate({
+    this->ProcessAction({
       .type = SELECT_CARD,
       .selectedCard = card.GetGameID(),
       .from = HAND
     });
-
-    if (update.phaseChange) {
-      this->LoadCommandPalette();
-    }
-
-    for (CardMovement& move : update.movements) {
-      CardGroup* from = cardGroupMap.at(move.from);
-      CardGroup* to = cardGroupMap.at(move.to);
-      from->MoveToGroupByGameID(move.cardId, to);
-    }
 
     this->hand.ProcessClick(std::move(info));
 

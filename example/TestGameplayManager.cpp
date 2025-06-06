@@ -22,9 +22,10 @@ UpdateInfo TestGameplayManager::RequestUpdate(GameAction action) {
       .from = action.from,
       .to = action.from == DISCARD ? DECK : DISCARD,
     }};
-    if (action.selectedCard == 12) {
+    if (action.from == HAND && action.selectedCard == 12) {
       this->phase.SetMode(SELECTING_CARDS);
       this->phase.SetPlayableCards({0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11});
+      this->phase.SetSelectionRange(2, 2);
       this->selectedCards = {};
       return {
         .movements = movements,
@@ -36,35 +37,43 @@ UpdateInfo TestGameplayManager::RequestUpdate(GameAction action) {
       .phaseChange = false
     };
   } else {
-    std::pair<std::set<unsigned int>::iterator, bool> res = this->selectedCards.insert(action.selectedCard);
-    if (!res.second) {
-      this->selectedCards.erase(action.selectedCard);
-    }
-    PrintSet(std::cout, this->selectedCards);
 
-    std::vector<CardMovement> movements = {};
-    for (unsigned int el : this->selectedCards) {
-      CardMovement movement = {
-        .cardId = el,
-        .from = HAND,
-        .to = DISCARD
-      };
-      movements.push_back(movement);
-    }
+    if (action.type == FINISH_SELECTION) {
+      std::vector<CardMovement> movements = {};
+      for (unsigned int el : this->selectedCards) {
+        CardMovement movement = {
+          .cardId = el,
+          .from = HAND,
+          .to = DISCARD
+        };
+        movements.push_back(movement);
+      }
 
-    if (this->selectedCards.size() == 2) {
       this->phase.SetMode(MY_TURN);
+      this->phase.SetPlayableCards({});
+
       return {
         .movements = movements,
         .phaseChange = true
       };
     } else {
+      std::pair<std::set<unsigned int>::iterator, bool> res = this->selectedCards.insert(action.selectedCard);
+      if (!res.second) {
+        this->selectedCards.erase(action.selectedCard);
+      }
+
       return {
         .movements = {},
-        .phaseChange = false
+        .phaseChange = true
       };
     }
+
   }
+}
+
+bool TestGameplayManager::SelectionPossiblyDone() {
+  std::cout << "Here" << std::endl;
+  return this->phase.InSelectionRange(this->selectedCards.size());
 }
 
 GameMode TestGameplayManager::GetPhase() {

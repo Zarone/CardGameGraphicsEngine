@@ -14,8 +14,10 @@ private:
   unsigned int boundTo;
   bool hasSetup;
   bool loadedFromImage = false;
+  std::string path = "N/A";
+  bool headless;
 public:
-  Texture(const std::string& path);
+  Texture(const std::string& path, bool headless = false);
   Texture(unsigned char* buffer, unsigned int width, unsigned int height);
   ~Texture();
   void Bind(unsigned int textureSlot);

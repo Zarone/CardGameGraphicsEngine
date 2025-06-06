@@ -82,7 +82,7 @@ void CommandPalette::SetButtonLocations() {
     
     float scale = scaleMultiple(i,maxSize,-currentScroll/angleStep)*buttonScale;
     
-    glm::mat4 transform = glm::translate(glm::identity<glm::mat4>(), glm::vec3(x, y, i*0.1f+0.00001f));
+    glm::mat4 transform = glm::translate(glm::identity<glm::mat4>(), glm::vec3(x, y, i*0.1f+0.1f));
     transform = glm::scale(transform, glm::vec3(xScale*scale/this->renderer->GetAspectRatio(), scale, 1.0f));
     this->buttons[i].second.SetTransform(&transform);
   }
@@ -158,7 +158,7 @@ bool CommandPalette::CheckCollision(
     double localCollisionZ = MAXFLOAT;
     bool objectCollision = backingPlane.CheckCollision(renderer, x, y, &localCollisionZ, &localCollisionInfo);
 
-    if (objectCollision && localCollisionZ < bestCollisionZ) {
+    if (objectCollision && MAXFLOAT == bestCollisionZ) {
       std::cout << "plane collision" << std::endl;
       bestCollisionZ = localCollisionZ;
       selectedObject = &backingPlane;

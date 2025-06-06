@@ -48,14 +48,15 @@ bool SimplePlane::CheckCollision(
   if (this->perspective) {
     std::cout << "No implemented way to check collision with perspective-enabled simple plane object" << std::endl;
   } else {
-    glm::vec3 projectedTopLeft = renderer->Get3DScreenPositionFromCamera(this->transform * glm::vec4(-0.5f, 0.5f, 0.0f, 1.0f));
+    glm::vec4 topLeft = this->transform * glm::vec4(-0.5f, 0.5f, 0.0f, 1.0f);
+    glm::vec3 projectedTopLeft = renderer->Get3DScreenPositionFromCamera(topLeft);
     glm::vec3 projectedBottomRight = renderer->Get3DScreenPositionFromCamera(this->transform * glm::vec4(0.5f, -0.5f, 0.0f, 1.0f));
 
     if (x < projectedTopLeft.x || x > projectedBottomRight.x || y < projectedTopLeft.y || y > projectedBottomRight.y) {
       return false;
     }
 
-    *collisionZ = 0.0f;
+    *collisionZ = topLeft.z;
     info->groupPointer = (SimplePlane*)this;
     return true;
   }

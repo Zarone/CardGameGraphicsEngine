@@ -17,7 +17,8 @@ struct UpdateInfo {
 
 enum GameActionType {
   END_TURN,
-  SELECT_CARD
+  SELECT_CARD,
+  FINISH_SELECTION
 };
 
 struct GameAction {
@@ -35,5 +36,6 @@ public:
   bool IsPlayableCard(unsigned int id);
   bool IsSelectedCard(unsigned int id);
   UpdateInfo RequestUpdate(GameAction action);
+  bool SelectionPossiblyDone();
   GameMode GetPhase();
 };

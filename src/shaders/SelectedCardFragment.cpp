@@ -14,7 +14,7 @@ uniform sampler2D textures[16];
 
 float shininess = 8.0;
 float glow = 1.0;
-vec4 glowColor = vec4(0.0, 0.0, 1.0, 0.8);
+vec4 glowColor = vec4(0.0, 0.0, 1.0, 1.0);
 
 float scale = 0.97;
 float superEllipse(vec2 uv)

@@ -162,7 +162,7 @@ void ExpandableStackCardGroup::MoveToGroup(int index, CardGroup* to) {
   };
   if (this->isExpanded) {
     std::cout << "unimplemented expansion in movetogroup" << std::endl;
-    ASSERT(false);
+    //ASSERT(false);
   } else {
     cardCopy.renderData.displayedPosition = (to->WorldSpaceToThisSpace())*this->stackRenderer.transform*v;
   }

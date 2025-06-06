@@ -11,14 +11,27 @@ void TextureLRU::Access(Texture* tex) {
   // get index in lru (use hashmap)
   auto indexIter = this->itemToIndex.find(tex);
   if (indexIter == this->itemToIndex.end()) {
-    std::cout << "Couldn't access texture" << std::endl;
+    std::cout << "Couldn't access texture " << *tex << std::endl;
     exit(EXIT_FAILURE);
   }
 
-  Texture* currentFront = *this->data.begin();
-  this->data.splice(this->data.begin(), this->data, indexIter->second);
-  itemToIndex[tex] = this->data.begin();
-  itemToIndex[currentFront] = ++this->data.begin();
+  // If the texture is already at the front, no need to move it
+  if (indexIter->second == this->data.begin()) {
+    return;
+  }
+
+  // Store the iterator to the element being moved
+  auto movedIter = indexIter->second;
+  
+  // Perform the splice operation
+  this->data.splice(this->data.begin(), this->data, movedIter);
+  
+  // Update all iterators in the map
+  auto it = this->data.begin();
+  while (it != this->data.end()) {
+    itemToIndex[*it] = it;
+    ++it;
+  }
 }
 
 Texture* TextureLRU::PopLRU() {

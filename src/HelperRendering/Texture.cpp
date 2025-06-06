@@ -6,9 +6,10 @@
 #include "../Helper/ErrorHandling.h"
 #include "../external/stb_image.h"
 
-Texture::Texture(const std::string& path) {
+Texture::Texture(const std::string& path, bool headless): headless(headless) {
   //stbi_set_flip_vertically_on_load(1);
 
+  this->path = path;
   this->buffer = stbi_load(path.c_str(), &(this->width), &(this->height), &(this->bitsPerPixel), 4);
   this->loadedFromImage = true;
   if (!(this->buffer))
@@ -17,13 +18,15 @@ Texture::Texture(const std::string& path) {
     std::cout << stbi_failure_reason() << std::endl;
   }
 
-  GLCall(glGenTextures(1, &(this->textureID)));
+  if (!headless) {
+    GLCall(glGenTextures(1, &(this->textureID)));
+  }
 
   this->isBound = false;
   this->hasSetup = false;
 }
 
-Texture::Texture(unsigned char* buffer, unsigned int width, unsigned int height) {
+Texture::Texture(unsigned char* buffer, unsigned int width, unsigned int height) : headless(false) {
   this->buffer = buffer;
   this->width = width;
   this->height = height;
@@ -35,8 +38,9 @@ Texture::Texture(unsigned char* buffer, unsigned int width, unsigned int height)
 }
 
 Texture::~Texture() {
-  GLCall(glDeleteTextures(1, &(this->textureID)));
-
+  if (!this->headless) {
+    GLCall(glDeleteTextures(1, &(this->textureID)));
+  }
   // if buffer never got freed
   if (this->loadedFromImage && this->buffer) {
     stbi_image_free(buffer);
@@ -98,6 +102,9 @@ int Texture::GetBoundSlot() {
 }
 
 std::ostream& operator<<(std::ostream&os, const Texture& t) {
-  os << "Texture: isBound: " << t.isBound << ", boundTo: " << t.boundTo;
+  os << "Texture: isBound: " << t.isBound << ", boundTo: " << t.boundTo << ", loadedFromImage:" << t.loadedFromImage;
+  if (t.loadedFromImage) {
+    os << ", path: " << t.path;
+  }
   return os;
 }

@@ -8,7 +8,6 @@ Right now, the application is very barebones. The application opens to a main me
 ![Screenshot 2](./README/2.png "Screenshot 2")
 
 ### TODO:
-- Make command palette scrollable
 - Make test server to handle gamestate
 - use expandedCardGroupRenderer for temporary groups (i.e. look at the top 5 cards of your deck)
 - Add visible scroll bar for expanded view

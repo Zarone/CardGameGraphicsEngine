@@ -22,7 +22,7 @@ FannedCardGroupRenderer::FannedCardGroupRenderer(
       Material(
         {
           .hasTexture=false,
-          .shader=renderer->GetShader("basicShader"),
+          .shader=renderer->GetShader(BasicShader),
           .color=glm::vec4(0.5f, 0.0f, 0.5f, 0.5f)
         }
       )
@@ -34,7 +34,7 @@ FannedCardGroupRenderer::FannedCardGroupRenderer(
       Material(
         {
           .hasTexture=false,
-          .shader=renderer->GetShader("basicShader"),
+          .shader=renderer->GetShader(BasicShader),
           .color=glm::vec4(0.0f, 0.5f, 0.0f, 0.5f)
         }
       )

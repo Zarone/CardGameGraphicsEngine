@@ -33,7 +33,7 @@ void SimplePlane::MakeClickable() {
   this->isClickable = true;
 }
 void SimplePlane::MakeUnclickable() {
-  this->isClickable = true;
+  this->isClickable = false;
 }
 
 bool SimplePlane::CheckCollision(

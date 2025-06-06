@@ -181,6 +181,18 @@ void TestGameState::LoadCommandPalette() {
         {
           .text="End Selection",
           .func=[]() {
+            std::cout << "End Selection Pressed1" << std::endl;
+          }
+        },
+        {
+          .text="End Selection",
+          .func=[]() {
+            std::cout << "End Selection Pressed1" << std::endl;
+          }
+        },
+        {
+          .text="End Selection",
+          .func=[]() {
             std::cout << "End Selection Pressed2" << std::endl;
           }
         },

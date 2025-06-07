@@ -47,6 +47,7 @@ add_executable(${PROJECT_NAME}
   src/CardGroup/FannedCardGroupRenderer.cpp
   src/CardGroup/StackedCardGroupRenderer.cpp
   src/CardGroup/ExpandedStackCardGroupRenderer.cpp
+  src/CardGroup/TemporaryCardGroup.cpp
   src/HelperOpenGL/IndexBuffer.cpp
   src/HelperOpenGL/MemoryLayout.cpp
   src/HelperOpenGL/VertexArray.cpp

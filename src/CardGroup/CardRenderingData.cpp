@@ -60,6 +60,10 @@ bool CardRenderingData::UpdateDisplayed(double deltaTime) {
 }
 
 std::ostream& operator<<(std::ostream& os, const CardRenderingData& d) {
-  os << "[" << *d.shader << "]";
+  if (d.shader == nullptr) {
+    os << "[nullptr]";
+  } else {
+    os << "[" << *d.shader << "]";
+  }
   return os;
 }

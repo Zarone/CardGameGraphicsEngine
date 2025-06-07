@@ -1,6 +1,7 @@
 #pragma once
 
 enum Pile {
+  TEMPORARY,
   HAND,
   RESERVE,
   SPECIALS,

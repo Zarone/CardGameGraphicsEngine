@@ -13,6 +13,8 @@ struct CardMovement {
 struct UpdateInfo {
   std::vector<CardMovement> movements;  
   bool phaseChange;
+  Pile openView; 
+  std::vector<unsigned int> openViewCards;
 };
 
 enum GameActionType {

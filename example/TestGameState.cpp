@@ -108,6 +108,10 @@ TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* data
     -90.0f,
     false
   ),
+  tempPile(
+    renderer,
+    glm::vec3(0,0,0)
+  ),
   palette(renderer),
   database(database)
 {
@@ -147,6 +151,7 @@ TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* data
   AddObject(&passTurn);
   AddCardGroup(&deck, DECK);
   AddCardGroup(&discardPile, DISCARD);
+  AddCardGroup(&tempPile, TEMPORARY);
 
   this->LoadCommandPalette();
 }
@@ -198,6 +203,10 @@ void TestGameState::ProcessAction(const GameAction& action) {
 
   if (update.phaseChange) {
     this->LoadCommandPalette();
+  }
+
+  if (update.openView == TEMPORARY) {
+    this->tempPile.EnableWithCards(update.openViewCards);
   }
 
   for (CardMovement& move : update.movements) {

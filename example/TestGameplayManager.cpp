@@ -12,7 +12,9 @@ bool TestGameplayManager::IsPlayableCard(unsigned int id) {
 }
 
 bool TestGameplayManager::IsSelectedCard(unsigned int id) {
-  return this->selectedCards.find(id) != this->selectedCards.end();
+  return 
+    (this->GetPhase()==SELECTING_CARDS && this->selectedCards.find(id) != this->selectedCards.end())
+    || (this->GetPhase()==SELECTING_TEMPORARY_CARDS && id == -1);
 }
 
 UpdateInfo TestGameplayManager::RequestUpdate(GameAction action) {
@@ -29,7 +31,8 @@ UpdateInfo TestGameplayManager::RequestUpdate(GameAction action) {
       this->selectedCards = {};
       return {
         .movements = movements,
-        .phaseChange = true 
+        .phaseChange = true,
+        .openView = HAND
       };
     } 
     return {
@@ -49,12 +52,14 @@ UpdateInfo TestGameplayManager::RequestUpdate(GameAction action) {
         movements.push_back(movement);
       }
 
-      this->phase.SetMode(MY_TURN);
+      this->phase.SetMode(SELECTING_TEMPORARY_CARDS);
       this->phase.SetPlayableCards({});
 
       return {
         .movements = movements,
-        .phaseChange = true
+        .phaseChange = true,
+        .openView = TEMPORARY,
+        .openViewCards = { 6, 6, 6 }
       };
     } else {
       std::pair<std::set<unsigned int>::iterator, bool> res = this->selectedCards.insert(action.selectedCard);
@@ -64,7 +69,8 @@ UpdateInfo TestGameplayManager::RequestUpdate(GameAction action) {
 
       return {
         .movements = {},
-        .phaseChange = true
+        .phaseChange = true,
+        .openView = HAND
       };
     }
 

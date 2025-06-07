@@ -6,6 +6,7 @@
 #include "../src/shaders/allShaders.h"
 #include "../src/CardGroup/FannedCardGroup.h"
 #include "../src/CardGroup/ExpandableStackCardGroup.h"
+#include "../src/CardGroup/TemporaryCardGroup.h"
 #include "../src/Scene/CommandPalette.h"
 
 class TestGameState : public GameState
@@ -21,6 +22,7 @@ private:
   FannedCardGroup oppSpecials;
   ExpandableStackCardGroup deck;
   ExpandableStackCardGroup discardPile;
+  TemporaryCardGroup tempPile;
   BoundButton passTurn;
   CommandPalette palette;
   TestCardDatabaseSingleton* database;

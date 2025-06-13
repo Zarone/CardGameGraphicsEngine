@@ -93,6 +93,8 @@ bool TemporaryCardGroup::CheckCollision(
   double* collisionZ, 
   CollisionInfo* info
 ) const {
+  if (!this->isEnabled) return false;
+
   info->groupPointer = (TemporaryCardGroup*)this;
   if (isExpanded) {
     bool collision = this->expandedRenderer.CheckCollision(renderer, x, y, collisionZ, info);

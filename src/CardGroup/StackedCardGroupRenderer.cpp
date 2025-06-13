@@ -174,6 +174,7 @@ bool StackedCardGroupRenderer::CheckCollision(
     &xScale
   )) return false;
   else {
+    *collisionZ = zAtCursor;
     return true;
   }
 }

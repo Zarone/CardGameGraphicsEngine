@@ -3,6 +3,7 @@
 #include <set>
 #include "TestGameplayPhase.h"
 #include "TestGameplayPiles.h"
+#include "ServerHandler/ServerManager.h"
 
 struct CardMovement {
   unsigned int cardId;
@@ -33,6 +34,7 @@ class TestGameplayManager {
 private:
   std::set<unsigned int> selectedCards;
   TestGameplayPhase phase;
+  ServerManager server;
 public:
   TestGameplayManager();
   bool IsPlayableCard(unsigned int id);

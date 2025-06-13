@@ -1,10 +1,26 @@
 #include "TestGameplayManager.h"
 #include "TestGameState.h"
+#include <stdexcept>
 #include <vector>
 
 TestGameplayManager::TestGameplayManager() 
 : phase(true)
 {
+	if (!server.ConnectToServer()) {
+    throw std::runtime_error("Failed to connect to server");
+		return;
+	}
+
+  std::cout << "Starting Server Initialization" << std::endl;
+  server.Initialize({
+    1,2,3,4,5,6,7,8,9,10,
+    11,12,13,14,15,16,17,18,19,20,
+    21,22,23,24,25,26,27,28,29,30,
+    31,32,33,34,35,36,37,38,39,40,
+    41,42,43,44,45,46,47,48,49,50,
+    51,52,53,54,55,56,57,58,59,60,
+  });
+  std::cout << "Finish Server Initialization" << std::endl;
 }
 
 bool TestGameplayManager::IsPlayableCard(unsigned int id) {
@@ -40,7 +56,6 @@ UpdateInfo TestGameplayManager::RequestUpdate(GameAction action) {
       .phaseChange = false
     };
   } else {
-
     if (action.type == FINISH_SELECTION) {
       std::vector<CardMovement> movements = {};
       for (unsigned int el : this->selectedCards) {

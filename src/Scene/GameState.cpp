@@ -51,7 +51,6 @@ bool GameState::CheckCollision(Renderer* renderer, double x, double y, double* c
   for (SceneObject* group : this->cardGroups) {
     CollisionInfo tempInfo;
     objectCollision = group->CheckCollision(renderer, x, y, &tempZ, &tempInfo);
-    if (objectCollision) std::cout << "Collision at " << tempZ << std::endl;
     if (objectCollision && tempZ < minZ) {
       minZ = tempZ;
       collisionInfo = std::move(tempInfo);

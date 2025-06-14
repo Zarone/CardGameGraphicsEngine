@@ -17,13 +17,14 @@ private:
 	const char* HOST = "localhost";
 	const char* PATH = "/socket?room=3";
 
-  const std::string MessageTypeSetup = "SETUP_MESSAGE";
-  const std::string MessageTypeHeadsOrTailsChoice = "COIN_CHOICE";
-  const std::string MessageTypeFirstOrSecondChoice = "FIRST_OR_SECOND_CHOICE";
-
 	int SendSetupMessage(const std::vector<unsigned int>& deck);
 
 public:
+  static constexpr std::string MessageTypeSetup = "SETUP_MESSAGE";
+  static constexpr std::string MessageTypeHeadsOrTailsChoice = "COIN_CHOICE";
+  static constexpr std::string MessageTypeFirstOrSecondChoice = "FIRST_OR_SECOND_CHOICE";
+  static constexpr std::string MessageTypeGamePlay = "GAMEPLAY";
+
 	ServerManager() : sock(0) {}
 
 	json ReceiveMessage(std::string& response, bool jsonMessage = false);
@@ -34,7 +35,7 @@ public:
 
 	bool ConnectToServer();
 
-	void Initialize(const std::vector<unsigned int>& deck);
+  std::vector<unsigned int> Initialize(const std::vector<unsigned int>& deck);
 
 	~ServerManager();
 };

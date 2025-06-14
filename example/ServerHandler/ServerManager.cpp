@@ -127,12 +127,12 @@ bool ServerManager::ConnectToServer() {
 }
 
 
-void ServerManager::Initialize(const std::vector<unsigned int>& deck) {
+std::vector<unsigned int> ServerManager::Initialize(const std::vector<unsigned int>& deck) {
   std::string _;
   ReceiveMessage(_); // Initializer message
   ReceiveMessage(_); // 'Hi Client!' Message
   SendSetupMessage(deck);
-  ReceiveMessage(_, true); // Response to Setup Message
+  json setupResponse = ReceiveMessage(_, true); // Response to Setup Message
 
   json response = ReceiveMessage(_, true); // Receive either coin flip or wait
   std::cout << "response.content.isChoosingFlip: " << response["content"]["isChoosingFlip"] << std::endl;
@@ -166,6 +166,8 @@ void ServerManager::Initialize(const std::vector<unsigned int>& deck) {
 
   response = ReceiveMessage(_, true); // after turn order selected by server
   std::cout << "Is Going First: " << response["content"]["myTurn"] << std::endl;
+
+  return setupResponse;
 }
 
 ServerManager::~ServerManager() {

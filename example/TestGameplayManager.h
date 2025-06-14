@@ -1,6 +1,7 @@
 #pragma once
 
 #include <set>
+#include <unordered_map>
 #include "TestGameplayPhase.h"
 #include "TestGameplayPiles.h"
 #include "ServerHandler/ServerManager.h"
@@ -35,6 +36,7 @@ private:
   std::set<unsigned int> selectedCards;
   TestGameplayPhase phase;
   ServerManager server;
+  std::unordered_map<unsigned int, unsigned int> gameIDToID;
 public:
   TestGameplayManager();
   bool IsPlayableCard(unsigned int id);

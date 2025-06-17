@@ -5,19 +5,7 @@
 #include "TestGameplayPhase.h"
 #include "TestGameplayPiles.h"
 #include "ServerHandler/ServerManager.h"
-
-struct CardMovement {
-  unsigned int cardId;
-  Pile from;
-  Pile to;
-};
-
-struct UpdateInfo {
-  std::vector<CardMovement> movements;  
-  bool phaseChange;
-  Pile openView; 
-  std::vector<unsigned int> openViewCards;
-};
+#include "TestUpdateInfo.h"
 
 enum GameActionType {
   END_TURN,
@@ -25,9 +13,18 @@ enum GameActionType {
   FINISH_SELECTION
 };
 
+enum MessageType {
+  SETUP,
+  HEADS_OR_TAILS,
+  COIN_CHOICE,
+  FIRST_OR_SECOND,
+  FIRST_OR_SECOND_CHOICE,
+  GAMEPLAY,
+};
+
 struct GameAction {
   GameActionType type;
-  unsigned int selectedCard;
+  std::vector<unsigned int> selectedCards;
   Pile from;
 };
 
@@ -36,12 +33,14 @@ private:
   std::set<unsigned int> selectedCards;
   TestGameplayPhase phase;
   ServerManager server;
-  std::unordered_map<unsigned int, unsigned int> gameIDToID;
+  UpdateInfo SendAction(json action);
 public:
   TestGameplayManager();
+  SetupData Setup(const std::vector<unsigned int>& deck);
   bool IsPlayableCard(unsigned int id);
   bool IsSelectedCard(unsigned int id);
   UpdateInfo RequestUpdate(GameAction action);
   bool SelectionPossiblyDone();
   GameMode GetPhase();
+  std::unordered_map<unsigned int, unsigned int> gameIDToID;
 };

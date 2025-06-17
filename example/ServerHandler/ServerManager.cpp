@@ -2,11 +2,11 @@
 #include "ServerManager.h"
 #include "WebSocketFrame.h"
 
-int ServerManager::SendSetupMessage(const std::vector<unsigned int>& deck) {
+int ServerManager::SendSetupMessage(const std::vector<unsigned int>& deck, unsigned int messageTypeSetup) {
   time_t currentTime = std::time(nullptr);
 
   json jsonMessage = {
-    {"type", MessageTypeSetup},
+    {"type", messageTypeSetup},
     {
       "content", {
         { "deck", deck }
@@ -27,7 +27,9 @@ int ServerManager::SendSetupMessage(const std::vector<unsigned int>& deck) {
 json ServerManager::ReceiveMessage(std::string& response, bool jsonMessage) {
   std::vector<uint8_t> frameBuffer;
   frameBuffer.resize(1024);
+  std::cout << "before read" << std::endl;
   int valread = read(sock, frameBuffer.data(), frameBuffer.size());
+  std::cout << "after read" << std::endl;
   if (valread < 0 || valread > 1024) {
     std::cerr << "Failed to read response" << std::endl;
     return -1;
@@ -39,7 +41,7 @@ json ServerManager::ReceiveMessage(std::string& response, bool jsonMessage) {
     try {
       json jsonResponse = json::parse(response);
       std::cout << "Server response (JSON): " << jsonResponse.dump(2) << std::endl;
-      return std::move(jsonResponse);
+      return jsonResponse;
     } catch (const json::parse_error& e) {
       std::cout << "Server response (raw): " << response << std::endl;
     }
@@ -68,7 +70,7 @@ int ServerManager::SendMessage(const std::string& message) {
   return 0;
 }
 
-int ServerManager::SendMessage(const json& message, const std::string& type) {
+int ServerManager::SendMessage(const json& message, unsigned int type) {
   time_t currentTime = std::time(nullptr);
 
   json jsonMessage = {
@@ -123,15 +125,26 @@ bool ServerManager::ConnectToServer() {
     return false;
   }
 
+  std::cout << "Finished connecting to server" << std::endl;
+
+  // Setup web socket instead of http
+  std::string _;
+  ReceiveMessage(_); // Initializer message
+  
   return true;
 }
 
-
-std::vector<unsigned int> ServerManager::Initialize(const std::vector<unsigned int>& deck) {
+SetupData ServerManager::Initialize(
+  const std::vector<unsigned int>& deck, 
+  unsigned int messageTypeSetup,
+  unsigned int headsOrTailsChoice, 
+  unsigned int firstOrSecondChoice
+) {
   std::string _;
-  ReceiveMessage(_); // Initializer message
+  std::cout << "before hi client message" << std::endl;
   ReceiveMessage(_); // 'Hi Client!' Message
-  SendSetupMessage(deck);
+  std::cout << "before send setup message" << std::endl;
+  SendSetupMessage(deck, messageTypeSetup);
   json setupResponse = ReceiveMessage(_, true); // Response to Setup Message
 
   json response = ReceiveMessage(_, true); // Receive either coin flip or wait
@@ -143,14 +156,14 @@ std::vector<unsigned int> ServerManager::Initialize(const std::vector<unsigned i
     // send heads or tails
     SendMessage({
       {"heads", true}
-    }, MessageTypeHeadsOrTailsChoice);
+    }, headsOrTailsChoice);
     json response = ReceiveMessage(_, true); // after selecting
     std::cout << "isChoosingTurnOrder: " << response["content"] << std::endl;
     bool isChoosingTurnOrder = response["content"]["isChoosingTurnOrder"];
     if (isChoosingTurnOrder) {
       SendMessage({
         {"first", true}
-      }, MessageTypeFirstOrSecondChoice);
+      }, firstOrSecondChoice);
     }
   } else {
     // wait
@@ -160,17 +173,36 @@ std::vector<unsigned int> ServerManager::Initialize(const std::vector<unsigned i
     if (isChoosingTurnOrder) {
       SendMessage({
         {"first", true}
-      }, MessageTypeFirstOrSecondChoice);
+      }, firstOrSecondChoice);
     }
   }
 
   response = ReceiveMessage(_, true); // after turn order selected by server
   std::cout << "Is Going First: " << response["content"]["myTurn"] << std::endl;
 
-  return setupResponse;
+  std::vector<CardMovement> movements = {};
+  for (json jsonCardMovement : response["content"]["movements"]) {
+    movements.push_back({
+      .cardId = jsonCardMovement["cardId"],
+      .from = jsonCardMovement["from"],
+      .to = jsonCardMovement["to"]
+    });
+  }
+
+  return {
+    .correspondingGameIds = setupResponse,
+    .info = {
+      .movements = movements,
+      .phase = response["content"]["phase"],
+      .openView = response["content"]["pile"],
+      .openViewCards = response["content"]["openViewCards"],
+      .selectableCards = response["content"]["selectableCards"],
+    }
+  };
 }
 
 ServerManager::~ServerManager() {
+  std::cout << "Close Server" << std::endl;
   if (sock > 0) {
     close(sock);
   }

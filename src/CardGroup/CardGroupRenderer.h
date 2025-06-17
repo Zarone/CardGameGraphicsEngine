@@ -181,5 +181,5 @@ public:
   // Game state should perform operations on the card group,
   // so that it can correctly manipulate data. So these can just
   // be blank unless I need them for something else.
-  ClickEvent ProcessPreClick(CollisionInfo info) {return {};};
+  virtual ClickEvent ProcessPreClick(CollisionInfo info) {return {};};
 };

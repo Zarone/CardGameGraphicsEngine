@@ -30,6 +30,7 @@ private:
 
   void EndTurnButtonPress();
   void LoadCommandPalette();
+  void HandleUpdate(const UpdateInfo& update);
   void ProcessAction(const GameAction& action);
 public:
   TestGameState(Renderer* renderer, TestCardDatabaseSingleton* database);

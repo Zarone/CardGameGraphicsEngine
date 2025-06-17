@@ -7,30 +7,37 @@
 TestGameplayManager::TestGameplayManager() 
 : phase(true)
 {
-	if (!server.ConnectToServer()) {
+  if (!server.ConnectToServer()) {
     throw std::runtime_error("Failed to connect to server");
-		return;
-	}
+    return;
+  }
 
   std::cout << "Starting Server Initialization" << std::endl;
+}
 
-  std::vector<unsigned int> deck = {
-    1,2,3,4,5,6,7,8,9,10,
-    11,12,13,14,15,16,17,18,19,20,
-    21,22,23,24,25,26,27,28,29,30,
-    31,32,33,34,35,36,37,38,39,40,
-    41,42,43,44,45,46,47,48,49,50,
-    51,52,53,54,55,56,57,58,59,60,
-  };
+SetupData TestGameplayManager::Setup(const std::vector<unsigned int>& deck) {
+  std::cout << "inside Setup" << std::endl;
+  SetupData setupData = server.Initialize(
+    deck,
+    MessageType::SETUP,
+    MessageType::COIN_CHOICE,
+    MessageType::FIRST_OR_SECOND_CHOICE
+  );
 
-  std::vector<unsigned int> correspondingGameIds = server.Initialize(deck);
+  setupData.info.phaseChange = this->phase.GetMode() != setupData.info.phase;
+  this->phase.SetMode(setupData.info.phase);
+  std::cout << "playable on setup:";
+  PrintVector(std::cout, setupData.info.selectableCards);
+  this->phase.SetPlayableCards(setupData.info.selectableCards);
   
-  PrintVector(std::cout, correspondingGameIds);
-  for (int i = 0; i < correspondingGameIds.size(); ++i) {
-    this->gameIDToID[correspondingGameIds[i]] = deck[i]; 
+  PrintVector(std::cout, setupData.correspondingGameIds);
+  for (int i = 0; i < setupData.correspondingGameIds.size(); ++i) {
+    this->gameIDToID[setupData.correspondingGameIds[i]] = deck[i]; 
   }
 
   std::cout << "Finish Server Initialization" << std::endl;
+
+  return setupData;
 }
 
 bool TestGameplayManager::IsPlayableCard(unsigned int id) {
@@ -43,32 +50,51 @@ bool TestGameplayManager::IsSelectedCard(unsigned int id) {
     || (this->GetPhase()==SELECTING_TEMPORARY_CARDS && id == -1);
 }
 
-UpdateInfo TestGameplayManager::RequestUpdate(GameAction action) {
-  std::unordered_map<GameActionType, std::string> GameActionTypeToString = {
-    {GameActionType::END_TURN, "END_TURN"},
-    {GameActionType::FINISH_SELECTION, "FINISH_SELECTION"},
-    {GameActionType::SELECT_CARD, "SELECT_CARD"}
-  };
+UpdateInfo TestGameplayManager::SendAction(json action) {
+  server.SendMessage(action, MessageType::GAMEPLAY);
 
-  std::unordered_map<Pile, std::string> PileToString = {
-    {Pile::DECK, "DECK"},
-    {Pile::HAND, "HAND"},
-  };
+  std::string response;
+  json update = server.ReceiveMessage(response, true);
+  std::cout << "Game Action RESPONSE: " << response << std::endl;
 
-  server.SendMessage({
-    {
-      { "type", GameActionTypeToString[action.type] },
-      { "selectedCard", action.selectedCard },
-      { "from", PileToString[action.from] }
-    }
-  }, ServerManager::MessageTypeGamePlay);
+  std::cout << "Getting card movements" << std::endl;
+  std::vector<CardMovement> movements = {};
+  for (json jsonMovement : update["content"]["movements"]) {
+    std::cout << "Pushing movement" << std::endl;
+    movements.push_back({
+      .cardId = jsonMovement["cardId"],
+      .from = jsonMovement["from"],
+      .to = jsonMovement["to"]
+    });
+  }
 
-  return {
-    .movements = {},
+  UpdateInfo info = {
+    .movements = movements,
     .phaseChange = true,
-    .openView = HAND
+    .phase = update["content"]["phase"],
+    .openView = update["content"]["pile"],
+    .openViewCards = update["content"]["openViewCards"],
+    .selectableCards = update["content"]["selectableCards"]
   };
-  //if (this->phase.GetMode() == MY_TURN) {
+
+  info.phaseChange = this->phase.GetMode() != info.phase;
+  this->phase.SetMode(info.phase);
+  this->phase.SetPlayableCards(info.selectableCards);
+  std::cout << "Updated SetPlayableCards" << std::endl;
+  PrintVector(std::cout, info.selectableCards);
+  this->phase.SetSelectionRange(2, 2);
+
+  return info;
+}
+
+UpdateInfo TestGameplayManager::RequestUpdate(GameAction action) {
+
+  if (this->phase.GetMode() == MY_TURN) {
+    return this->SendAction({
+      { "type", action.type },
+      { "selectedCards", action.selectedCards },
+      { "from", action.from }
+    });
     //std::vector<CardMovement> movements = {{
       //.cardId = action.selectedCard,
       //.from = action.from,
@@ -89,8 +115,8 @@ UpdateInfo TestGameplayManager::RequestUpdate(GameAction action) {
       //.movements = movements,
       //.phaseChange = false
     //};
-  //} else {
-    //if (action.type == FINISH_SELECTION) {
+  } else {
+    if (action.type == FINISH_SELECTION) {
       //std::vector<CardMovement> movements = {};
       //for (unsigned int el : this->selectedCards) {
         //CardMovement movement = {
@@ -110,20 +136,26 @@ UpdateInfo TestGameplayManager::RequestUpdate(GameAction action) {
         //.openView = TEMPORARY,
         //.openViewCards = { 6, 6, 6 }
       //};
-    //} else {
-      //std::pair<std::set<unsigned int>::iterator, bool> res = this->selectedCards.insert(action.selectedCard);
-      //if (!res.second) {
-        //this->selectedCards.erase(action.selectedCard);
-      //}
+      UpdateInfo info = this->SendAction({
+        { "type", FINISH_SELECTION },
+        { "selectedCards", this->selectedCards },
+        { "from", action.from }
+      });
+      this->selectedCards = {};
+      return info;
+    } else {
+      std::pair<std::set<unsigned int>::iterator, bool> res = this->selectedCards.insert(action.selectedCards[0]);
+      if (!res.second) {
+        this->selectedCards.erase(action.selectedCards[0]);
+      }
 
-      //return {
-        //.movements = {},
-        //.phaseChange = true,
-        //.openView = HAND
-      //};
-    //}
-
-  //}
+      return {
+        .movements = {},
+        .phaseChange = true,
+        .openView = HAND
+      };
+    }
+  }
 }
 
 bool TestGameplayManager::SelectionPossiblyDone() {

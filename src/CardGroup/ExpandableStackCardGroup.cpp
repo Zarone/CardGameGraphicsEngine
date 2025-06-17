@@ -96,7 +96,7 @@ void ExpandableStackCardGroup::ProcessScroll(CollisionInfo info, double yOffset)
 
 ClickEvent ExpandableStackCardGroup::ProcessPreClick(CollisionInfo info) {
   if (isExpanded) {
-    std::cout << "You forgot to implement expanded processpreclick" << std::endl;
+    this->expandedRenderer.ProcessPreClick(std::move(info));
     return {};
   } else {
     return this->stackRenderer.ProcessPreClick(std::move(info));

@@ -1,0 +1,9 @@
+#pragma once
+
+enum GameMode {
+  MY_TURN, 
+  OPPONENT_TURN,
+  SELECTING_CARDS,
+  SELECTING_TEMPORARY_CARDS
+};
+

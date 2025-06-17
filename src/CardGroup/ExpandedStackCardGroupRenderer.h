@@ -73,4 +73,6 @@ public:
   void ProcessScroll(CollisionInfo info, double yOffset);
   ClickEvent ProcessClick(CollisionInfo info);
   void ReleaseClick();
+  ClickEvent ProcessPreClick(CollisionInfo info);
+  void ReleaseClick(CollisionInfo info);
 };

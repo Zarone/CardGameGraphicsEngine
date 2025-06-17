@@ -71,7 +71,7 @@ void TemporaryCardGroup::ProcessScroll(CollisionInfo info, double yOffset) {
 
 ClickEvent TemporaryCardGroup::ProcessPreClick(CollisionInfo info) {
   if (isExpanded) {
-    std::cout << "You forgot to implement expanded processpreclick" << std::endl;
+    this->expandedRenderer.ProcessPreClick(std::move(info));
     return {};
   } else {
     return this->showButton.ProcessPreClick(std::move(info));

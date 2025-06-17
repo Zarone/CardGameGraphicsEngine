@@ -123,20 +123,6 @@ TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* data
   oppHand.AddCard(2);
   oppHand.AddCard(3);
 
-  hand.AddCard(0, 0);
-  hand.AddCard(2, 1);
-  hand.AddCard(3, 2);
-  hand.AddCard(0, 3);
-  hand.AddCard(2, 4);
-  hand.AddCard(3, 5);
-  hand.AddCard(0, 6);
-  hand.AddCard(2, 7);
-  hand.AddCard(3, 8);
-  hand.AddCard(0, 9);
-  hand.AddCard(1, 10);
-  hand.AddCard(4, 11);
-  hand.AddCard(5, 12);
-
   AddCardGroup(&hand, HAND);
   AddCardGroup(&oppHand, OPP_HAND);
   AddCardGroup(&reserve, RESERVE);
@@ -149,11 +135,42 @@ TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* data
   renderer->textureMap.SetupTexturePath("endturn");
   AddObject(&palette);
   AddObject(&passTurn);
-  AddCardGroup(&deck, DECK);
+  AddCardGroup(&this->deck, DECK);
   AddCardGroup(&discardPile, DISCARD);
   AddCardGroup(&tempPile, TEMPORARY);
 
   this->LoadCommandPalette();
+
+  std::vector<unsigned int> deck = {
+    0, 1, 2, 3, 4, 5,
+    0, 1, 2, 3, 4, 5,
+    0, 1, 2, 3, 4, 5,
+    0, 1, 2, 3, 4, 5,
+    0, 1, 2, 3, 4, 5,
+    0, 1, 2, 3, 4, 5,
+    0, 1, 2, 3, 4, 5,
+    0, 1, 2, 3, 4, 5,
+    0, 1, 2, 3, 4, 5,
+    0, 1, 2, 3, 4, 5,
+  };
+  SetupData setupData = this->gameplayManager.Setup(deck);
+  for (auto gameID : setupData.correspondingGameIds) {
+    this->deck.AddCard(this->gameplayManager.gameIDToID[gameID], gameID);
+  }
+  this->HandleUpdate(setupData.info);
+  //hand.AddCard(0, 0);
+  //hand.AddCard(2, 1);
+  //hand.AddCard(3, 2);
+  //hand.AddCard(0, 3);
+  //hand.AddCard(2, 4);
+  //hand.AddCard(3, 5);
+  //hand.AddCard(0, 6);
+  //hand.AddCard(2, 7);
+  //hand.AddCard(3, 8);
+  //hand.AddCard(0, 9);
+  //hand.AddCard(1, 10);
+  //hand.AddCard(4, 11);
+  //hand.AddCard(5, 12);
 }
 
 void TestGameState::LoadCommandPalette() {
@@ -198,9 +215,7 @@ void TestGameState::LoadCommandPalette() {
   }
 }
 
-void TestGameState::ProcessAction(const GameAction& action) {
-  UpdateInfo update = this->gameplayManager.RequestUpdate(action);
-
+void TestGameState::HandleUpdate(const UpdateInfo& update) {
   if (update.phaseChange) {
     this->LoadCommandPalette();
   }
@@ -209,11 +224,17 @@ void TestGameState::ProcessAction(const GameAction& action) {
     this->tempPile.EnableWithCards(update.openViewCards);
   }
 
-  for (CardMovement& move : update.movements) {
+  for (const CardMovement& move : update.movements) {
     CardGroup* from = cardGroupMap.at(move.from);
     CardGroup* to = cardGroupMap.at(move.to);
     from->MoveToGroupByGameID(move.cardId, to);
   }
+}
+
+void TestGameState::ProcessAction(const GameAction& action) {
+  UpdateInfo update = this->gameplayManager.RequestUpdate(action);
+
+  this->HandleUpdate(update);
 }
 
 ClickEvent TestGameState::ProcessClick(CollisionInfo info) {
@@ -238,7 +259,7 @@ ClickEvent TestGameState::ProcessClick(CollisionInfo info) {
 
     this->ProcessAction({
       .type = SELECT_CARD,
-      .selectedCard = card.GetGameID(),
+      .selectedCards = { card.GetGameID() },
       .from = HAND
     });
 
@@ -258,17 +279,11 @@ ClickEvent TestGameState::ProcessClick(CollisionInfo info) {
       std::cout << "Discard card with id " << card.GetGameID() << " selected" << std::endl;
       TestCardInfo* cardInfo = this->database->GetInfo(card.GetID());
 
-      UpdateInfo update = this->gameplayManager.RequestUpdate({
+      this->ProcessAction({
         .type = SELECT_CARD,
-        .selectedCard = card.GetGameID(),
+        .selectedCards = { card.GetGameID() },
         .from = DISCARD
       });
-
-      for (CardMovement& move : update.movements) {
-        CardGroup* from = cardGroupMap.at(move.from);
-        CardGroup* to = cardGroupMap.at(move.to);
-        from->MoveToGroupByGameID(move.cardId, to);
-      }
     } else {
       std::cout << "discard collision had no card info. Sending to discard." << std::endl;
       src->ProcessClick(std::move(info));

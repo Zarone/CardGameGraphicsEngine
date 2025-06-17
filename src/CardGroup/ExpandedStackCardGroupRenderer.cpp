@@ -407,3 +407,10 @@ void ExpandedStackCardGroupRenderer::ProcessScroll(CollisionInfo info, double yO
 void ExpandedStackCardGroupRenderer::ReleaseClick() {
   this->closeExpandedView.ReleaseClick();
 }
+
+ClickEvent ExpandedStackCardGroupRenderer::ProcessPreClick(CollisionInfo info) {
+  if (info.innerCollision && info.innerCollision->groupPointer == &this->closeExpandedView) {
+    return this->closeExpandedView.ProcessPreClick(std::move(info));
+  }
+  return {};
+}

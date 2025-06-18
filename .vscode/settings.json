@@ -74,6 +74,12 @@
     "type_traits": "cpp",
     "utility": "cpp",
     "ranges": "cpp",
-    "stdfloat": "cpp"
+    "stdfloat": "cpp",
+    "any": "cpp",
+    "execution": "cpp",
+    "forward_list": "cpp",
+    "print": "cpp",
+    "valarray": "cpp",
+    "format": "cpp"
   }
 }

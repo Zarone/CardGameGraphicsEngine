@@ -1,6 +1,8 @@
 #include <iostream>
+#include <errno.h>
 #include "ServerManager.h"
 #include "WebSocketFrame.h"
+#include <fcntl.h>
 
 int ServerManager::SendSetupMessage(const std::vector<unsigned int>& deck, unsigned int messageTypeSetup) {
   time_t currentTime = std::time(nullptr);
@@ -183,14 +185,15 @@ SetupData ServerManager::Initialize(
   std::vector<CardMovement> movements = {};
   for (json jsonCardMovement : response["content"]["movements"]) {
     movements.push_back({
-      .cardId = jsonCardMovement["cardId"],
+      .gameID = jsonCardMovement["gameId"],
       .from = jsonCardMovement["from"],
       .to = jsonCardMovement["to"]
     });
   }
 
   return {
-    .correspondingGameIds = setupResponse,
+    .correspondingGameIds = setupResponse["content"]["myDeck"],
+    .oppCorrespondingGameIds = setupResponse["content"]["oppDeck"],
     .info = {
       .movements = movements,
       .phase = response["content"]["phase"],
@@ -199,6 +202,52 @@ SetupData ServerManager::Initialize(
       .selectableCards = response["content"]["selectableCards"],
     }
   };
+}
+
+json ServerManager::ReceiveMessageNonBlocking(std::string& response, bool jsonMessage) {
+  // Set socket to non-blocking mode
+  int flags = fcntl(sock, F_GETFL, 0);
+  fcntl(sock, F_SETFL, flags | O_NONBLOCK);
+  
+  std::vector<uint8_t> frameBuffer;
+  frameBuffer.resize(1024);
+  
+  int valread = read(sock, frameBuffer.data(), frameBuffer.size());
+  
+  // Restore blocking mode
+  fcntl(sock, F_SETFL, flags);
+  
+  if (valread < 0) {
+    if (errno == EAGAIN || errno == EWOULDBLOCK) {
+      // No data available
+      response = "";
+      return json();
+    }
+    std::cerr << "Failed to read response" << std::endl;
+    return json();
+  }
+  
+  if (valread == 0 || valread > 1024) {
+    std::cerr << "Invalid read size: " << valread << std::endl;
+    return json();
+  }
+
+  frameBuffer.resize(valread);
+  response = WebSocketFrame::parseFrame(frameBuffer);
+  
+  if (jsonMessage) {
+    try {
+      json jsonResponse = json::parse(response);
+      std::cout << "Server response (JSON): " << jsonResponse.dump(2) << std::endl;
+      return jsonResponse;
+    } catch (const json::parse_error& e) {
+      std::cout << "Server response (raw): " << response << std::endl;
+    }
+  } else {
+    std::cout << "Server response: " << response << std::endl;
+  }
+
+  return json();
 }
 
 ServerManager::~ServerManager() {

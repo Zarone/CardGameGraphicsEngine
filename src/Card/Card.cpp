@@ -1,7 +1,7 @@
 #include "Card.h"
 
-Card::Card(unsigned int id) 
-: id(id), gameId(-1)
+Card::Card(unsigned int gameId) 
+: id(-1), gameId(gameId)
 {
 }
 
@@ -16,6 +16,10 @@ unsigned int Card::GetID() {
 
 unsigned int Card::GetGameID() {
   return this->gameId;
+}
+
+void Card::SetCardID(unsigned int cardID) {
+  this->id = cardID;
 }
 
 std::ostream& operator<<(std::ostream& os, const Card& c) {

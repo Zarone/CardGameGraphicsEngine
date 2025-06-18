@@ -6,9 +6,9 @@
 CardGroup::CardGroup(Renderer* renderer): renderer(renderer) {
 }
 
-void CardGroup::AddCard(unsigned int id) {
+void CardGroup::AddCard(unsigned int gameID) {
   this->cards.push_back({
-    .card = Card(id),
+    .card = Card(gameID),
     .renderData = CardRenderingData()
   });
 }
@@ -32,11 +32,15 @@ std::vector<CardItem>* CardGroup::GetCards() {
   return &this->cards;
 }
 
-void CardGroup::MoveToGroupByGameID(unsigned int gameID, CardGroup* to) {
+void CardGroup::MoveToGroupByGameID(unsigned int gameID, CardGroup* to, int cardID, bool supplyCardID) {
   int i = 0;
   for (auto& card :  this->cards) {
-
-    if (card.card.GetGameID() == gameID) return this->MoveToGroup(i, to);
+    if (card.card.GetGameID() == gameID) {
+      if (supplyCardID) {
+        this->cards[i].card.SetCardID(cardID);
+      }
+      return this->MoveToGroup(i, to);
+    }
 
     ++i;
   }

@@ -6,6 +6,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <netdb.h>
+#include <fcntl.h>
 #include "../external/json.hpp"
 #include "../TestUpdateInfo.h"
 
@@ -13,6 +14,7 @@ using json = nlohmann::json;
 
 struct SetupData {
   std::vector<unsigned int> correspondingGameIds;
+  std::vector<unsigned int> oppCorrespondingGameIds;
   UpdateInfo info;
 };
 
@@ -29,6 +31,7 @@ public:
 	ServerManager() : sock(0) {}
 
 	json ReceiveMessage(std::string& response, bool jsonMessage = false);
+	json ReceiveMessageNonBlocking(std::string& response, bool jsonMessage = false);
 
 	int SendMessage(const std::string& message);
 

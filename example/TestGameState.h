@@ -13,15 +13,17 @@ class TestGameState : public GameState
 {
 private:
   FannedCardGroup hand;
-  FannedCardGroup oppHand;
   FannedCardGroup reserve;
   FannedCardGroup battlefield;
   FannedCardGroup specials;
+  ExpandableStackCardGroup deck;
+  ExpandableStackCardGroup discardPile;
+  FannedCardGroup oppHand;
   FannedCardGroup oppReserve;
   FannedCardGroup oppBatlefield;
   FannedCardGroup oppSpecials;
-  ExpandableStackCardGroup deck;
-  ExpandableStackCardGroup discardPile;
+  ExpandableStackCardGroup oppDeck;
+  ExpandableStackCardGroup oppDiscardPile;
   TemporaryCardGroup tempPile;
   BoundButton passTurn;
   CommandPalette palette;
@@ -32,6 +34,7 @@ private:
   void LoadCommandPalette();
   void HandleUpdate(const UpdateInfo& update);
   void ProcessAction(const GameAction& action);
+  void ProcessPendingMessages();
 public:
   TestGameState(Renderer* renderer, TestCardDatabaseSingleton* database);
   ClickEvent ProcessClick(CollisionInfo info);

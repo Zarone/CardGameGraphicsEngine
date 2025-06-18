@@ -15,14 +15,6 @@ TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* data
     false,  // z flipped
     true
   ),
-  oppHand(
-    renderer,
-    glm::vec3(0.0f, -1.5f, -5.5f),
-    10.0f, // rotateX
-    4.0f,  // width
-    true, // z flipped
-    true
-  ),
   specials(
     renderer,
     glm::vec3(0.0f, -2.0f, 4.5f),
@@ -50,18 +42,38 @@ TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* data
     false,  // z flipped
     false
   ),
-  oppReserve(
+  battlefield(
     renderer,
-    glm::vec3(0.0f, -2.0f, -2.75f),
+    glm::vec3(0.0f, -2.0f, 1.f),
     //glm::vec3(0.0f, -0.5f, 6.0f),
     -90.0f, // rotateX
     7.0f,   // width
     false,  // z flipped
     false
   ),
-  battlefield(
+  deck(
     renderer,
-    glm::vec3(0.0f, -2.0f, 1.f),
+    glm::vec3(4.1f, -2.0f, 2.75f),
+    -90.0f,
+    true
+  ),
+  discardPile(
+    renderer,
+    glm::vec3(4.1f, -2.0f, 4.5f),
+    -90.0f,
+    false
+  ),
+  oppHand(
+    renderer,
+    glm::vec3(0.0f, -1.5f, -5.5f),
+    10.0f, // rotateX
+    4.0f,  // width
+    true, // z flipped
+    true
+  ),
+  oppReserve(
+    renderer,
+    glm::vec3(0.0f, -2.0f, -2.75f),
     //glm::vec3(0.0f, -0.5f, 6.0f),
     -90.0f, // rotateX
     7.0f,   // width
@@ -75,6 +87,18 @@ TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* data
     -90.0f, // rotateX
     7.0f,   // width
     false,  // z flipped
+    false
+  ),
+  oppDeck(
+    renderer,
+    glm::vec3(-4.1f, -2.0f, -2.75f),
+    -90.0f,
+    true
+  ),
+  oppDiscardPile(
+    renderer,
+    glm::vec3(4.1f, -2.0f, -4.5f),
+    -90.0f,
     false
   ),
   passTurn(
@@ -96,18 +120,6 @@ TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* data
     }),
     std::bind(&TestGameState::EndTurnButtonPress, this)
   ),
-  deck(
-    renderer,
-    glm::vec3(4.1f, -2.0f, 2.75f),
-    -90.0f,
-    true
-  ),
-  discardPile(
-    renderer,
-    glm::vec3(4.1f, -2.0f, 4.5f),
-    -90.0f,
-    false
-  ),
   tempPile(
     renderer,
     glm::vec3(0,0,0)
@@ -115,14 +127,6 @@ TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* data
   palette(renderer),
   database(database)
 {
-
-  oppHand.AddCard(0);
-  oppHand.AddCard(2);
-  oppHand.AddCard(3);
-  oppHand.AddCard(0);
-  oppHand.AddCard(2);
-  oppHand.AddCard(3);
-
   AddCardGroup(&hand, HAND);
   AddCardGroup(&oppHand, OPP_HAND);
   AddCardGroup(&reserve, RESERVE);
@@ -138,6 +142,8 @@ TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* data
   AddCardGroup(&this->deck, DECK);
   AddCardGroup(&discardPile, DISCARD);
   AddCardGroup(&tempPile, TEMPORARY);
+  AddCardGroup(&oppDeck, OPP_DECK);
+  AddCardGroup(&oppDiscardPile, OPP_DISCARD);
 
   this->LoadCommandPalette();
 
@@ -157,20 +163,10 @@ TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* data
   for (auto gameID : setupData.correspondingGameIds) {
     this->deck.AddCard(this->gameplayManager.gameIDToID[gameID], gameID);
   }
+  for (auto gameID : setupData.oppCorrespondingGameIds) {
+    this->oppDeck.AddCard(gameID);
+  }
   this->HandleUpdate(setupData.info);
-  //hand.AddCard(0, 0);
-  //hand.AddCard(2, 1);
-  //hand.AddCard(3, 2);
-  //hand.AddCard(0, 3);
-  //hand.AddCard(2, 4);
-  //hand.AddCard(3, 5);
-  //hand.AddCard(0, 6);
-  //hand.AddCard(2, 7);
-  //hand.AddCard(3, 8);
-  //hand.AddCard(0, 9);
-  //hand.AddCard(1, 10);
-  //hand.AddCard(4, 11);
-  //hand.AddCard(5, 12);
 }
 
 void TestGameState::LoadCommandPalette() {
@@ -216,18 +212,20 @@ void TestGameState::LoadCommandPalette() {
 }
 
 void TestGameState::HandleUpdate(const UpdateInfo& update) {
-  if (update.phaseChange) {
-    this->LoadCommandPalette();
-  }
+  // bool phaseUpdate = this->gameplayManager.GetPhase() != update.phase;
+  // if (phaseUpdate) {
+  this->LoadCommandPalette();
+  // }
 
   if (update.openView == TEMPORARY) {
     this->tempPile.EnableWithCards(update.openViewCards);
   }
 
   for (const CardMovement& move : update.movements) {
+    std::cout << "Move: " << move.gameID << std::endl;
     CardGroup* from = cardGroupMap.at(move.from);
     CardGroup* to = cardGroupMap.at(move.to);
-    from->MoveToGroupByGameID(move.cardId, to);
+    from->MoveToGroupByGameID(move.gameID, to, move.cardID, move.from == OPP_HAND);
   }
 }
 
@@ -313,6 +311,17 @@ void TestGameState::EndTurnButtonPress() {
   std::cout << "end turn click" << std::endl;
 }
 
+void TestGameState::ProcessPendingMessages() {
+  // Check for and process any pending messages from the server
+  if (this->gameplayManager.HasPendingMessages()) {
+    std::vector<UpdateInfo> messages = this->gameplayManager.GetAllMessages();
+    std::cout << "Processing " << messages.size() << " pending messages" << std::endl;
+    for (const UpdateInfo& info : messages) {
+      this->HandleUpdate(info);
+    }
+  }
+}
+
 void TestGameState::LoadProperShader(Renderer* renderer, CardGroup* group) {
   if (&this->hand == group) {
     for (CardItem& card : *group->GetCards()) {
@@ -354,6 +363,8 @@ void TestGameState::LoadProperShader(Renderer* renderer, CardGroup* group) {
 }
 
 void TestGameState::Render(Renderer* renderer) {
+  this->ProcessPendingMessages();
+
   for (CardGroup* group : this->cardGroups) {
     this->LoadProperShader(renderer, group);
   }

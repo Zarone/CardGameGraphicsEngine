@@ -5,7 +5,8 @@
 #include <vector>
 
 struct CardMovement {
-  unsigned int cardId;
+  unsigned int cardID; // unspecified unless from opponent's hand or deck
+  unsigned int gameID;
   Pile from;
   Pile to;
 };

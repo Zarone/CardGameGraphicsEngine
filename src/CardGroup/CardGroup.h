@@ -46,5 +46,5 @@ public:
   virtual ClickEvent ProcessClick(CollisionInfo info) = 0;
   virtual ClickEvent ProcessPreClick(CollisionInfo info) = 0;
   virtual void ReleaseClick() = 0;
-  void MoveToGroupByGameID(unsigned int gameId, CardGroup* to);
+  void MoveToGroupByGameID(unsigned int gameId, CardGroup* to, int cardID = -1, bool supplyCardID = false);
 };

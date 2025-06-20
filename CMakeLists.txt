@@ -23,7 +23,7 @@ find_package(Freetype REQUIRED)
 # Add the executable with all source files
 add_executable(${PROJECT_NAME}
   example/ServerHandler/ServerManager.cpp
-  example/ServerHandler/WebSocketFrame.cpp
+  example/external/easywsclient.cpp
   example/TestCardDatabaseSingleton.cpp
   example/TestCardInfo.cpp
   example/TestGameState.cpp

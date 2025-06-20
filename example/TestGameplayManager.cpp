@@ -1,4 +1,5 @@
 #include "TestGameplayManager.h"
+#include "TestGameMode.h"
 #include "TestGameState.h"
 #include "ServerHandler/ServerManager.h"
 #include "../src/Helper/ErrorHandling.h"
@@ -31,28 +32,19 @@ TestGameplayManager::~TestGameplayManager() {
   }
 }
 
+const size_t MAX_QUEUE_SIZE = 100; // Prevent memory issues
 void TestGameplayManager::MessageReceiverLoop() {
-  const size_t MAX_QUEUE_SIZE = 100; // Prevent memory issues
-  
   while (!shouldStop) {
     try {
       std::string response;
-      json update = server.ReceiveMessageNonBlocking(response, true); // Non-blocking receive
+      json update = server.ReceiveMessage(response, true, true); // Non-blocking receive
       
       if (!response.empty()) {
         std::cout << "Background thread received message: " << response << std::endl;
         
         UpdateInfo info = ProcessReceivedMessage(response);
         
-        // Add to queue with size limit
-        {
-          std::lock_guard<std::mutex> lock(queueMutex);
-          if (messageQueue.size() < MAX_QUEUE_SIZE) {
-            messageQueue.push_back(info);
-          } else {
-            std::cerr << "Warning: Message queue full, dropping message" << std::endl;
-          }
-        }
+        AddToQueue(info);
         
         // Notify waiting threads
         queueCondition.notify_one();
@@ -69,6 +61,15 @@ void TestGameplayManager::MessageReceiverLoop() {
   }
 }
 
+void TestGameplayManager::AddToQueue(const UpdateInfo& info) {
+  std::lock_guard<std::mutex> lock(queueMutex);
+  if (messageQueue.size() < MAX_QUEUE_SIZE) {
+    messageQueue.push_back(info);
+  } else {
+    std::cerr << "Warning: Message queue full, dropping message" << std::endl;
+  }
+}
+
 UpdateInfo TestGameplayManager::ProcessReceivedMessage(const std::string& response) {
   json update = json::parse(response);
   
@@ -77,8 +78,8 @@ UpdateInfo TestGameplayManager::ProcessReceivedMessage(const std::string& respon
   for (json jsonMovement : update["content"]["movements"]) {
     std::cout << "Pushing movement" << std::endl;
     movements.push_back({
-      .gameID = jsonMovement["gameId"],
       .cardID = jsonMovement["cardId"],
+      .gameID = jsonMovement["gameId"],
       .from = jsonMovement["from"],
       .to = jsonMovement["to"]
     });
@@ -86,27 +87,23 @@ UpdateInfo TestGameplayManager::ProcessReceivedMessage(const std::string& respon
 
   UpdateInfo info = {
     .movements = movements,
-    .phaseChange = true,
     .phase = update["content"]["phase"],
     .openView = update["content"]["pile"],
     .openViewCards = update["content"]["openViewCards"],
-    .selectableCards = update["content"]["selectableCards"]
+    .selectableCards = update["content"]["selectableCards"],
+    .selectedCardsChanged = false,
+    .selectableCardsChanged = true
   };
-
-  // info.phaseChange = this->phase.GetMode() != info.phase;
-  this->phase.SetMode(info.phase);
-  this->phase.SetPlayableCards(info.selectableCards);
-  // std::cout << "Updated SetPlayableCards" << std::endl;
-  // PrintVector(std::cout, info.selectableCards);
-  this->phase.SetSelectionRange(2, 2);
 
   return info;
 }
 
 void TestGameplayManager::ChangePhaseForUpdate(const UpdateInfo& info) {
   this->phase.SetMode(info.phase);
-  this->phase.SetPlayableCards(info.selectableCards);
-  this->phase.SetSelectionRange(2, 2);
+  if (info.selectableCardsChanged) {
+    this->phase.SetPlayableCards(info.selectableCards);
+    this->phase.SetSelectionRange(2, 2);
+  }
 }
 
 bool TestGameplayManager::HasPendingMessages() {
@@ -135,7 +132,6 @@ SetupData TestGameplayManager::Setup(const std::vector<unsigned int>& deck) {
     MessageType::FIRST_OR_SECOND_CHOICE
   );
 
-  setupData.info.phaseChange = this->phase.GetMode() != setupData.info.phase;
   this->phase.SetMode(setupData.info.phase);
   std::cout << "playable on setup:";
   PrintVector(std::cout, setupData.info.selectableCards);
@@ -165,65 +161,38 @@ bool TestGameplayManager::IsSelectedCard(unsigned int id) {
     || (this->GetPhase()==SELECTING_TEMPORARY_CARDS && id == -1);
 }
 
-UpdateInfo TestGameplayManager::SendAction(json action) {
+void TestGameplayManager::SendAction(json action) {
   server.SendMessage(action, MessageType::GAMEPLAY);
-
-  std::string response;
-  json update = server.ReceiveMessage(response, true);
-  std::cout << "Game Action RESPONSE: " << response << std::endl;
-
-  return ProcessReceivedMessage(response);
 }
 
-UpdateInfo TestGameplayManager::RequestUpdate(GameAction action) {
+void TestGameplayManager::PostAction(GameAction action) {
   if (this->phase.GetMode() == MY_TURN) {
-    UpdateInfo info = this->SendAction({
+    this->SendAction({
       { "type", action.type },
       { "selectedCards", action.selectedCards },
       { "from", action.from }
     });
-    this->ChangePhaseForUpdate(info);
-    return info;
-  } else {
+  } else if (this->phase.GetMode() == SELECTING_CARDS) {
     if (action.type == FINISH_SELECTION) {
-      //std::vector<CardMovement> movements = {};
-      //for (unsigned int el : this->selectedCards) {
-        //CardMovement movement = {
-          //.cardId = el,
-          //.from = HAND,
-          //.to = DISCARD
-        //};
-        //movements.push_back(movement);
-      //}
-
-      //this->phase.SetMode(SELECTING_TEMPORARY_CARDS);
-      //this->phase.SetPlayableCards({});
-
-      //return {
-        //.movements = movements,
-        //.phaseChange = true,
-        //.openView = TEMPORARY,
-        //.openViewCards = { 6, 6, 6 }
-      //};
-      UpdateInfo info = this->SendAction({
+      this->SendAction({
         { "type", FINISH_SELECTION },
         { "selectedCards", this->selectedCards },
         { "from", action.from }
       });
       this->selectedCards = {};
-      this->ChangePhaseForUpdate(info);
-      return info;
     } else {
       std::pair<std::set<unsigned int>::iterator, bool> res = this->selectedCards.insert(action.selectedCards[0]);
       if (!res.second) {
         this->selectedCards.erase(action.selectedCards[0]);
       }
-
-      return {
+      this->AddToQueue({
         .movements = {},
-        .phaseChange = true,
+        .phase = SELECTING_CARDS,
         .openView = HAND,
-      };
+        .selectableCards = {},
+        .selectedCardsChanged = true,
+        .selectableCardsChanged = false
+      });
     }
   }
 }

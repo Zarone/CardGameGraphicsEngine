@@ -46,9 +46,10 @@ private:
   std::thread messageReceiverThread;
   std::atomic<bool> shouldStop;
   
-  UpdateInfo SendAction(json action);
+  void SendAction(json action);
   void MessageReceiverLoop();
   UpdateInfo ProcessReceivedMessage(const std::string& response);
+  void AddToQueue(const UpdateInfo& info);
 
 
 public:
@@ -57,7 +58,7 @@ public:
   SetupData Setup(const std::vector<unsigned int>& deck);
   bool IsPlayableCard(unsigned int id);
   bool IsSelectedCard(unsigned int id);
-  UpdateInfo RequestUpdate(GameAction action);
+  void PostAction(GameAction action);
   bool SelectionPossiblyDone();
   GameMode GetPhase();
   void ChangePhaseForUpdate(const UpdateInfo &info);

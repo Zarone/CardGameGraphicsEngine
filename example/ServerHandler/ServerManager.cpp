@@ -1,8 +1,12 @@
-#include <iostream>
-#include <errno.h>
 #include "ServerManager.h"
-#include "WebSocketFrame.h"
-#include <fcntl.h>
+#include <iostream>
+#include <ctime>
+#include <vector>
+#include <string>
+#include <mutex>
+#include <condition_variable>
+
+using easywsclient::WebSocket;
 
 int ServerManager::SendSetupMessage(const std::vector<unsigned int>& deck, unsigned int messageTypeSetup) {
   time_t currentTime = std::time(nullptr);
@@ -18,27 +22,51 @@ int ServerManager::SendSetupMessage(const std::vector<unsigned int>& deck, unsig
   };
 
   std::string jsonString = jsonMessage.dump();
-  auto frame = WebSocketFrame::createFrame(jsonString);
-  if (send(sock, frame.data(), frame.size(), 0) < 0) {
-    std::cerr << "Failed to send message" << std::endl;
-    return -1;
+  if (ws) {
+    ws->send(jsonString);
   }
   return 0;
 }
 
-json ServerManager::ReceiveMessage(std::string& response, bool jsonMessage) {
-  std::vector<uint8_t> frameBuffer;
-  frameBuffer.resize(1024);
-  std::cout << "before read" << std::endl;
-  int valread = read(sock, frameBuffer.data(), frameBuffer.size());
-  std::cout << "after read" << std::endl;
-  if (valread < 0 || valread > 1024) {
-    std::cerr << "Failed to read response" << std::endl;
-    return -1;
+json ServerManager::ReceiveMessage(std::string& response, bool jsonMessage, bool nonBlocking) {
+  if (!this->HasPendingMessages()) {
+    if (!ws) {
+      std::cout << "No websocket for some reason" << std::endl;
+      return json();
+    }
+
+    if (nonBlocking) {
+      ws->poll(0); // non-blocking
+      ws->dispatch([&](const std::string &message) {
+        std::lock_guard<std::mutex> lock(queueMutex);
+        messageQueue.push_back(message);
+        queueCondition.notify_one();
+      });
+    } else {
+      while (!this->HasPendingMessages() && ws->getReadyState() != easywsclient::WebSocket::CLOSED) {
+        std::cout << "Started blocking for message" << std::endl;
+        ws->poll(-1); // Block until a message is received
+        std::cout << "Finished blocking for message" << std::endl;
+        ws->dispatch([&](const std::string &message) {
+          std::lock_guard<std::mutex> lock(queueMutex);
+          messageQueue.push_back(message);
+          queueCondition.notify_one();
+          std::cout << "Receive Message Direct: " << message << std::endl;
+        });
+        if (!this->HasPendingMessages() && ws->getReadyState() != easywsclient::WebSocket::CLOSED) {
+          std::cout << "Poll returned without a full message. Polling again." << std::endl;
+        }
+      }
+      std::cout << "Finished dispatch" << std::endl;
+    }
   }
 
-  frameBuffer.resize(valread);
-  response = WebSocketFrame::parseFrame(frameBuffer);
+  response = this->PopMessage();
+
+  if (response.empty()) {
+    return json();
+  }
+
   if (jsonMessage) {
     try {
       json jsonResponse = json::parse(response);
@@ -51,7 +79,7 @@ json ServerManager::ReceiveMessage(std::string& response, bool jsonMessage) {
     std::cout << "Server response: " << response << std::endl;
   }
 
-  return 0;
+  return json();
 }
 
 int ServerManager::SendMessage(const std::string& message) {
@@ -64,10 +92,8 @@ int ServerManager::SendMessage(const std::string& message) {
   };
 
   std::string jsonString = jsonMessage.dump();
-  auto frame = WebSocketFrame::createFrame(jsonString);
-  if (send(sock, frame.data(), frame.size(), 0) < 0) {
-    std::cerr << "Failed to send message" << std::endl;
-    return -1;
+  if (ws) {
+    ws->send(jsonString);
   }
   return 0;
 }
@@ -82,58 +108,16 @@ int ServerManager::SendMessage(const json& message, unsigned int type) {
   };
 
   std::string jsonString = jsonMessage.dump();
-  auto frame = WebSocketFrame::createFrame(jsonString);
-  if (send(sock, frame.data(), frame.size(), 0) < 0) {
-    std::cerr << "Failed to send message" << std::endl;
-    return -1;
+  if (ws) {
+    ws->send(jsonString);
   }
   return 0;
 }
 
 bool ServerManager::ConnectToServer() {
-  struct sockaddr_in serv_addr;
-    
-  if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-    std::cerr << "Socket creation error" << std::endl;
-    return false;
-  }
-
-  struct hostent* host = gethostbyname(HOST);
-  if (host == nullptr) {
-    std::cerr << "Failed to get host by name" << std::endl;
-    return false;
-  }
-
-  serv_addr.sin_family = AF_INET;
-  serv_addr.sin_port = htons(PORT);
-  memcpy(&serv_addr.sin_addr.s_addr, host->h_addr, host->h_length);
-
-  if (connect(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {
-    std::cerr << "Connection failed" << std::endl;
-    return false;
-  }
-
-  std::cout << "Connected to server at " << HOST << ":" << PORT << std::endl;
-
-  std::string request = "GET " + std::string(PATH) + " HTTP/1.1\r\n"
-                        "Host: " + std::string(HOST) + ":" + std::to_string(PORT) + "\r\n"
-                        "Connection: Upgrade\r\n"
-                        "Upgrade: websocket\r\n"
-                        "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\n"
-                        "Sec-WebSocket-Version: 13\r\n\r\n";
-
-  if (send(sock, request.c_str(), request.length(), 0) < 0) {
-    std::cerr << "Failed to send request" << std::endl;
-    return false;
-  }
-
-  std::cout << "Finished connecting to server" << std::endl;
-
-  // Setup web socket instead of http
-  std::string _;
-  ReceiveMessage(_); // Initializer message
-  
-  return true;
+  std::string url = "ws://" + std::string(HOST) + ":" + std::to_string(PORT) + std::string(PATH);
+  ws.reset(WebSocket::from_url(url));
+  return ws != nullptr;
 }
 
 SetupData ServerManager::Initialize(
@@ -144,7 +128,7 @@ SetupData ServerManager::Initialize(
 ) {
   std::string _;
   std::cout << "before hi client message" << std::endl;
-  ReceiveMessage(_); // 'Hi Client!' Message
+  ReceiveMessage(_, false); // 'Hi Client!' Message
   std::cout << "before send setup message" << std::endl;
   SendSetupMessage(deck, messageTypeSetup);
   json setupResponse = ReceiveMessage(_, true); // Response to Setup Message
@@ -204,55 +188,35 @@ SetupData ServerManager::Initialize(
   };
 }
 
-json ServerManager::ReceiveMessageNonBlocking(std::string& response, bool jsonMessage) {
-  // Set socket to non-blocking mode
-  int flags = fcntl(sock, F_GETFL, 0);
-  fcntl(sock, F_SETFL, flags | O_NONBLOCK);
-  
-  std::vector<uint8_t> frameBuffer;
-  frameBuffer.resize(1024);
-  
-  int valread = read(sock, frameBuffer.data(), frameBuffer.size());
-  
-  // Restore blocking mode
-  fcntl(sock, F_SETFL, flags);
-  
-  if (valread < 0) {
-    if (errno == EAGAIN || errno == EWOULDBLOCK) {
-      // No data available
-      response = "";
-      return json();
-    }
-    std::cerr << "Failed to read response" << std::endl;
-    return json();
-  }
-  
-  if (valread == 0 || valread > 1024) {
-    std::cerr << "Invalid read size: " << valread << std::endl;
-    return json();
-  }
-
-  frameBuffer.resize(valread);
-  response = WebSocketFrame::parseFrame(frameBuffer);
-  
-  if (jsonMessage) {
-    try {
-      json jsonResponse = json::parse(response);
-      std::cout << "Server response (JSON): " << jsonResponse.dump(2) << std::endl;
-      return jsonResponse;
-    } catch (const json::parse_error& e) {
-      std::cout << "Server response (raw): " << response << std::endl;
-    }
-  } else {
-    std::cout << "Server response: " << response << std::endl;
-  }
-
-  return json();
-}
+ServerManager::ServerManager() : ws(nullptr) {}
 
 ServerManager::~ServerManager() {
   std::cout << "Close Server" << std::endl;
-  if (sock > 0) {
-    close(sock);
+  if (ws) {
+    ws->close();
   }
+}
+
+// Message queue accessors
+bool ServerManager::HasPendingMessages() {
+  std::lock_guard<std::mutex> lock(queueMutex);
+  return !messageQueue.empty();
+}
+
+std::string ServerManager::PopMessage() {
+  std::unique_lock<std::mutex> lock(queueMutex);
+  if (messageQueue.empty()) return std::string();
+  std::string msg = messageQueue.front();
+  messageQueue.pop_front();
+  return msg;
+}
+
+size_t ServerManager::GetQueueSize() {
+  std::lock_guard<std::mutex> lock(queueMutex);
+  return messageQueue.size();
+}
+
+void ServerManager::WaitForMessage() {
+  std::unique_lock<std::mutex> lock(queueMutex);
+  queueCondition.wait(lock, [&]{ return !messageQueue.empty(); });
 }

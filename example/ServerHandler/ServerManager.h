@@ -2,13 +2,15 @@
 
 #include <string>
 #include <vector>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <netdb.h>
-#include <fcntl.h>
+#include <memory>
 #include "../external/json.hpp"
 #include "../TestUpdateInfo.h"
+#include "../external/easywsclient.hpp"
+#include "../../src/Card/CardInfo.h"
+#include "../../src/Scene/SceneData.h"
+#include <deque>
+#include <mutex>
+#include <condition_variable>
 
 using json = nlohmann::json;
 
@@ -20,18 +22,20 @@ struct SetupData {
 
 class ServerManager {
 private:
-	int sock;
 	const int PORT = 3000;
 	const char* HOST = "localhost";
 	const char* PATH = "/socket?room=3";
+	std::unique_ptr<easywsclient::WebSocket> ws;
+	std::deque<std::string> messageQueue;
+	std::mutex queueMutex;
+	std::condition_variable queueCondition;
 
 	int SendSetupMessage(const std::vector<unsigned int>& deck, unsigned int messageTypeSetup);
 
 public:
-	ServerManager() : sock(0) {}
+	ServerManager();
 
-	json ReceiveMessage(std::string& response, bool jsonMessage = false);
-	json ReceiveMessageNonBlocking(std::string& response, bool jsonMessage = false);
+	json ReceiveMessage(std::string& response, bool jsonMessage = false, bool nonBlocking = false);
 
 	int SendMessage(const std::string& message);
 
@@ -47,4 +51,10 @@ public:
   );
 
 	~ServerManager();
+
+	// Message queue accessors
+	bool HasPendingMessages();
+	std::string PopMessage();
+	size_t GetQueueSize();
+	void WaitForMessage();
 };

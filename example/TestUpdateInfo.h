@@ -12,11 +12,12 @@ struct CardMovement {
 };
 
 struct UpdateInfo {
-  std::vector<CardMovement> movements;  
-  bool phaseChange;
+  std::vector<CardMovement> movements;
   GameMode phase;
-  Pile openView; 
+  Pile openView;
   std::vector<unsigned int> openViewCards;
   std::vector<unsigned int> selectableCards;
+  bool selectedCardsChanged;
+  bool selectableCardsChanged;
 };
 

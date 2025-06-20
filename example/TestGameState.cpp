@@ -187,6 +187,14 @@ void TestGameState::LoadCommandPalette() {
       });
       break; 
     case OPPONENT_TURN:
+      palette.SetButtons({
+        {
+          .text="Say Hi",
+          .func=[]() {
+            std::cout << "Clicked \"Say Hi\" button" << std::endl;
+          }
+        }
+      });
       break; 
     case SELECTING_CARDS:
       if (this->gameplayManager.SelectionPossiblyDone()) {
@@ -212,10 +220,11 @@ void TestGameState::LoadCommandPalette() {
 }
 
 void TestGameState::HandleUpdate(const UpdateInfo& update) {
-  // bool phaseUpdate = this->gameplayManager.GetPhase() != update.phase;
-  // if (phaseUpdate) {
-  this->LoadCommandPalette();
-  // }
+  bool phaseUpdate = update.selectedCardsChanged || this->gameplayManager.GetPhase() != update.phase;
+  this->gameplayManager.ChangePhaseForUpdate(update);
+  if (phaseUpdate) {
+     this->LoadCommandPalette();
+  }
 
   if (update.openView == TEMPORARY) {
     this->tempPile.EnableWithCards(update.openViewCards);
@@ -230,9 +239,7 @@ void TestGameState::HandleUpdate(const UpdateInfo& update) {
 }
 
 void TestGameState::ProcessAction(const GameAction& action) {
-  UpdateInfo update = this->gameplayManager.RequestUpdate(action);
-
-  this->HandleUpdate(update);
+  this->gameplayManager.PostAction(action);
 }
 
 ClickEvent TestGameState::ProcessClick(CollisionInfo info) {

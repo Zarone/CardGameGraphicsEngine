@@ -62,7 +62,7 @@ void main()
       ? texture(textures[f_cardTexture], v_texture)
         + dist*vec4( glow + glowColor * glow * shine )
       : texture(textures[f_cardTexture], vec2(1.0 - uv.x, uv.y));
-
   color = texColor;
+
 }
 )";

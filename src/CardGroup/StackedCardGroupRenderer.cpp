@@ -106,6 +106,7 @@ void StackedCardGroupRenderer::Render(Renderer* renderer) {
       shader->SetUniform4fv("u_projMatrix", false, glm::value_ptr(projMatrix));
       shader->SetUniform4fv("u_cameraMatrix", false, glm::value_ptr(camMatrix));
       shader->SetUniform4fv("u_modelMatrix", false, glm::value_ptr(this->transform));
+      shader->SetUniform1i("u_applyPerspective", true);
       shader->SetInstancedTextures(renderer->maxBindableTextures, &renderer->textureMap);
       int size = this->GetCardsWithShader(shader, totalSize-renderSize);
       this->BindAndDrawAllFrontFaces(

@@ -16,6 +16,7 @@ flat out int f_cardTexture;
 uniform mat4 u_projMatrix;
 uniform mat4 u_cameraMatrix;
 uniform mat4 u_modelMatrix;
+uniform bool u_applyPerspective;
 
 mat4 getZRotation(float rotation) 
 {

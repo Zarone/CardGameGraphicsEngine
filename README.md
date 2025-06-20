@@ -12,8 +12,8 @@ Right now, the application is very bare-bones. The application opens to a main m
 - Correctly handle turn order signal
 - Dynamically handle game actions on example server
 - Handle End Turn Button
+- Make command palette visible on expandedView
 - Ask user heads/tail and then first/second
-- Fix Shader while looking in discard pile
 - Display the current phase
 - Be able to render tokens onto cards (i.e poison, burn in pokémon card game)
 - Add visible scroll bar for expanded view

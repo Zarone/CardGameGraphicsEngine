@@ -284,6 +284,7 @@ ClickEvent TestGameState::ProcessClick(CollisionInfo info) {
       std::cout << "Discard card with id " << card.GetGameID() << " selected" << std::endl;
       TestCardInfo* cardInfo = this->database->GetInfo(card.GetID());
 
+      this->discardPile.SetDirtyPosition(true);
       this->ProcessAction({
         .type = SELECT_CARD,
         .selectedCards = { card.GetGameID() },
@@ -345,7 +346,9 @@ void TestGameState::LoadProperShader(Renderer* renderer, CardGroup* group) {
   } else if (&this->discardPile == group) {
     if (this->discardPile.GetIsExpanded()) {
       for (CardItem& card : *group->GetCards()) {
-        if (this->gameplayManager.IsPlayableCard(card.card.GetGameID())) {
+        if (this->gameplayManager.IsSelectedCard(card.card.GetGameID())) {
+          card.renderData.shader = renderer->GetShader(SelectedCardShader); 
+        } else if (this->gameplayManager.IsPlayableCard(card.card.GetGameID())) {
           card.renderData.shader = renderer->GetShader(HighlightCardShader);
         } else {
           card.renderData.shader = renderer->GetShader(CardShader);

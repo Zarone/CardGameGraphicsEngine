@@ -302,6 +302,7 @@ void ExpandedStackCardGroupRenderer::Render(
   }
 
   if (this->dirtyPosition) {
+    this->dirtyDisplay = true;
     this->UpdateCardPositions();
   }
 
@@ -347,6 +348,7 @@ void ExpandedStackCardGroupRenderer::Render(
       shader->SetUniform4fv("u_projMatrix", false, glm::value_ptr(identity));
       shader->SetUniform4fv("u_cameraMatrix", false, glm::value_ptr(identity));
       shader->SetUniform4fv("u_modelMatrix", false, glm::value_ptr(this->transform));
+      shader->SetUniform1i("u_applyPerspective", 0); // set to false
       shader->SetInstancedTextures(maxBindableTextures, &renderer->textureMap);
       int thisSize = this->GetCardsWithShader(shader);
       this->BindAndDrawAllFrontFaces(

@@ -18,6 +18,7 @@ flat out int f_cardTexture;
 uniform mat4 u_projMatrix;
 uniform mat4 u_cameraMatrix;
 uniform mat4 u_modelMatrix;
+uniform bool u_applyPerspective;
 
 mat4 getZRotation(float rotation) 
 {
@@ -39,7 +40,11 @@ void main()
   mat4 cameraModelMatrix = u_cameraMatrix * u_modelMatrix;
   vec4 cameraPosition4 = (cameraModelMatrix * vec4(vertexPosition, 1));
   gl_Position = u_projMatrix * cameraPosition4;
-  v_cameraPosition = cameraPosition4.xyz;
+  if (u_applyPerspective) {
+    v_cameraPosition = cameraPosition4.xyz;
+  } else {
+    v_cameraPosition = vec3(cameraPosition4.x,cameraPosition4.y,-1.0);
+  }
 
   v_normal = normalize(mat3(cameraModelMatrix)*vec3(0,0,1));
 

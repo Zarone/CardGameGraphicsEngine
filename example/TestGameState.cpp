@@ -296,6 +296,8 @@ ClickEvent TestGameState::ProcessClick(CollisionInfo info) {
   } else if (src == &this->deck) {
     std::cout << "deck click recognized" << std::endl;
     src->ProcessClick(std::move(info));
+  } else if (src == &this->oppDeck) {
+    std::cout << "Clicked Opponent's Deck" << std::endl;
   } else if (src == &this->palette) {
     this->palette.ProcessClick(std::move(info));
   } else {

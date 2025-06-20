@@ -9,7 +9,12 @@ Right now, the application is very bare-bones. The application opens to a main m
 ![Screenshot 3](./README/3.png "Screenshot 3")
 
 ### TODO:
-- Have server send mirrored updateInfo to other player.
+- Correctly handle turn order signal
+- Dynamically handle game actions on example server
+- Handle End Turn Button
+- Ask user heads/tail and then first/second
+- Fix Shader while looking in discard pile
+- Display the current phase
 - Be able to render tokens onto cards (i.e poison, burn in pokémon card game)
 - Add visible scroll bar for expanded view
 - Right click to expand view of single card

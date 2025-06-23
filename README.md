@@ -9,8 +9,9 @@ Right now, the application is very bare-bones. The application opens to a main m
 ![Screenshot 3](./README/3.png "Screenshot 3")
 
 ### TODO:
-- Correctly handle turn order signal
 - Dynamically handle game actions on example server
+  - mark some card groups as public (i.e. the opponent can see them) and make movement to a public card group share the CardID as well as the GameID so that the card can be rendered by all players.
+- Make all card groups dynamic (i.e. ```game.Players[user]["DECK"]``` instead of ```game.Players[user].Deck```)
 - Handle End Turn Button
 - Make command palette visible on expandedView
 - Ask user heads/tail and then first/second

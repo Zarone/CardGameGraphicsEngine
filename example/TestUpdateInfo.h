@@ -19,5 +19,7 @@ struct UpdateInfo {
   std::vector<unsigned int> selectableCards;
   bool selectedCardsChanged;
   bool selectableCardsChanged;
+  int selectionMin;
+  int selectionMax;
 };
 

@@ -28,7 +28,7 @@ add_executable(${PROJECT_NAME}
   example/TestCardInfo.cpp
   example/TestGameState.cpp
   example/TestGameplayManager.cpp
-  example/TestGameplayManager.cpp
+  example/TestGameplayPiles.cpp
   example/TestGameplayPhase.cpp
   example/TestScene.cpp
   src/external/stb_image.cpp

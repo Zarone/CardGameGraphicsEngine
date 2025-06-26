@@ -80,20 +80,27 @@ UpdateInfo TestGameplayManager::ProcessReceivedMessage(const std::string& respon
     movements.push_back({
       .cardID = jsonMovement["cardId"],
       .gameID = jsonMovement["gameId"],
-      .from = jsonMovement["from"],
-      .to = jsonMovement["to"]
+      .from = Pile(jsonMovement["from"]),
+      .to = Pile(jsonMovement["to"])
     });
   }
 
   UpdateInfo info = {
     .movements = movements,
     .phase = update["content"]["phase"],
-    .openView = update["content"]["pile"],
+    .openView = Pile(update["content"]["pile"]),
     .openViewCards = update["content"]["openViewCards"],
     .selectableCards = update["content"]["selectableCards"],
     .selectedCardsChanged = false,
-    .selectableCardsChanged = true
+    .selectableCardsChanged = true,
   };
+
+  if (update["content"]["count"].contains("atMost")) {
+    info.selectionMax = update["content"]["count"]["atMost"];
+  }
+  if (update["content"]["count"].contains("atLeast")) {
+    info.selectionMax = update["content"]["count"]["atLeast"];
+  }
 
   return info;
 }
@@ -102,7 +109,7 @@ void TestGameplayManager::ChangePhaseForUpdate(const UpdateInfo& info) {
   this->phase.SetMode(info.phase);
   if (info.selectableCardsChanged) {
     this->phase.SetPlayableCards(info.selectableCards);
-    this->phase.SetSelectionRange(2, 2);
+    this->phase.SetSelectionRange(info.selectionMin, info.selectionMax);
   }
 }
 
@@ -170,14 +177,14 @@ void TestGameplayManager::PostAction(GameAction action) {
     this->SendAction({
       { "type", action.type },
       { "selectedCards", action.selectedCards },
-      { "from", action.from }
+      { "from", action.from.GetInString() }
     });
   } else if (this->phase.GetMode() == SELECTING_CARDS) {
     if (action.type == FINISH_SELECTION) {
       this->SendAction({
         { "type", FINISH_SELECTION },
         { "selectedCards", this->selectedCards },
-        { "from", action.from }
+        { "from", action.from.GetInString() }
       });
       this->selectedCards = {};
     } else {
@@ -188,7 +195,7 @@ void TestGameplayManager::PostAction(GameAction action) {
       this->AddToQueue({
         .movements = {},
         .phase = SELECTING_CARDS,
-        .openView = HAND,
+        .openView = Pile("HAND"),
         .selectableCards = {},
         .selectedCardsChanged = true,
         .selectableCardsChanged = false

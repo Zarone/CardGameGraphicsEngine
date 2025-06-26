@@ -9,7 +9,7 @@ class GameState : public SceneObject
 protected:
   std::vector<SceneObject*> nonCardGroups;
   std::vector<CardGroup*> cardGroups;
-  std::map<unsigned int, CardGroup*> cardGroupMap;
+  std::map<std::string, CardGroup*> cardGroupMap;
 public:
   GameState();
   void AddObject(SceneObject* group);
@@ -22,7 +22,7 @@ public:
   * @param pile The id for the pile (recommended to use enum for this arg)
   *
   */
-  void AddCardGroup(CardGroup* group, unsigned int pile);
+  void AddCardGroup(CardGroup* group, std::string pile);
 
   virtual void Render(Renderer* renderer);
   void UpdateTick(double deltaTime);

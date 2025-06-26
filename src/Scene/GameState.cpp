@@ -7,7 +7,7 @@ void GameState::AddObject(SceneObject* group) {
   nonCardGroups.push_back(group);
 }
 
-void GameState::AddCardGroup(CardGroup* group, unsigned int pile) { 
+void GameState::AddCardGroup(CardGroup* group, std::string pile) { 
   cardGroups.push_back(group);
   cardGroupMap.insert({pile, group});
 }

@@ -164,14 +164,13 @@ SetupData ServerManager::Initialize(
   }
 
   response = ReceiveMessage(_, true); // after turn order selected by server
-  std::cout << "Is Going First: " << response["content"]["myTurn"] << std::endl;
 
   std::vector<CardMovement> movements = {};
   for (json jsonCardMovement : response["content"]["movements"]) {
     movements.push_back({
       .gameID = jsonCardMovement["gameId"],
-      .from = jsonCardMovement["from"],
-      .to = jsonCardMovement["to"]
+      .from = Pile(jsonCardMovement["from"]),
+      .to = Pile(jsonCardMovement["to"])
     });
   }
 
@@ -181,7 +180,7 @@ SetupData ServerManager::Initialize(
     .info = {
       .movements = movements,
       .phase = response["content"]["phase"],
-      .openView = response["content"]["pile"],
+      .openView = Pile(response["content"]["pile"]),
       .openViewCards = response["content"]["openViewCards"],
       .selectableCards = response["content"]["selectableCards"],
     }

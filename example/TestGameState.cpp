@@ -127,23 +127,23 @@ TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* data
   palette(renderer),
   database(database)
 {
-  AddCardGroup(&hand, HAND);
-  AddCardGroup(&oppHand, OPP_HAND);
-  AddCardGroup(&reserve, RESERVE);
-  AddCardGroup(&oppReserve, OPP_RESERVE);
-  AddCardGroup(&battlefield, BATTLEFIELD);
-  AddCardGroup(&oppBatlefield, OPP_BATTLEFIELD);
-  AddCardGroup(&specials, SPECIALS);
-  AddCardGroup(&oppSpecials, OPP_SPECIALS);
+  AddCardGroup(&hand, "HAND");
+  AddCardGroup(&oppHand, "OPP_HAND");
+  AddCardGroup(&reserve, "RESERVE");
+  AddCardGroup(&oppReserve, "OPP_RESERVE");
+  AddCardGroup(&battlefield, "BATTLEFIELD");
+  AddCardGroup(&oppBatlefield, "OPP_BATTLEFIELD");
+  AddCardGroup(&specials, "SPECIALS");
+  AddCardGroup(&oppSpecials, "OPP_SPECIALS");
 
   renderer->textureMap.SetupTexturePath("endturn");
   AddObject(&palette);
   AddObject(&passTurn);
-  AddCardGroup(&this->deck, DECK);
-  AddCardGroup(&discardPile, DISCARD);
-  AddCardGroup(&tempPile, TEMPORARY);
-  AddCardGroup(&oppDeck, OPP_DECK);
-  AddCardGroup(&oppDiscardPile, OPP_DISCARD);
+  AddCardGroup(&this->deck, "DECK");
+  AddCardGroup(&discardPile, "DISCARD");
+  AddCardGroup(&tempPile, "TEMPORARY");
+  AddCardGroup(&oppDeck, "OPP_DECK");
+  AddCardGroup(&oppDiscardPile, "OPP_DISCARD");
 
   this->LoadCommandPalette();
 
@@ -226,15 +226,15 @@ void TestGameState::HandleUpdate(const UpdateInfo& update) {
      this->LoadCommandPalette();
   }
 
-  if (update.openView == TEMPORARY) {
+  if (update.openView == "TEMPORARY") {
     this->tempPile.EnableWithCards(update.openViewCards);
   }
 
   for (const CardMovement& move : update.movements) {
     std::cout << "Move: " << move.gameID << std::endl;
-    CardGroup* from = cardGroupMap.at(move.from);
-    CardGroup* to = cardGroupMap.at(move.to);
-    from->MoveToGroupByGameID(move.gameID, to, move.cardID, move.from == OPP_HAND);
+    CardGroup* from = cardGroupMap.at(move.from.GetInString());
+    CardGroup* to = cardGroupMap.at(move.to.GetInString());
+    from->MoveToGroupByGameID(move.gameID, to, move.cardID, move.from == "OPP_HAND");
   }
 }
 
@@ -265,7 +265,7 @@ ClickEvent TestGameState::ProcessClick(CollisionInfo info) {
     this->ProcessAction({
       .type = SELECT_CARD,
       .selectedCards = { card.GetGameID() },
-      .from = HAND
+      .from = Pile("HAND")
     });
 
     this->hand.ProcessClick(std::move(info));
@@ -288,7 +288,7 @@ ClickEvent TestGameState::ProcessClick(CollisionInfo info) {
       this->ProcessAction({
         .type = SELECT_CARD,
         .selectedCards = { card.GetGameID() },
-        .from = DISCARD
+        .from = Pile("DISCARD")
       });
     } else {
       std::cout << "discard collision had no card info. Sending to discard." << std::endl;
@@ -296,7 +296,24 @@ ClickEvent TestGameState::ProcessClick(CollisionInfo info) {
     }
   } else if (src == &this->deck) {
     std::cout << "deck click recognized" << std::endl;
-    src->ProcessClick(std::move(info));
+
+    if (info.isCard) {
+      unsigned int cardIndex = info.cardIndex;
+      std::cout << "card with index " << cardIndex << " selected" << std::endl;
+      Card card = this->deck.GetCard(cardIndex);
+      std::cout << "card with id " << card.GetGameID() << " selected" << std::endl;
+      TestCardInfo* cardInfo = this->database->GetInfo(card.GetID());
+
+      this->deck.SetDirtyPosition(true);
+      this->ProcessAction({
+        .type = SELECT_CARD,
+        .selectedCards = { card.GetGameID() },
+        .from = Pile("DECK")
+      });
+    } else {
+      std::cout << "deck collision had no card info. Sending to deck." << std::endl;
+      src->ProcessClick(std::move(info));
+    }
   } else if (src == &this->oppDeck) {
     std::cout << "Clicked Opponent's Deck" << std::endl;
   } else if (src == &this->palette) {
@@ -343,8 +360,9 @@ void TestGameState::LoadProperShader(Renderer* renderer, CardGroup* group) {
         card.renderData.shader = renderer->GetShader(CardShader);
       }
     }
-  } else if (&this->discardPile == group) {
-    if (this->discardPile.GetIsExpanded()) {
+  } else if (&this->discardPile == group || &this->deck == group) {
+    ExpandableStackCardGroup* pileGroup = (ExpandableStackCardGroup*)group;
+    if (pileGroup->GetIsExpanded()) {
       for (CardItem& card : *group->GetCards()) {
         if (this->gameplayManager.IsSelectedCard(card.card.GetGameID())) {
           card.renderData.shader = renderer->GetShader(SelectedCardShader); 

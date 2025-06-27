@@ -59,6 +59,7 @@ add_executable(${PROJECT_NAME}
   src/SimpleRenderObjects/SimpleButton.cpp
   src/SimpleRenderObjects/SimplePlane.cpp
   src/SimpleRenderObjects/SimpleRenderObject.cpp
+  src/SimpleRenderObjects/TextBox.cpp
   src/Card/Card.cpp
   src/Card/CardInfo.cpp
   src/Helper/ErrorHandling.cpp

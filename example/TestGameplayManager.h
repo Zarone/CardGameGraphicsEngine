@@ -55,7 +55,7 @@ private:
 public:
   TestGameplayManager();
   ~TestGameplayManager();
-  SetupData Setup(const std::vector<unsigned int>& deck);
+  SetupData Setup(const std::vector<unsigned int>& deck, std::atomic<bool>* stopFlag);
   bool IsPlayableCard(unsigned int id);
   bool IsSelectedCard(unsigned int id);
   void PostAction(GameAction action);

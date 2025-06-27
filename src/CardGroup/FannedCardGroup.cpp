@@ -26,6 +26,7 @@ void FannedCardGroup::Render(Renderer* renderer) {
 }
 
 void FannedCardGroup::UpdateTick(double deltaTime) {
+  this->thisRenderer.SetCardsPointer(&this->cards);
   this->thisRenderer.UpdateTick(deltaTime);
 }
 

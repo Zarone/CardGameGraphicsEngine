@@ -4,6 +4,8 @@
 #include "./TestCardInfo.h"
 #include "TestGameplayPiles.h"
 #include "../src/shaders/allShaders.h"
+#include <thread>
+#include "../src/SimpleRenderObjects/TextBox.h"
 
 TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* database):
   hand(
@@ -159,7 +161,37 @@ TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* data
     0, 1, 2, 3, 4, 5,
     0, 1, 2, 3, 4, 5,
   };
-  SetupData setupData = this->gameplayManager.Setup(deck);
+
+  this->setupThread = std::thread(
+    [this, deck](){
+      this->Setup(deck);
+    }
+  );
+
+  // Create setupTextBox for waiting state
+  glm::mat4 boxTransform = glm::scale(
+    glm::translate(glm::identity<glm::mat4>(), glm::vec3(0.0f, 0.0f, 0.0f)),
+    glm::vec3(1.9f, 1.9f, 1.0f)
+  );
+  Material boxMaterial = Material({
+    .hasTexture = false,
+    .shader = renderer->GetShader(BasicShader),
+    .color = glm::vec4(0.0f, 0.0f, 1.0f, 0.7f)
+  });
+  setupTextBox = new TextBox(
+    renderer,
+    boxTransform,
+    boxMaterial,
+    "../assets/fonts/Roboto-Regular.ttf",
+    32,
+    "Waiting for player to join...",
+    glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)
+  );
+}
+
+void TestGameState::Setup(std::vector<unsigned int> deck) {
+  SetupData setupData = this->gameplayManager.Setup(deck, &this->stopSetupThread);
+  if (this->stopSetupThread) return;
   for (auto gameID : setupData.correspondingGameIds) {
     this->deck.AddCard(this->gameplayManager.gameIDToID[gameID], gameID);
   }
@@ -167,7 +199,33 @@ TestGameState::TestGameState(Renderer* renderer, TestCardDatabaseSingleton* data
     this->oppDeck.AddCard(gameID);
   }
   this->HandleUpdate(setupData.info);
+  this->setupComplete = true;
 }
+
+TestGameState::~TestGameState() {
+  std::cout << "delete game state" << std::endl;
+  stopSetupThread = true;
+  if (setupThread.joinable()) {
+    setupThread.join();
+  } 
+  
+  if (setupTextBox) delete setupTextBox;
+}
+void TestGameState::Render(Renderer* renderer) {
+  if (!this->setupComplete) {
+    if (setupTextBox) setupTextBox->Render(renderer);
+    else std::cout << "Waiting for player to join" << std::endl;
+    return;
+  }
+
+  this->ProcessPendingMessages();
+
+  for (CardGroup* group : this->cardGroups) {
+    this->LoadProperShader(renderer, group);
+  }
+  GameState::Render(renderer);
+}
+
 
 void TestGameState::LoadCommandPalette() {
   GameMode mode = this->gameplayManager.GetPhase();
@@ -219,30 +277,9 @@ void TestGameState::LoadCommandPalette() {
   }
 }
 
-void TestGameState::HandleUpdate(const UpdateInfo& update) {
-  bool phaseUpdate = update.selectedCardsChanged || this->gameplayManager.GetPhase() != update.phase;
-  this->gameplayManager.ChangePhaseForUpdate(update);
-  if (phaseUpdate) {
-     this->LoadCommandPalette();
-  }
-
-  if (update.openView == "TEMPORARY") {
-    this->tempPile.EnableWithCards(update.openViewCards);
-  }
-
-  for (const CardMovement& move : update.movements) {
-    std::cout << "Move: " << move.gameID << std::endl;
-    CardGroup* from = cardGroupMap.at(move.from.GetInString());
-    CardGroup* to = cardGroupMap.at(move.to.GetInString());
-    from->MoveToGroupByGameID(move.gameID, to, move.cardID, move.from == "OPP_HAND");
-  }
-}
-
-void TestGameState::ProcessAction(const GameAction& action) {
-  this->gameplayManager.PostAction(action);
-}
-
 ClickEvent TestGameState::ProcessClick(CollisionInfo info) {
+  if (!this->setupComplete) return {};
+
   SceneObject* src = (SceneObject*) info.groupPointer;
 
   if (src == &this->hand) {
@@ -328,7 +365,13 @@ ClickEvent TestGameState::ProcessClick(CollisionInfo info) {
   };
 }
 
+void TestGameState::UpdateTick(double deltaTime) {
+  if (!this->setupComplete) return;
+  this->GameState::UpdateTick(deltaTime);
+}
+
 void TestGameState::ProcessScroll(CollisionInfo info, double yOffset) {
+  if (!this->setupComplete) return;
   SceneObject* src = (SceneObject*) info.groupPointer;
 
   src->ProcessScroll(std::move(info), yOffset);
@@ -337,6 +380,26 @@ void TestGameState::ProcessScroll(CollisionInfo info, double yOffset) {
 void TestGameState::EndTurnButtonPress() {
   std::cout << "end turn click" << std::endl;
 }
+
+void TestGameState::HandleUpdate(const UpdateInfo& update) {
+  bool phaseUpdate = update.selectedCardsChanged || this->gameplayManager.GetPhase() != update.phase;
+  this->gameplayManager.ChangePhaseForUpdate(update);
+  if (phaseUpdate) {
+     this->LoadCommandPalette();
+  }
+
+  if (update.openView == "TEMPORARY") {
+    this->tempPile.EnableWithCards(update.openViewCards);
+  }
+
+  for (const CardMovement& move : update.movements) {
+    std::cout << "Move: " << move.gameID << std::endl;
+    CardGroup* from = cardGroupMap.at(move.from.GetInString());
+    CardGroup* to = cardGroupMap.at(move.to.GetInString());
+    from->MoveToGroupByGameID(move.gameID, to, move.cardID, move.from == "OPP_HAND");
+  }
+}
+
 
 void TestGameState::ProcessPendingMessages() {
   // Check for and process any pending messages from the server
@@ -392,11 +455,6 @@ void TestGameState::LoadProperShader(Renderer* renderer, CardGroup* group) {
   }
 }
 
-void TestGameState::Render(Renderer* renderer) {
-  this->ProcessPendingMessages();
-
-  for (CardGroup* group : this->cardGroups) {
-    this->LoadProperShader(renderer, group);
-  }
-  GameState::Render(renderer);
+void TestGameState::ProcessAction(const GameAction& action) {
+  this->gameplayManager.PostAction(action);
 }

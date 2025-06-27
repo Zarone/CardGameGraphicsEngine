@@ -130,13 +130,14 @@ size_t TestGameplayManager::GetQueueSize() {
   return messageQueue.size();
 }
 
-SetupData TestGameplayManager::Setup(const std::vector<unsigned int>& deck) {
+SetupData TestGameplayManager::Setup(const std::vector<unsigned int>& deck, std::atomic<bool>* stopFlag) {
   std::cout << "inside Setup" << std::endl;
   SetupData setupData = server.Initialize(
     deck,
     MessageType::SETUP,
     MessageType::COIN_CHOICE,
-    MessageType::FIRST_OR_SECOND_CHOICE
+    MessageType::FIRST_OR_SECOND_CHOICE,
+    stopFlag
   );
 
   this->phase.SetMode(setupData.info.phase);

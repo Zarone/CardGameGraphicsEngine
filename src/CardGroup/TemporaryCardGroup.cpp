@@ -43,6 +43,7 @@ void TemporaryCardGroup::UpdateTick(double deltaTime) {
   if (!this->isEnabled) return;
 
   if (isExpanded) {
+    this->expandedRenderer.SetCardsPointer(&this->cards);
     this->expandedRenderer.UpdateTick(deltaTime);
   } else {
     this->showButton.UpdateTick(deltaTime);

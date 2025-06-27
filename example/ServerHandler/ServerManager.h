@@ -11,6 +11,7 @@
 #include <deque>
 #include <mutex>
 #include <condition_variable>
+#include <atomic>
 
 using json = nlohmann::json;
 
@@ -47,7 +48,8 @@ public:
     const std::vector<unsigned int>& deck,
     unsigned int messageTypeSetup,
     unsigned int headsOrTailsChoice, 
-    unsigned int firstOrSecondChoice
+    unsigned int firstOrSecondChoice,
+    std::atomic<bool>* stopFlag
   );
 
 	~ServerManager();

@@ -5,6 +5,9 @@
 #include <string>
 #include <mutex>
 #include <condition_variable>
+#include <atomic>
+#include <thread>
+#include <functional>
 
 using easywsclient::WebSocket;
 
@@ -120,20 +123,48 @@ bool ServerManager::ConnectToServer() {
   return ws != nullptr;
 }
 
+// Helper for non-blocking receive with stop flag
+static json WaitForMessageOrStop(std::function<json()> receiveFunc, std::atomic<bool>* stopFlag) {
+  while (true) {
+    if (stopFlag && *stopFlag) return {};
+    json result = receiveFunc();
+    if (!result.is_null()) return result;
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  }
+}
+
 SetupData ServerManager::Initialize(
   const std::vector<unsigned int>& deck, 
   unsigned int messageTypeSetup,
   unsigned int headsOrTailsChoice, 
-  unsigned int firstOrSecondChoice
+  unsigned int firstOrSecondChoice,
+  std::atomic<bool>* stopFlag
 ) {
   std::string _;
   std::cout << "before hi client message" << std::endl;
-  ReceiveMessage(_, false); // 'Hi Client!' Message
+  // Non-blocking receive loop for 'Hi Client!' message
+  while (!this->HasPendingMessages()) {
+    if (stopFlag && *stopFlag) return {};
+    ws->poll(10); // 10ms timeout
+    ws->dispatch([&](const std::string &message) {
+      std::lock_guard<std::mutex> lock(queueMutex);
+      messageQueue.push_back(message);
+      queueCondition.notify_one();
+    });
+  }
+  ReceiveMessage(_, false, true); // Non-blocking
+  if (stopFlag && *stopFlag) return {};
+
   std::cout << "before send setup message" << std::endl;
   SendSetupMessage(deck, messageTypeSetup);
-  json setupResponse = ReceiveMessage(_, true); // Response to Setup Message
 
-  json response = ReceiveMessage(_, true); // Receive either coin flip or wait
+  // Wait for setup response
+  json setupResponse = WaitForMessageOrStop([&]() { return ReceiveMessage(_, true, true); }, stopFlag);
+  if (stopFlag && *stopFlag) return {};
+
+  // Wait for coin flip or wait response
+  json response = WaitForMessageOrStop([&]() { return ReceiveMessage(_, true, true); }, stopFlag);
+  if (stopFlag && *stopFlag) return {};
   std::cout << "response.content.isChoosingFlip: " << response["content"]["isChoosingFlip"] << std::endl;
 
   bool isChoosingFlip = response["content"]["isChoosingFlip"];
@@ -143,7 +174,9 @@ SetupData ServerManager::Initialize(
     SendMessage({
       {"heads", true}
     }, headsOrTailsChoice);
-    json response = ReceiveMessage(_, true); // after selecting
+    // Wait for response after selecting
+    response = WaitForMessageOrStop([&]() { return ReceiveMessage(_, true, true); }, stopFlag);
+    if (stopFlag && *stopFlag) return {};
     std::cout << "isChoosingTurnOrder: " << response["content"] << std::endl;
     bool isChoosingTurnOrder = response["content"]["isChoosingTurnOrder"];
     if (isChoosingTurnOrder) {
@@ -153,7 +186,8 @@ SetupData ServerManager::Initialize(
     }
   } else {
     // wait
-    json response = ReceiveMessage(_, true); // after selecting
+    response = WaitForMessageOrStop([&]() { return ReceiveMessage(_, true, true); }, stopFlag);
+    if (stopFlag && *stopFlag) return {};
     std::cout << "isChoosingTurnOrder: " << response["content"] << std::endl;
     bool isChoosingTurnOrder = response["content"]["isChoosingTurnOrder"];
     if (isChoosingTurnOrder) {
@@ -163,7 +197,9 @@ SetupData ServerManager::Initialize(
     }
   }
 
-  response = ReceiveMessage(_, true); // after turn order selected by server
+  // Wait for final response after turn order selected by server
+  response = WaitForMessageOrStop([&]() { return ReceiveMessage(_, true, true); }, stopFlag);
+  if (stopFlag && *stopFlag) return {};
 
   std::vector<CardMovement> movements = {};
   for (json jsonCardMovement : response["content"]["movements"]) {

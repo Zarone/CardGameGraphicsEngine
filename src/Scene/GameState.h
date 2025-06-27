@@ -25,7 +25,7 @@ public:
   void AddCardGroup(CardGroup* group, std::string pile);
 
   virtual void Render(Renderer* renderer);
-  void UpdateTick(double deltaTime);
+  virtual void UpdateTick(double deltaTime);
   bool CheckCollision(
     Renderer* renderer, 
     double x, 

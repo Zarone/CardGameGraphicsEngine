@@ -197,6 +197,7 @@ void CardGroupRenderer::SetDirtyPosition(bool dirty) {
 
 void CardGroupRenderer::UpdateTick(double deltaTime) {
   bool anythingUpdated = false;
+  if (!cardsPointer) throw std::runtime_error("Cards Pointer is nullptr");
   for (auto& card : *cardsPointer) {
     anythingUpdated = card.renderData.UpdateDisplayed(deltaTime) || anythingUpdated;
   }

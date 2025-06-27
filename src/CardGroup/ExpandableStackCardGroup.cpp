@@ -71,8 +71,10 @@ void ExpandableStackCardGroup::Render(Renderer* renderer) {
 
 void ExpandableStackCardGroup::UpdateTick(double deltaTime) {
   if (isExpanded) {
+    this->expandedRenderer.SetCardsPointer(&this->cards);
     this->expandedRenderer.UpdateTick(deltaTime);
   } else {
+    this->stackRenderer.SetCardsPointer(&this->cards);
     this->stackRenderer.UpdateTick(deltaTime);
   }
 }

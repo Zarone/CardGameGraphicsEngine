@@ -28,6 +28,7 @@ void TestGameplayPhase::SetSelectionRange(int min, int max) {
   this->selectionMax = max;
 }
 
+#include <iostream>
 bool TestGameplayPhase::InSelectionRange(int value) {
   return value >= this->selectionMin && value <= this->selectionMax;
 }

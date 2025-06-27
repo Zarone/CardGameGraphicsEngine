@@ -11,7 +11,8 @@ Right now, the application is very bare-bones. The application opens to a main m
 ### TODO:
 - Dynamically handle game actions on example server
   - mark some card groups as public (i.e. the opponent can see them) and make movement to a public card group share the CardID as well as the GameID so that the card can be rendered by all players.
-- Make all card groups dynamic (i.e. ```game.Players[user]["DECK"]``` instead of ```game.Players[user].Deck```)
+  - open the right view on ultra ball
+  - activate effects of cards in play. Cards with activate effects will give the yellow glow, and when you click them it will poll the server for legal actions and display them in the command palette.
 - Handle End Turn Button
 - Make command palette visible on expandedView
 - Ask user heads/tail and then first/second

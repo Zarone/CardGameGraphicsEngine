@@ -99,7 +99,7 @@ UpdateInfo TestGameplayManager::ProcessReceivedMessage(const std::string& respon
     info.selectionMax = update["content"]["count"]["atMost"];
   }
   if (update["content"]["count"].contains("atLeast")) {
-    info.selectionMax = update["content"]["count"]["atLeast"];
+    info.selectionMin = update["content"]["count"]["atLeast"];
   }
 
   return info;
@@ -205,7 +205,6 @@ void TestGameplayManager::PostAction(GameAction action) {
 }
 
 bool TestGameplayManager::SelectionPossiblyDone() {
-  std::cout << "Here" << std::endl;
   return this->phase.InSelectionRange(this->selectedCards.size());
 }
 

@@ -3,18 +3,13 @@
 #include "TestGameState.h"
 #include "ServerHandler/ServerManager.h"
 #include "../src/Helper/ErrorHandling.h"
-#include <stdexcept>
-#include <vector>
-#include <iostream>
-#include <thread>
-#include <mutex>
-#include <condition_variable>
+#include "../src/pch.h"
 
 TestGameplayManager::TestGameplayManager() 
 : phase(true), shouldStop(false)
 {
   if (!server.ConnectToServer()) {
-    throw std::runtime_error("Failed to connect to server");
+    throw std::runtime_error("Failed to connect to server!");
     return;
   }
 

@@ -1,4 +1,4 @@
-#include <GL/glew.h>
+#include "pch.h"
 
 #include "../src/HelperRendering/WindowManager.h"
 

@@ -1,6 +1,4 @@
-#include <GL/glew.h>
-#include <iostream>
-#include <unordered_map>
+#include "../../src/pch.h"
 
 #include "Texture.h"
 #include "../Helper/ErrorHandling.h"

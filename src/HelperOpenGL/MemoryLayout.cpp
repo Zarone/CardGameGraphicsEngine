@@ -1,6 +1,4 @@
-#include <GL/glew.h>
-#include <cstdlib>
-#include <iostream>
+#include "../pch.h"
 #include "MemoryLayout.h"
 
 MemoryLayout::MemoryLayout() {

@@ -1,6 +1,4 @@
-#include <cstdlib>
-#include <GL/glew.h>
-#include <iostream>
+#include "../pch.h"
 #include "WindowManager.h"
 #include "../Helper/ErrorHandling.h"
 

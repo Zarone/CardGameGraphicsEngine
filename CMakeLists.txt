@@ -3,6 +3,10 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_BUILD_TYPE "DEBUG")
 set(CMAKE_EXPORT_COMPILE_COMMANDS "ON")
 project(GraphicsEngine LANGUAGES CXX)
+
+# Enable precompiled headers
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpch-instantiate-templates")
+
 include(FetchContent)
 
 FetchContent_Declare(
@@ -22,6 +26,7 @@ find_package(Freetype REQUIRED)
 
 # Add the executable with all source files
 add_executable(${PROJECT_NAME}
+  src/pch.cpp
   example/ServerHandler/ServerManager.cpp
   example/external/easywsclient.cpp
   example/TestCardDatabaseSingleton.cpp
@@ -77,7 +82,14 @@ add_executable(${PROJECT_NAME}
   src/main.cpp
 )
 
+# Link libraries first
+target_link_libraries(${PROJECT_NAME} PRIVATE glfw GLEW::GLEW glm Freetype::Freetype)
+
+# Enable precompiled headers for the main executable (after linking libraries)
+target_precompile_headers(${PROJECT_NAME} PRIVATE src/pch.h)
+
 add_executable(test
+  src/pch.cpp
   src/external/stb_image.cpp
   test/main.cpp
   test/TestTextureLRU.cpp
@@ -86,8 +98,11 @@ add_executable(test
   src/Helper/ErrorHandling.cpp
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE glfw GLEW::GLEW glm Freetype::Freetype)
-target_link_libraries(test PRIVATE GLEW::GLEW)
+# Link libraries for test executable
+target_link_libraries(test PRIVATE GLEW::GLEW glm)
+
+# Enable precompiled headers for the test executable (after linking libraries)
+target_precompile_headers(test PRIVATE src/pch.h)
 
 if (APPLE)
   target_link_libraries(${PROJECT_NAME} PRIVATE "-framework OpenGL")

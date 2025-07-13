@@ -1,60 +1,72 @@
 #include <iostream>
+#include <stdexcept>
 #include "../Helper/ErrorHandling.h"
 #include "TextureLRU.h"
 
-TextureLRU::TextureLRU() {
-  this->data = std::list<Texture*>();
-  this->itemToIndex = std::unordered_map<Texture*, std::list<Texture*>::iterator>();
-}
-
 void TextureLRU::Access(Texture* tex) {
-  // get index in lru (use hashmap)
-  auto indexIter = this->itemToIndex.find(tex);
-  if (indexIter == this->itemToIndex.end()) {
-    std::cout << "Couldn't access texture " << *tex << std::endl;
-    exit(EXIT_FAILURE);
+  if (!tex) {
+    throw std::invalid_argument("Cannot access null texture");
   }
 
-  // If the texture is already at the front, no need to move it
-  if (indexIter->second == this->data.begin()) {
+  auto it = itemToIndex.find(tex);
+  if (it == itemToIndex.end()) {
+    throw std::runtime_error("Texture not found in LRU cache");
+  }
+
+  // If already at front, no need to move
+  if (it->second == data.begin()) {
     return;
   }
 
-  // Store the iterator to the element being moved
-  auto movedIter = indexIter->second;
+  // Move to front using splice (O(1) operation)
+  data.splice(data.begin(), data, it->second);
   
-  // Perform the splice operation
-  this->data.splice(this->data.begin(), this->data, movedIter);
-  
-  // Update all iterators in the map
-  auto it = this->data.begin();
-  while (it != this->data.end()) {
-    itemToIndex[*it] = it;
-    ++it;
-  }
+  // Update the iterator in the map
+  itemToIndex[tex] = data.begin();
 }
 
 Texture* TextureLRU::PopLRU() {
-  Texture* tex = this->data.back();
-  this->data.pop_back();
+  if (data.empty()) {
+    return nullptr;
+  }
+
+  Texture* tex = data.back();
+  data.pop_back();
   itemToIndex.erase(tex);
   return tex;
 }
 
 void TextureLRU::Push(Texture* tex) {
-  this->data.push_front(tex);
-  this->itemToIndex[tex] = this->data.begin();
+  if (!tex) {
+    throw std::invalid_argument("Cannot push null texture");
+  }
+
+  // Check if already exists
+  if (itemToIndex.find(tex) != itemToIndex.end()) {
+    throw std::runtime_error("Texture already exists in LRU cache");
+  }
+
+  data.push_front(tex);
+  itemToIndex[tex] = data.begin();
 }
 
 void TextureLRU::PrintData() {
-  PrintVector<Texture*>(std::cout, this->data);
-  PrintMapToStream(std::cout, this->itemToIndex);
+  std::cout << "LRU Cache contents:" << std::endl;
+  std::cout << "List: ";
+  for (const auto& tex : data) {
+    std::cout << tex << " ";
+  }
+  std::cout << std::endl;
+  
+  std::cout << "Map size: " << itemToIndex.size() << std::endl;
 }
 
 Texture* TextureLRU::GetIndex(unsigned int index) {
-  std::list<Texture*>::iterator it = this->data.begin();
-  for (unsigned int i = 0; i < index; i++) {
-    it++;
+  if (index >= data.size()) {
+    return nullptr;
   }
+
+  auto it = data.begin();
+  std::advance(it, index);
   return *it;
 }

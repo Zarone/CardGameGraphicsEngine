@@ -1,7 +1,7 @@
 #pragma once
 
 #include <list>
-
+#include <unordered_map>
 #include "Texture.h"
 
 class TextureLRU
@@ -9,8 +9,11 @@ class TextureLRU
 private:
   std::list<Texture*> data;
   std::unordered_map<Texture*, std::list<Texture*>::iterator> itemToIndex;
+
 public:
-  TextureLRU();
+  TextureLRU() = default;
+  ~TextureLRU() = default;
+  
   void Access(Texture* tex);
   Texture* PopLRU();
   void Push(Texture* tex);
